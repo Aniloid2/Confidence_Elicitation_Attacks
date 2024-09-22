@@ -41,8 +41,8 @@ import os
 from numpy.random import dirichlet
 
 
-# from src.utils.shared.misc import identify_correct_incorrect_labels
-# import argparse
+# from src.utils.shared.misc import self.predictor.prompt_class._identify_correct_incorrect_labels
+
 
 # import random
 # import numpy as np
@@ -1825,7 +1825,7 @@ class LLMSelfWordSubstitutionW1(WordSwap):
 
         prompt_length = len(inputs['input_ids'][0])
         generated_tokens = outputs[0][prompt_length:]
-        generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+        generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
         # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         print ('generated_text:',generated_text) 
@@ -2004,7 +2004,8 @@ class LLMSelfWordSubstitutionW1(WordSwap):
         #     raise ValueError("Unsupported task. Please choose either 'sst2', 'ag_news', or 'strategyQA'.")
 
         label_list =  self.dataset.label_names 
-        expected_prediction, filtered_label_list = identify_correct_incorrect_labels(label_list,label_index)
+        print ('label_index',label_index)
+        expected_prediction, filtered_label_list = self.predictor.prompt_class._identify_correct_incorrect_labels(label_index)
             
         other_classes = ' or '.join(filtered_label_list)
         attack_type = 'Replace at most two words in the sentence with synonyms.'
@@ -3641,7 +3642,7 @@ class GreedySearch(SearchMethod):
             
             label_list = self.dataset.label_names
             label_index = self.goal_function.ground_truth_output
-            expected_prediction, other_classes = identify_correct_incorrect_labels(label_list, label_index)
+            expected_prediction, other_classes = self.predictor.prompt_class._identify_correct_incorrect_labels( label_index)
             
             len_text, indices_to_order = self.get_indices_to_order(initial_text)
             print ('initial_text',initial_text)
@@ -3816,7 +3817,7 @@ class GreedySearch_USE(SearchMethod):
             
             label_list = self.dataset.label_names
             label_index = self.goal_function.ground_truth_output
-            expected_prediction, other_classes = identify_correct_incorrect_labels(label_list, label_index)
+            expected_prediction, other_classes = self.predictor.prompt_class._identify_correct_incorrect_labels( label_index)
             
             len_text, indices_to_order = self.get_indices_to_order(initial_text)
             print ('initial_text',initial_text)
@@ -4007,7 +4008,7 @@ class GreedySearch_Margin(SearchMethod):
             
             label_list = self.dataset.label_names
             label_index = self.goal_function.ground_truth_output
-            expected_prediction, other_classes = identify_correct_incorrect_labels(label_list, label_index)
+            expected_prediction, other_classes = self.predictor.prompt_class._identify_correct_incorrect_labels( label_index)
             
             len_text, indices_to_order = self.get_indices_to_order(initial_text)
             print ('initial_text',initial_text)
