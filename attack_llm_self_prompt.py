@@ -3918,7 +3918,7 @@ class GreedySearch_USE(SearchMethod):
         max_similarity = -float("inf")
         # pick two indexes and modify them
         while i < len(index_order) and not search_over:
-            if i > self.max_iter:
+            if i > self.max_iter_i:
                 break
             transformed_text_candidates = self.get_transformations(
                 cur_result.attacked_text,
@@ -4110,7 +4110,7 @@ class GreedySearch_USE_Hardlabel(SearchMethod):
         max_similarity = -float("inf")
         # pick two indexes and modify them
         while i < len(index_order) and not search_over:
-            if i > self.max_iter:
+            if i > self.max_iter_i:
                 break
             transformed_text_candidates = self.get_transformations(
                 cur_result.attacked_text,
