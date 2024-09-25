@@ -13,9 +13,9 @@ def get_args():
                         help='What is the task strtructure, for classification we expect a static label list across all samples. In future we may extend to sequence to sequence modelling, dynamic label classification etc') 
     parser.add_argument('--confidence_type', type=str, default='weighted_confidence', choices=['verbal_confidence','weighted_confidence','sherman_kent', 'yougov','single_token_mix'],
                         help='type of confidence levels')
-    parser.add_argument('--prompting_type', type=str, default='step2_k_pred_avg', choices=['s1','w1','s1_black_box', '2step', 'empirical','k_pred_avg','step2_k_pred_avg' ,'other_prompting_types_here','e_guided_paraphrasing'],
+    parser.add_argument('--prompting_type', type=str, default='step2_k_pred_avg', choices=['s1','w1','s1_black_box', '2step', 'empirical_confidence','k_pred_avg','step2_k_pred_avg' ,'other_prompting_types_here','e_guided_paraphrasing'],
                         help='Type of prompting to use')
-    parser.add_argument('--search_method', type=str, default='black_box', choices=['black_box','greedy_search','greedy_search_use','sspattack','greedy_search_withmin_use'],
+    parser.add_argument('--search_method', type=str, default='black_box', choices=['black_box','greedy_search','greedy_search_use','greedy_search_use_hardlabel','sspattack','greedy_search_withmin_use'],
                         help='Type of search technique')
     parser.add_argument('--transformation_method', type=str, default='word_swap_embedding', choices=['word_swap_embedding','sspattack','self_word_sub','e_guided_paraphrasing'],
                         help='Type of transformations to use')

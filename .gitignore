@@ -168,3 +168,21 @@ bash_scripts/attack_orchestration/*
 
 testing_check_dirichlet_distribution/*
 testing_check_dirichlet_distribution.txt
+
+testing_empirical_confidence/*
+testing_empirical_confidence.txt
+
+testing_empirical_confidence_temp0.1/*
+testing_empirical_confidence_temp0.1.txt
+
+testing_no_guidance_ablation/*
+testing_no_guidance_ablation.txt
+
+testing_empirical_confidence_0.1/*
+testing_empirical_confidence_0.1.txt
+
+testing_empirical_confidence_0.5/*
+testing_empirical_confidence_0.5.txt
+
+testing_empirical_confidence_1.0/*
+testing_empirical_confidence_1.0.txt

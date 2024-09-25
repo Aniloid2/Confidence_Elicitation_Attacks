@@ -31,6 +31,9 @@ class SST2Prompts(BaseClassificationPrompt):
         prompt = f"[Placeholder for predict_and_confidence_prompt with text: {text}]"
         return prompt
 
+    
+    
+
     def cot_prompt(self, text):
         # Placeholder for chain-of-thought prompt
         prompt = f"[Placeholder for cot_prompt with text: {text}]"

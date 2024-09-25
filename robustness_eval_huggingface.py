@@ -1460,12 +1460,19 @@ class PredictionContainer(AbstractPredictor):
         self.classifier_results = ClassifierPredictorResults()
 
 from src.inference import Step2KPredAvg
-if args.prompting_type == 'step2_k_pred_avg':
-    predictor = Step2KPredAvg(**vars(args))
-    predictor.predictor_container = PredictionContainer()
-else:
-    print ('invalid')
-    sys.exit()
+
+# if args.prompting_type == 'step2_k_pred_avg':
+from src.inference.inference_config import DYNAMIC_INFERENCE
+args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
+args.predictor.predictor_container = PredictionContainer()
+
+
+# if args.prompting_type == 'step2_k_pred_avg':
+#     predictor = Step2KPredAvg(**vars(args))
+#     predictor.predictor_container = PredictionContainer()
+# else:
+#     print ('invalid')
+#     sys.exit()
 
 
 # print ('texts',texts,'len texts', len(texts), 'true_labels',sum([i for i in true_labels if i == 1]),len(true_labels))
@@ -1497,17 +1504,17 @@ for  datapoint in args.dataset:
     #     guess, probs, confidence = predict_sentiment_and_verbal_confidence_2step_k_pred_avg(datapoint=datapoint,label_names=label_names)
     # print ('guess, probs, confidence',guess, probs, confidence)
 
-    guess, probs, confidence = predictor.predict_and_confidence(datapoint)
+    guess, probs, confidence = args.predictor.predict_and_confidence(datapoint)
     if guess == 'null':
         counter_null+=1
     #     continue
     # prediction_label = 0 if guess == 'negative' elif guess = 'positive' 1 else 2
     
-    prediction_label = predictor.prompt_class.task_name_to_label[guess] #TASK_NAME_TO_LABEL
+    prediction_label = args.predictor.prompt_class.task_name_to_label[guess] #TASK_NAME_TO_LABEL
 
-    predictor.predictor_container.add_true_label(true_label)
-    predictor.predictor_container.add_probability(probs)
-    predictor.predictor_container.add_confidence(confidence)
+    args.predictor.predictor_container.add_true_label(true_label)
+    args.predictor.predictor_container.add_probability(probs)
+    args.predictor.predictor_container.add_confidence(confidence)
 
     if args.task == 'popQA':
         true_label=1
@@ -1527,7 +1534,7 @@ for  datapoint in args.dataset:
 
 from src.utils.shared.evaluation.predictor_evaluation import predictor_evaluation
 
-predictor_evaluation(args,predictor)
+predictor_evaluation(args,args.predictor)
 
 
 

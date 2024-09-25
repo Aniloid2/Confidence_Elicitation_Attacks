@@ -182,7 +182,7 @@ class Step2KPredAvg(BasePredictor):
         # print('prompt', prompt)
         # print("Generated Prediction Text:", generated_text) 
 
-        generated_text = self.prompt_class._call_model(generate_args,inputs)
+        generated_text = self.prompt_class._call_model(generate_args)
 
         # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
         # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
@@ -275,7 +275,7 @@ class Step2KPredAvg(BasePredictor):
             "max_new_tokens": 300,
             'pad_token_id': self.tokenizer.eos_token_id
         }
-        generated_text = self.prompt_class._call_model(generate_args, inputs)
+        generated_text = self.prompt_class._call_model(generate_args)
         # with torch.no_grad():
         #     outputs = self.model.generate(**generate_args)
 
@@ -355,7 +355,7 @@ class Step2KPredAvg(BasePredictor):
             print('empirical_mean', empirical_mean) 
 
             from src.utils.shared.plotting import ternary_plot, ternary_mean_plot
-            if self.ternary_plot:
+            if self.ternary_plot == True:
                 if empirical_mean.shape[0] == 3:
                     if self.current_sample:
                         # self.inference_step +=1

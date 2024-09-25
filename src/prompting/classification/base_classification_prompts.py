@@ -27,6 +27,14 @@ class BaseClassificationPrompt:
         self.task_name_to_label = self._initialize_task_name_to_label()
         self.task_label_to_name = self._initialize_task_label_to_name()
 
+
+    def _predict_prompt_singular(self, text):
+        
+        prompt = f"""{self.start_prompt_header}Provide your best guess for the following text ({self.prediction_options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {self.prediction_options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess:{self.end_prompt_footer}"""
+        print ('predict_prompt:', prompt)
+
+        return prompt
+
     def _initialize_task_name_to_label(self):
         task_name_to_label = {label: i for i,label in enumerate(self.label_list)}
         task_name_to_label['null'] = self.n_classes
@@ -114,11 +122,12 @@ class BaseClassificationPrompt:
         result_list.extend(['null'] * (self.k_pred - len(result_list)))
         return result_list
 
-    def _call_model(self,generate_args ,inputs):
+    def _call_model(self,generate_args):
         with torch.no_grad():
             outputs = self.model.generate(**generate_args)
 
-        prompt_length = len(inputs['input_ids'][0])
+        # prompt_length = len(inputs['input_ids'][0])
+        prompt_length = len(generate_args['input_ids'][0])
         generated_tokens = outputs[0][prompt_length:]
         generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
         print("Generated Confidence Text:", generated_text)
