@@ -34,8 +34,8 @@ def load_data(args):
         return dataset_class, label_names
 
     elif task == 'ag_news':
-        print(f"Loading Ag News dataset from 'fancyzhx/ag_news'...")
-        strategy_dataset = load_dataset('fancyzhx/ag_news', split='test')#.select(range(500)) # example: taking 50 samples
+        print(f"Loading Ag News dataset from ' '...")
+        strategy_dataset = load_dataset(' ', split='test')#.select(range(500)) # example: taking 50 samples
         print(f"Ag News dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
         
         dataset = HuggingFaceDataset(strategy_dataset, split="test", shuffle=True)
@@ -79,8 +79,8 @@ def load_data(args):
         from collections import defaultdict
 
         split = "test"
-        print(f"Loading PopQA {split} dataset from 'akariasai/PopQA'...")
-        raw_dataset = load_dataset("akariasai/PopQA", split=split).select(range(5))
+        print(f"Loading PopQA {split} dataset from ' '...")
+        raw_dataset = load_dataset(" ", split=split).select(range(5))
         print(f"PopQA {split} dataset loaded successfully", type(raw_dataset),'column names',raw_dataset.column_names)
 
         # add a new column, and for each datasample given raw_dataset['prop'] (e.g capital, business etc) extract all other rows that have the same raw_dataset['prop'] and add their answers which are accessed raw_dataset['possible_answers'] and add them to a new column raw_dataset['wrong_possible_answers'] 
@@ -161,8 +161,8 @@ def load_data(args):
         return dataset_class_t, label_names
     elif task == 'strategyQA':
         from datasets import load_dataset 
-        print(f"Loading StrategyQA dataset from 'ChilleD/StrategyQA'...")
-        strategy_dataset = load_dataset('ChilleD/StrategyQA', split='test').select(range(500)) # example: taking 50 samples
+        print(f"Loading StrategyQA dataset from ''...")
+        strategy_dataset = load_dataset('', split='test').select(range(500)) # example: taking 50 samples
         print(f"StrategyQA dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
 
         strategy_dataset = strategy_dataset.rename_column("question", "text")
