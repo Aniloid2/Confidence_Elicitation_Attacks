@@ -190,3 +190,5 @@ testing_empirical_confidence_1.0.txt
 
 bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
 bash_scripts/attack_orchestration/attack_all_models_tasks.sh
+
+table_plots/*
