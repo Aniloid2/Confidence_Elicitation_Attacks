@@ -36,7 +36,7 @@ def get_args():
                         help='Number of transformations to perform')
     parser.add_argument('--index_order_technique', type=str, default='prompt_top_k', choices=['prompt_top_k','random','delete' ,'other_techniques_here'],
                         help='Index order technique to use')
-    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/brian/hub',
+    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/[user]/hub',
                         help='Directory for transformers cache')
     parser.add_argument('--experiment_name_folder', type=str, default='attack_calibrated_model',
                         help='Folder name for the experiment')
