@@ -161,13 +161,13 @@ function run_test() {
 declare -a param_names=("model_type" "task" "num_transformations" "prompting_type" "search_method" "transformation_method" "n_embeddings" "similarity_threshold" "confidence_type" "k_pred" "similarity_technique" "prompt_shot_type" "index_order_technique"  "temperature" "num_examples")
 
 # Test configurations: each row corresponds to a set of hyperparameters for a specific GPU
-declare -a config_gpu_1=("mistralv03" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
-# declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.7 500)
-# declare -a config_gpu_3=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_2=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
 
-# declare -a config_gpu_1=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
-# declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
-# declare -a config_gpu_1=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_3=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_4=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
+declare -a config_gpu_5=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.7 500)
 
 
 # List of GPU IDs to use and their corresponding configurations
@@ -176,9 +176,13 @@ declare -A gpu_config_map=(
   [1]="config_gpu_1"
   [2]="config_gpu_2"
   [3]="config_gpu_3"
+  [4]="config_gpu_4"
+  [5]="config_gpu_5"
+  [6]="config_gpu_6"
+  [7]="config_gpu_7"
 )
 
-gpus=(1  )
+gpus=( 0 1 2 3 4 5    )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)
