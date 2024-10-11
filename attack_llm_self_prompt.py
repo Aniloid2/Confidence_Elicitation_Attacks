@@ -3698,43 +3698,47 @@ class TextHoaxer(SearchMethod):
         print ('goal_function',self.goal_function)
         
         # Step 1: Initialization
-        # number_samples = 2
-        # self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
-        # self.goal_function.num_queries = self.number_of_queries
-        # perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
+        number_samples = 2
+        self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
+        self.goal_function.num_queries = self.number_of_queries
+        perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
         
-        # results, search_over = self.get_goal_results(perturbed_text)
+        results, search_over = self.get_goal_results(perturbed_text)
         
          
         
         # results_success = [result for result in results if result.ground_truth_output!=result.output] 
 
-        # results_success=[]
-        # perturbed_text_success = []
-        # for i,result in enumerate(results):
-        #     if result.ground_truth_output!=result.output:
-        #         results_success.append(result)
-        #         perturbed_text_success.append(perturbed_text[i])
+        results_success=[]
+        perturbed_text_success = []
+        for i,result in enumerate(results):
+            if result.ground_truth_output!=result.output:
+                results_success.append(result)
+                perturbed_text_success.append(perturbed_text[i])
 
 
-        # print ('returnign failed?')
-        # if len(results_success) == 0:
-        #     final_result = results[0]
-            
-        #     self.goal_function.num_queries = self.number_of_queries
-        #     self.goal_function.model.reset_inference_steps()
-        #     return final_result # return a random result that wasnt perturbed to show it failed.
+        print ('returnign failed?')
+        if len(results_success) == 0:
+            flag = 0
+        else:
+            flag = 1
 
-        # perturbed_text = perturbed_text_success[0]
-        # results = results_success[0]
- 
+            #     final_result = results[0]
+                
+            #     self.goal_function.num_queries = self.number_of_queries
+            #     self.goal_function.model.reset_inference_steps()
+            #     return final_result # return a random result that wasnt perturbed to show it failed.
 
-        # check that sample is adversarial
+            perturbed_text = perturbed_text_success[0]
+            # results = results_success[0]
+    
 
-        print ('attacked_text',attacked_text)
-        # print ('perturbed_text',perturbed_text)
+            # check that sample is adversarial
 
-        # random_text = perturbed_text.words
+            print ('attacked_text',attacked_text)
+            print ('perturbed_text',perturbed_text)
+
+            random_text = perturbed_text.words
 
         # get_vector(self, self.embedding, word): # word can either be a str or the index eqivalant of embed_content[word_idx_dict[word] ]
 
@@ -3806,55 +3810,60 @@ class TextHoaxer(SearchMethod):
 
         # print ('synonym_words',synonym_words)
         print ('synonyms_all',synonyms_all)
-
-        qrs = 1 # qrs start at 1 because we already had to use 1 query to detect if sample gets classified correctly
-        num_changed = 0
-        flag = 0
-        th = 0
-        while qrs < len(text_ls):
-            print ('qrs1',qrs)
-            random_text = text_ls[:]
-            for i in range(len(synonyms_all)):
-                idx = synonyms_all[i][0]
-                syn = synonyms_all[i][1]
-                random_text[idx] = random.choice(syn)
-                if i >= th:
-                    break
-            print ('random_text 1',random_text)
-            print ('attacked_text 1',attacked_text)
-            print ('text_ls 1',text_ls)
-            # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
-            # model_outputs = self.goal_function._call_model([random_text_joint])
-            # current_goal_status = self.goal_function._get_goal_status(
-            #     model_outputs[0], random_text_joint, check_skip=False
-            # )
-            # self.number_of_queries+=1
+        ###################### erlier code ##########################
+        # qrs = 1 # qrs start at 1 because we already had to use 1 query to detect if sample gets classified correctly
+        # num_changed = 0
+        # flag = 0
+        # th = 0
+        # while qrs < len(text_ls):
+        #     print ('qrs1',qrs)
+        #     random_text = text_ls[:]
+        #     for i in range(len(synonyms_all)):
+        #         idx = synonyms_all[i][0]
+        #         syn = synonyms_all[i][1]
+        #         random_text[idx] = random.choice(syn)
+        #         if i >= th:
+        #             break
+        #     print ('random_text 1',random_text)
+        #     print ('attacked_text 1',attacked_text)
+        #     print ('text_ls 1',text_ls)
+        #     # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
+        #     # model_outputs = self.goal_function._call_model([random_text_joint])
+        #     # current_goal_status = self.goal_function._get_goal_status(
+        #     #     model_outputs[0], random_text_joint, check_skip=False
+        #     # )
+        #     # self.number_of_queries+=1
             
-            random_text_joint = attacked_text.generate_new_attacked_text(random_text)
-            results_adv_initial, search_over = self.get_goal_results([random_text_joint])
-            # pr = get_attack_result([random_text], predictor, orig_label, batch_size)
-            if search_over: 
-                self.goal_function.model.reset_inference_steps()
-                return initial_result
+        #     random_text_joint = attacked_text.generate_new_attacked_text(random_text)
+        #     results_adv_initial, search_over = self.get_goal_results([random_text_joint])
+        #     # pr = get_attack_result([random_text], predictor, orig_label, batch_size)
+        #     if search_over: 
+        #         self.goal_function.model.reset_inference_steps()
+        #         return initial_result
 
-            qrs+=1
-            self.number_of_queries+=1
-            self.goal_function.num_queries = self.number_of_queries
-            th +=1
-            if th > len_text:
-                break
-            # if np.sum(pr)>0:
-            # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-            # print ('results first',results)
-            # if len(results) == 0: 
-            #     print ('returning initial result 1', initial_result)
-            #     return initial_result
+        #     qrs+=1
+        #     self.number_of_queries+=1
+        #     self.goal_function.num_queries = self.number_of_queries
+        #     th +=1
+        #     if th > len_text:
+        #         break
+        #     # if np.sum(pr)>0:
+        #     # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+        #     # print ('results first',results)
+        #     # if len(results) == 0: 
+        #     #     print ('returning initial result 1', initial_result)
+        #     #     return initial_result
 
-            if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                flag = 1
-                break
-        old_qrs = qrs
+        #     if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+        #         flag = 1
+        #         break
+        # old_qrs = qrs
+        # print ('old_qrs',old_qrs)
+        ######################################################
+        qrs = number_samples + 1
+        old_qrs = qrs  
         print ('old_qrs',old_qrs)
+
         # while qrs < old_qrs + 2500 and flag == 0:
 
         # we remove this part because althou if tries all possible queries to find a solution, to make sure we stay in buget we 
