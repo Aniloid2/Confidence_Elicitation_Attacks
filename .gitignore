@@ -163,8 +163,8 @@ cython_debug/
 
 confidence_instruction_finetuning.py
 bash_scripts/attack_orchestration/*
-!bash_scripts/attack_orchestration/attack_all_models_tasks.sh
-!bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
+# !bash_scripts/attack_orchestration/attack_all_models_tasks.sh
+# !bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
 
 testing_check_dirichlet_distribution/*
 testing_check_dirichlet_distribution.txt
@@ -192,3 +192,6 @@ bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
 bash_scripts/attack_orchestration/attack_all_models_tasks.sh
 
 table_plots/*
+
+texthoaxer_test1/*
+texthoaxer_test1.txt

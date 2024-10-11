@@ -255,6 +255,11 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # declare -a config_gpu_1=("llama3" "strategyQA" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.7 500 5)
 # declare -a config_gpu_2=("llama3" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500 5)
 
+# LLAMA3 texthoaxer
+declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
+declare -a config_gpu_2=("llama3" "strategyQA" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5)
+declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
+
 
 
 # TextFooler Random, delete, top_K
@@ -280,7 +285,7 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # declare -a config_gpu_5=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 5 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 100 5)
 # declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 100 5)
 # declare -a config_gpu_6=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 20 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 100 5)
-declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 50 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 100 5)
+# declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 50 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 100 5)
 
 #No Feedback Ablation
 # declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use_hardlabel" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
@@ -301,7 +306,7 @@ declare -A gpu_config_map=(
 )
 
 # List of GPU IDs to use
-gpus=( 0 1 2 3 )
+gpus=( 0 1 2  )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)

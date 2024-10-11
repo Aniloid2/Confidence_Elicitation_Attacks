@@ -10,6 +10,7 @@ DYNAMIC_PROMPT = {
                 'ag_news':AgNewsPrompts,
                 'strategyQA':StrategyQAPrompts,
                 'sst2':SST2Prompts,
+                'mnli':BaseClassificationPrompt,
             },
 
 

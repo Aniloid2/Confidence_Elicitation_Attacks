@@ -1,6 +1,6 @@
 # config.py
 import argparse
-
+import os
 def get_args():
     parser = argparse.ArgumentParser(description='Argument parser for model configuration')
 
@@ -15,9 +15,9 @@ def get_args():
                         help='type of confidence levels')
     parser.add_argument('--prompting_type', type=str, default='step2_k_pred_avg', choices=['s1','w1','s1_black_box', '2step', 'empirical_confidence','k_pred_avg','step2_k_pred_avg' ,'other_prompting_types_here','e_guided_paraphrasing'],
                         help='Type of prompting to use')
-    parser.add_argument('--search_method', type=str, default='black_box', choices=['black_box','greedy_search','greedy_search_use','greedy_search_use_hardlabel','sspattack','greedy_search_withmin_use'],
+    parser.add_argument('--search_method', type=str, default='black_box', choices=['black_box','greedy_search','greedy_search_use','greedy_search_use_hardlabel','sspattack','texthoaxer','greedy_search_withmin_use'],
                         help='Type of search technique')
-    parser.add_argument('--transformation_method', type=str, default='word_swap_embedding', choices=['word_swap_embedding','sspattack','self_word_sub','e_guided_paraphrasing'],
+    parser.add_argument('--transformation_method', type=str, default='word_swap_embedding', choices=['word_swap_embedding','sspattack','texthoaxer','self_word_sub','e_guided_paraphrasing'],
                         help='Type of transformations to use')
     parser.add_argument('--n_embeddings', type=int, default=10, help='Type of prompting to use')
     parser.add_argument('--prompt_shot_type', type=str, default='fs', choices=['fs','zs', 'other_shot_types_here'],
@@ -26,6 +26,8 @@ def get_args():
                         help='Number of predictions to perform')
     parser.add_argument('--max_iter_i', type=int, default=5,
                         help='Number of iterations to perform during search')
+    parser.add_argument('--query_budget', type=int, default=500,
+                        help='Attack query budget')
     parser.add_argument('--num_examples', type=int, default=500,
                         help='Number of examples to evaluate on')                    
     parser.add_argument('--similarity_technique', type=str, default='USE',
@@ -36,8 +38,10 @@ def get_args():
                         help='Number of transformations to perform')
     parser.add_argument('--index_order_technique', type=str, default='prompt_top_k', choices=['prompt_top_k','random','delete' ,'other_techniques_here'],
                         help='Index order technique to use')
-    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/[user]/hub',
+    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/brian/hub',
                         help='Directory for transformers cache')
+    parser.add_argument('--cache_dir', type=str, default=os.path.expanduser('~/.cache/CEAttacks'),
+                        help='Directory for caching files')
     parser.add_argument('--experiment_name_folder', type=str, default='attack_calibrated_model',
                         help='Folder name for the experiment')
     parser.add_argument('--temperature', type=float, default=0.7,

@@ -34,6 +34,20 @@ class BaseClassificationPrompt:
         print ('predict_prompt:', prompt)
 
         return prompt
+    
+    def _predict_prompt(self, text):
+        
+        prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guess for the following text ({self.prediction_options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either ({self.prediction_options}); not a complete sentence, just the guesses! Separated by a comma, for example [{self.prediction_options} ... x{self.k_pred}]>\n\nThe text is:${text} Guesses:{self.end_prompt_footer}"""
+        print ('predict_prompt:', prompt)
+
+        return prompt
+
+    def _confidence_prompt(self, text, guesses_output):
+        
+        confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text ({self.prediction_options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either ({self.prediction_options}); not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_options} that your guesses are correct, without any extra commentary whatsoever, for example [{self.confidence_options} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        print ('confidence_prompt:',confidence_prompt)
+
+        return confidence_prompt
 
     def _initialize_task_name_to_label(self):
         task_name_to_label = {label: i for i,label in enumerate(self.label_list)}

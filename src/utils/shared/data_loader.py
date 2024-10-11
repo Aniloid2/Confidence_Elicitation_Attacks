@@ -14,8 +14,8 @@ def load_data(args):
         per_class_samples = args.num_examples//args.n_classes
         dataset = HuggingFaceDataset(strategy_dataset, split="test", shuffle=True)
         # for i,j in dataset:
-        #     print ('i',i,j)
-        # sys.exit()
+        #     print ('i',i,j) 
+        # sys.exit() 
 
         # dataset = HuggingFaceDataset("glue", "sst2", split="validation", shuffle=True)
         label_names = dataset.label_names
@@ -34,8 +34,8 @@ def load_data(args):
         return dataset_class, label_names
 
     elif task == 'ag_news':
-        print(f"Loading Ag News dataset from ' '...")
-        strategy_dataset = load_dataset(' ', split='test')#.select(range(500)) # example: taking 50 samples
+        print(f"Loading Ag News dataset from 'fancyzhx/ag_news'...")
+        strategy_dataset = load_dataset('fancyzhx/ag_news', split='test')#.select(range(500)) # example: taking 50 samples
         print(f"Ag News dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
         
         dataset = HuggingFaceDataset(strategy_dataset, split="test", shuffle=True)
@@ -79,8 +79,8 @@ def load_data(args):
         from collections import defaultdict
 
         split = "test"
-        print(f"Loading PopQA {split} dataset from ' '...")
-        raw_dataset = load_dataset(" ", split=split).select(range(5))
+        print(f"Loading PopQA {split} dataset from 'akariasai/PopQA'...")
+        raw_dataset = load_dataset("akariasai/PopQA", split=split).select(range(5))
         print(f"PopQA {split} dataset loaded successfully", type(raw_dataset),'column names',raw_dataset.column_names)
 
         # add a new column, and for each datasample given raw_dataset['prop'] (e.g capital, business etc) extract all other rows that have the same raw_dataset['prop'] and add their answers which are accessed raw_dataset['possible_answers'] and add them to a new column raw_dataset['wrong_possible_answers'] 
@@ -161,8 +161,8 @@ def load_data(args):
         return dataset_class_t, label_names
     elif task == 'strategyQA':
         from datasets import load_dataset 
-        print(f"Loading StrategyQA dataset from ''...")
-        strategy_dataset = load_dataset('', split='test').select(range(500)) # example: taking 50 samples
+        print(f"Loading StrategyQA dataset from 'ChilleD/StrategyQA'...")
+        strategy_dataset = load_dataset('ChilleD/StrategyQA', split='test').select(range(500)) # example: taking 50 samples
         print(f"StrategyQA dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
 
         strategy_dataset = strategy_dataset.rename_column("question", "text")
@@ -173,13 +173,42 @@ def load_data(args):
 
         strategy_dataset_class = []
         strategy_dataset_class = [(text['text'], int(label)) for (text, label) in strategy_dataset]
+        # strategy_dataset_class_t = strategy_dataset_class[133:136]#[:args.num_examples]#[17:18]
         strategy_dataset_class_t = strategy_dataset_class[:args.num_examples]#[17:18]
         strategy_incontext_dataset_class = strategy_dataset_class[-5:]
         label_names = ['false','true']
         print(f'Total filtered dataset size for StrategyQA: {len(strategy_dataset)}')
         print(f'In-context samples for StrategyQA: {strategy_incontext_dataset_class}')
         return strategy_dataset_class_t, label_names
-     
+    elif task == 'mnli':
+        print("Loading MNLI dataset from 'nyu-mll/multi_nli'...")
+        # Load the validation split of the MNLI dataset
+        strategy_dataset = load_dataset('nyu-mll/multi_nli', split='validation_matched')
+        print(f"MNLI dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
+
+        per_class_samples = args.num_examples // args.n_classes
+        dataset = HuggingFaceDataset(strategy_dataset, split="validation", shuffle=True)
+        label_names = dataset.label_names
+
+        # Split dataset by label
+        dataset_class_0 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 0]  # Neutral
+        dataset_class_1 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 1]  # Entailment
+        dataset_class_2 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 2]  # Contradiction
+
+        # Create samples per class
+        dataset_class_0_t = dataset_class_0[:per_class_samples]
+        incontext_dataset_class_0 = dataset_class_0[-5:]
+
+        dataset_class_1_t = dataset_class_1[:per_class_samples]
+        incontext_dataset_class_1 = dataset_class_1[-5:]
+
+        dataset_class_2_t = dataset_class_2[:per_class_samples]
+        incontext_dataset_class_2 = dataset_class_2[-5:]
+
+        # Combine datasets
+        dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t
+
+        return dataset_class, label_names
     else:
         print("Task not supported.")
 
