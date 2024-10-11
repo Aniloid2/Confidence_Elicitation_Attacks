@@ -3932,7 +3932,7 @@ class TextHoaxer(SearchMethod):
                         print ('attacked_text',attacked_text)
                         print ('new_text_joint',new_text_joint)
                         if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass
+                            continue
                         
 
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, new_text_joint.text])
@@ -3987,7 +3987,7 @@ class TextHoaxer(SearchMethod):
 
                         new_text_joint = attacked_text.generate_new_attacked_text(new_text)
                         if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass
+                            continue
 
                         results, search_over = self.get_goal_results([new_text_joint])
                         if search_over: 
@@ -4156,7 +4156,7 @@ class TextHoaxer(SearchMethod):
                     print ('attacked_text',attacked_text)
                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass 
+                        continue 
                     # model_outputs = self.goal_function._call_model([theta_old_neighbor_text_joint])
                     # current_goal_status = self.goal_function._get_goal_status(
                     #     model_outputs[0], theta_old_neighbor_text_joint, check_skip=False
@@ -4281,7 +4281,7 @@ class TextHoaxer(SearchMethod):
                         print ('attacked_text',attacked_text)
                         print ('theta_new_text_joint',theta_new_text_joint)
                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass  
+                            continue  
                         results, search_over = self.get_goal_results([theta_new_text_joint])
                         if search_over: 
                             self.goal_function.model.reset_inference_steps()
@@ -4342,7 +4342,7 @@ class TextHoaxer(SearchMethod):
                         print ('attacked_text',attacked_text)
                         print ('theta_new_text_joint',theta_new_text_joint)
                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass
+                            continue
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4368,7 +4368,7 @@ class TextHoaxer(SearchMethod):
                         print ('attacked_text',attacked_text)
                         print ('gamma_old_text_joint',gamma_old_text_joint)
                         if attacked_text.text == gamma_old_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            pass
+                            continue
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, gamma_old_text_joint.text])
 
                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4402,7 +4402,7 @@ class TextHoaxer(SearchMethod):
                             print ('attacked_text',attacked_text)
                             print ('replaceback_text_joint',replaceback_text_joint)
                             if attacked_text.text == replaceback_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                pass
+                                continue
                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, replaceback_text_joint.text])
 
                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4449,7 +4449,7 @@ class TextHoaxer(SearchMethod):
                             print ('attacked_text',attacked_text)
                             print ('theta_new_text_joint',theta_new_text_joint)
                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                pass 
+                                continue 
                             # model_outputs = self.goal_function._call_model([theta_new_text_joint])
                             # current_goal_status = self.goal_function._get_goal_status(
                             #     model_outputs[0], theta_new_text_joint, check_skip=False
@@ -4528,7 +4528,7 @@ class TextHoaxer(SearchMethod):
                             print ('attacked_text',attacked_text)
                             print ('theta_new_text_joint 2',theta_new_text_joint)
                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                pass
+                                continue
                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
