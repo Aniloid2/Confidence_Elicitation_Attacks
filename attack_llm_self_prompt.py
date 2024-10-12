@@ -4138,7 +4138,11 @@ class TextHoaxer(SearchMethod):
                
                 u_vec = np.random.normal(loc=0.0, scale=1,size=theta_old.shape)
                 theta_old_neighbor = theta_old+0.5*u_vec
-
+                print ('theta_old_neighbor',theta_old_neighbor)
+                # Check if theta_old_neighbor is a 2D array
+                if theta_old_neighbor.ndim != 2:
+                    print('theta_old_neighbor not a 2D array. Skipping this iteration.')
+                    continue
                 theta_perturb_dist = np.sum((theta_old_neighbor)**2, axis=1)
                 nonzero_ele = np.nonzero(np.linalg.norm(theta_old,axis = -1))[0].tolist()
                 perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])

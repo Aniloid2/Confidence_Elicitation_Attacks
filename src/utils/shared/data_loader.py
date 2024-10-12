@@ -42,15 +42,17 @@ def load_data(args):
         # dataset = HuggingFaceDataset('ag_news', split="test", shuffle=True)
         label_names = dataset.label_names
         per_class_samples = args.num_examples//args.n_classes
-        # For dataset_class_1, only include documents with 3 or more characters and label == 1
-        dataset_class_1 = [(text['text'], label) for (text, label) in dataset if label == 1 and len(text['text']) >= 3]
-        dataset_class_1_t = dataset_class_1[:per_class_samples]
-        incontext_dataset_class_1 = dataset_class_1[-5:]
 
         # For dataset_class_0, only include documents with 3 or more characters and label == 0
         dataset_class_0 = [(text['text'], label) for (text, label) in dataset if label == 0 and len(text['text']) >= 3]
         dataset_class_0_t = dataset_class_0[:per_class_samples]
         incontext_dataset_class_0 = dataset_class_0[-5:]
+
+
+        # For dataset_class_1, only include documents with 3 or more characters and label == 1
+        dataset_class_1 = [(text['text'], label) for (text, label) in dataset if label == 1 and len(text['text']) >= 3]
+        dataset_class_1_t = dataset_class_1[:per_class_samples]
+        incontext_dataset_class_1 = dataset_class_1[-5:] 
 
         # For dataset_class_2
         dataset_class_2 = [(text['text'], label) for (text, label) in dataset if label == 2 and len(text['text']) >= 3]
@@ -63,7 +65,8 @@ def load_data(args):
         incontext_dataset_class_3 = dataset_class_3[-5:]
 
         # Combine datasets from different classes
-        dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t + dataset_class_3_t
+        # dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t + dataset_class_3_t
+        dataset_class =  dataset_class_1_t[9:20]  
 
         print(f'Total filtered dataset size: {len(dataset_class)}')
         print(f'In-context samples for class 1: {incontext_dataset_class_1}')
