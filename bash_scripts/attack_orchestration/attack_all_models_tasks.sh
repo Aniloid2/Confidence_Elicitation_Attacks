@@ -335,8 +335,8 @@ declare -a config_gpu_0=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_sear
 
 
 # Mistral texthoaxer
-declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
-declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5)
+# declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
+# declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5)
 declare -a config_gpu_2=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
 
 
