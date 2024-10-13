@@ -4244,6 +4244,8 @@ class TextHoaxer(SearchMethod):
 
                     print ('attacked_text',attacked_text)
                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
+                    if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+                        continue 
                     sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
 
                     if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4560,10 +4562,14 @@ class TextHoaxer(SearchMethod):
 
 
             best_attack_joint = attacked_text.generate_new_attacked_text(best_attack)
+            
 
 
             print ('attacked_text',attacked_text)
             print ('best_attack_joint',best_attack_joint)
+            if attacked_text.text == best_attack_joint.text: # is word sub leads to perturbation being same as original sample skip
+                self.goal_function.model.reset_inference_steps() 
+                return initial_result # in this case i return the initial result, shouldent really ever happen since we always check if the perturbed sample is the same as original one at each step and ignore perturbation if it is.
             
             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, best_attack_joint.text])
 

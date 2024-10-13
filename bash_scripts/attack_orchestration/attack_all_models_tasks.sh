@@ -222,7 +222,7 @@ function run_test() {
 }
 
 # List of hyperparameter names
-declare -a param_names=("model_type" "task" "num_transformations" "prompting_type" "search_method" "transformation_method" "n_embeddings" "similarity_threshold" "confidence_type" "k_pred" "similarity_technique" "prompt_shot_type" "index_order_technique" "temperature" "num_examples" "max_iter_i")
+declare -a param_names=("model_type" "task" "num_transformations" "prompting_type" "search_method" "transformation_method" "n_embeddings" "similarity_threshold" "confidence_type" "k_pred" "similarity_technique" "prompt_shot_type" "index_order_technique" "temperature" "num_examples" "max_iter_i" "query_budget")
 
 # Test configurations: each row corresponds to a set of hyperparameters for a specific GPU
 # TextFooler MISTRALv03
@@ -256,8 +256,8 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # declare -a config_gpu_2=("llama3" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500 5)
 
 # LLAMA3 texthoaxer
-# declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
-# declare -a config_gpu_2=("llama3" "strategyQA" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5)
+declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
+declare -a config_gpu_2=("llama3" "strategyQA" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5)
 declare -a config_gpu_1=("llama3" "ag_news" 1 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
 
 
@@ -310,7 +310,7 @@ gpus=( 0 1 2  )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)
-
+ 
 # Iterate over each GPU ID
 for gpu in "${gpus[@]}"; do
   config_name="${gpu_config_map[$gpu]}"
@@ -323,7 +323,7 @@ for gpu in "${gpus[@]}"; do
   done
 
   # Define a unique experiment name
-  experiment_name="Attack_model_EN${params[num_examples]}_${params[prompting_type]}_${params[model_type]}_${params[task]}_NT${params[num_transformations]}_Bs${params[similarity_threshold]}_CT${params[confidence_type]}_KP${params[k_pred]}_ST${params[similarity_technique]}_PST${params[prompt_shot_type]}_IOT${params[index_order_technique]}_SM${params[search_method]}_TM${params[transformation_method]}_NE${params[n_embeddings]}_TMP${params[temperature]}_MIT${params[max_iter_i]}"
+  experiment_name="Attack_model_EN${params[num_examples]}_${params[prompting_type]}_${params[model_type]}_${params[task]}_NT${params[num_transformations]}_Bs${params[similarity_threshold]}_CT${params[confidence_type]}_KP${params[k_pred]}_ST${params[similarity_technique]}_PST${params[prompt_shot_type]}_IOT${params[index_order_technique]}_SM${params[search_method]}_TM${params[transformation_method]}_NE${params[n_embeddings]}_TMP${params[temperature]}_MIT${params[max_iter_i]}_QB${params[query_budget]}"
   echo "Experiment name: $experiment_name on GPU $gpu"
 
   # Convert the associative array to a list of command-line options
