@@ -3754,6 +3754,7 @@ class TextHoaxer(SearchMethod):
         top_k_words = self.max_iter_i
         cos_sim = self.sim_lis
         budget =  self.query_budget - 1 # -1 because we have qrs > buget, but if we do a model call exacly on query results will be empty
+        num_synonyms = self.n_embeddings
         pos_ls = criteria.get_pos(text_ls)
         len_text = len(text_ls)
         # if len_text < sim_score_window:
@@ -3789,14 +3790,17 @@ class TextHoaxer(SearchMethod):
 
         synonym_words,synonym_values=[],[]
         for idx in words_perturb_idx:
-            res = list(zip(*(cos_sim[idx])))
+            res = list(zip(*(cos_sim[idx])))[:self.n_embeddings]
+            
             temp=[]
             for ii in res[1]:
                 temp.append(idx2word[ii])
+            print ('temp syn words',idx2word[idx],temp, len(temp))
             synonym_words.append(temp)
             temp=[]
             for ii in res[0]:
                 temp.append(ii)
+            print ('temp syn values',idx2word[idx],temp, len(temp))
             synonym_values.append(temp)
 
         synonyms_all = []
@@ -4119,6 +4123,7 @@ class TextHoaxer(SearchMethod):
             # best_sim = calc_sim(text_ls, [best_attack], -1, sim_score_window, sim_predictor)
             best_sim = random_sim
 
+            already_explored = set()
 
 
             gamma = 0.3*np.ones([words_perturb_embed_matrix.shape[0], 1])
@@ -4138,7 +4143,7 @@ class TextHoaxer(SearchMethod):
                
                 u_vec = np.random.normal(loc=0.0, scale=1,size=theta_old.shape)
                 theta_old_neighbor = theta_old+0.5*u_vec
-                print ('theta_old_neighbor',theta_old_neighbor)
+                # print ('theta_old_neighbor',theta_old_neighbor)
                 # Check if theta_old_neighbor is a 2D array
                 if theta_old_neighbor.ndim != 2:
                     print('theta_old_neighbor not a 2D array. Skipping this iteration.')
@@ -4170,6 +4175,10 @@ class TextHoaxer(SearchMethod):
                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                         continue 
+                    # elif theta_old_neighbor_text_joint in already_explored:
+                    #     continue
+                    # else:
+                    #     already_explored.add(theta_old_neighbor_text_joint)
                     # model_outputs = self.goal_function._call_model([theta_old_neighbor_text_joint])
                     # current_goal_status = self.goal_function._get_goal_status(
                     #     model_outputs[0], theta_old_neighbor_text_joint, check_skip=False
