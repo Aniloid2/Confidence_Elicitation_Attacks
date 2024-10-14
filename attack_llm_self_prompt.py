@@ -3790,8 +3790,14 @@ class TextHoaxer(SearchMethod):
 
         synonym_words,synonym_values=[],[]
         for idx in words_perturb_idx:
-            res = list(zip(*(cos_sim[idx])))[:self.n_embeddings]
+            res = list(zip(*(cos_sim[idx])))
             
+            # print ('res',res, len(res),len(res[0]),len(res[1]))
+            res[0] = res[0][:self.n_embeddings]
+            res[1] = res[1][:self.n_embeddings]
+            # [:self.n_embeddings]
+            # print ('res',len(res[0]),len(res[1]))
+            # sys.exit()
             temp=[]
             for ii in res[1]:
                 temp.append(idx2word[ii])
