@@ -3697,11 +3697,61 @@ class TextHoaxer(SearchMethod):
 
         print ('goal_function',self.goal_function)
         
+        
+
+        # get_vector(self, self.embedding, word): # word can either be a str or the index eqivalant of embed_content[word_idx_dict[word] ]
+
+        text_ls = attacked_text.words
+        true_label = initial_result.ground_truth_output 
+        orig_label = initial_result.output
+
+        word_idx_dict = self.embedding._word2index
+        embed_content = self.embedding
+        idx2word = self.embedding._index2word
+        word2idx = self.embedding._word2index
+        criteria = self
+        top_k_words = self.max_iter_i
+        cos_sim = self.sim_lis
+        budget =  self.query_budget - 1 # -1 because we have qrs > buget, but if we do a model call exacly on query results will be empty
+        num_synonyms = self.n_embeddings
+        pos_ls = criteria.get_pos(text_ls)
+        len_text = len(text_ls)
+        # if len_text < sim_score_window:
+        #     sim_score_threshold = 0.1
+        # half_sim_score_window = (sim_score_window - 1) // 2
+        num_queries = 1
+        rank = {}
+        words_perturb = []
+        # pos_ls = criteria.get_pos(text_ls)
+        # print ('pos_ls',pos_ls)
+        # pos_pref = ["ADJ", "ADV", "VERB", "NOUN"]
+        # for pos in pos_pref:
+        #     for i in range(len(pos_ls)):
+        #         if pos_ls[i] == pos and len(text_ls[i]) > 2:
+        #             words_perturb.append((i, text_ls[i]))
+        # print ('words_perturb',words_perturb)
+        # pos_ls = criteria.get_pos(text_ls)
+        pos_tags = nltk.pos_tag(text_ls)   
+        print ('pos_tags',pos_tags)
+        for i, (word, pos_tag) in enumerate(pos_tags):
+            if pos_tag.startswith(('VB', 'NN', 'JJ', 'RB')) and len(word) > 2:
+                words_perturb.append((i, word))
+
+        random.shuffle(words_perturb)
+        words_perturb = words_perturb[:top_k_words]
+
+
+
+        print ('words_perturb',words_perturb) 
+        words_perturb_indices = [idx for idx, word in words_perturb]
+
+
+
         # Step 1: Initialization
         number_samples = 2
         self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
         self.goal_function.num_queries = self.number_of_queries
-        perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
+        perturbed_text = [self.random_initialization(attacked_text,words_perturb_indices) for i in range(number_samples)]
         
         results, search_over = self.get_goal_results(perturbed_text)
         
@@ -3740,40 +3790,8 @@ class TextHoaxer(SearchMethod):
 
             random_text = perturbed_text.words
 
-        # get_vector(self, self.embedding, word): # word can either be a str or the index eqivalant of embed_content[word_idx_dict[word] ]
 
-        text_ls = attacked_text.words
-        true_label = initial_result.ground_truth_output 
-        orig_label = initial_result.output
 
-        word_idx_dict = self.embedding._word2index
-        embed_content = self.embedding
-        idx2word = self.embedding._index2word
-        word2idx = self.embedding._word2index
-        criteria = self
-        top_k_words = self.max_iter_i
-        cos_sim = self.sim_lis
-        budget =  self.query_budget - 1 # -1 because we have qrs > buget, but if we do a model call exacly on query results will be empty
-        num_synonyms = self.n_embeddings
-        pos_ls = criteria.get_pos(text_ls)
-        len_text = len(text_ls)
-        # if len_text < sim_score_window:
-        #     sim_score_threshold = 0.1
-        # half_sim_score_window = (sim_score_window - 1) // 2
-        num_queries = 1
-        rank = {}
-        words_perturb = []
-        pos_ls = criteria.get_pos(text_ls)
-        pos_pref = ["ADJ", "ADV", "VERB", "NOUN"]
-        for pos in pos_pref:
-            for i in range(len(pos_ls)):
-                if pos_ls[i] == pos and len(text_ls[i]) > 2:
-                    words_perturb.append((i, text_ls[i]))
-        print ('words_perturb',words_perturb)
-
-        random.shuffle(words_perturb)
-        words_perturb = words_perturb[:top_k_words]
-        print ('words_perturb',words_perturb) 
         words_perturb_idx= []
         words_perturb_embed = []
         words_perturb_doc_idx = []
@@ -4181,10 +4199,10 @@ class TextHoaxer(SearchMethod):
                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                         continue 
-                    # elif theta_old_neighbor_text_joint in already_explored:
-                    #     continue
-                    # else:
-                    #     already_explored.add(theta_old_neighbor_text_joint)
+                    elif theta_old_neighbor_text_joint in already_explored:
+                        continue
+                    else:
+                        already_explored.add(theta_old_neighbor_text_joint)
                     # model_outputs = self.goal_function._call_model([theta_old_neighbor_text_joint])
                     # current_goal_status = self.goal_function._get_goal_status(
                     #     model_outputs[0], theta_old_neighbor_text_joint, check_skip=False
@@ -4261,6 +4279,10 @@ class TextHoaxer(SearchMethod):
                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                         continue 
+                    elif theta_old_neighbor_text_joint in already_explored: # if we already tried this perturbation try again
+                        continue
+                    else:
+                        already_explored.add(theta_old_neighbor_text_joint)
                     sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
 
                     if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4312,6 +4334,10 @@ class TextHoaxer(SearchMethod):
                         print ('theta_new_text_joint',theta_new_text_joint)
                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                             continue  
+                        elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+                            continue
+                        else:
+                            already_explored.add(theta_new_text_joint)
                         results, search_over = self.get_goal_results([theta_new_text_joint])
                         if search_over: 
                             self.goal_function.model.reset_inference_steps()
@@ -4373,6 +4399,10 @@ class TextHoaxer(SearchMethod):
                         print ('theta_new_text_joint',theta_new_text_joint)
                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                             continue
+                        elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+                            continue
+                        else:
+                            already_explored.add(theta_new_text_joint)
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4399,6 +4429,10 @@ class TextHoaxer(SearchMethod):
                         print ('gamma_old_text_joint',gamma_old_text_joint)
                         if attacked_text.text == gamma_old_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                             continue
+                        elif gamma_old_text_joint in already_explored: # if we already tried this perturbation try again
+                            continue
+                        else:
+                            already_explored.add(gamma_old_text_joint)
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, gamma_old_text_joint.text])
 
                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4433,6 +4467,10 @@ class TextHoaxer(SearchMethod):
                             print ('replaceback_text_joint',replaceback_text_joint)
                             if attacked_text.text == replaceback_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                                 continue
+                            elif replaceback_text_joint in already_explored: # if we already tried this perturbation try again
+                                continue
+                            else:
+                                already_explored.add(replaceback_text_joint)
                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, replaceback_text_joint.text])
 
                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4480,6 +4518,10 @@ class TextHoaxer(SearchMethod):
                             print ('theta_new_text_joint',theta_new_text_joint)
                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                                 continue 
+                            elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+                                continue
+                            else:
+                                already_explored.add(theta_new_text_joint)
                             # model_outputs = self.goal_function._call_model([theta_new_text_joint])
                             # current_goal_status = self.goal_function._get_goal_status(
                             #     model_outputs[0], theta_new_text_joint, check_skip=False
@@ -4559,6 +4601,10 @@ class TextHoaxer(SearchMethod):
                             print ('theta_new_text_joint 2',theta_new_text_joint)
                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
                                 continue
+                            elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+                                continue
+                            else:
+                                already_explored.add(theta_new_text_joint)
                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
@@ -4730,20 +4776,26 @@ class TextHoaxer(SearchMethod):
         print ('just aviod everything')
         return initial_result
 
-    def random_initialization(self, text):
+    def random_initialization(self, text, words_perturb):
         words = text.words
         tmp_text = text
         size_text = len(text.words)
         start_i = 0
         while start_i < size_text:
             # print ('start tmp text',tmp_text)
+            if start_i not in words_perturb:
+                start_i+=1
+                continue
+            print ('words_perturb',words_perturb)
+            print ('start_i',start_i)
             words = tmp_text.words
             pos_tags = nltk.pos_tag(words)   
-            # print ('pos_tags',pos_tags)
+            print ('pos_tags nltk',pos_tags)
             if pos_tags[start_i][1].startswith(('VB', 'NN', 'JJ', 'RB')): 
                 # print ('pos_tags[start_i][1]',pos_tags[start_i][1])
                 replaced_with_synonyms = self.get_transformations(tmp_text, original_text=tmp_text,indices_to_modify=[start_i])
-                # print ('replaced_with_synonyms',replaced_with_synonyms)
+                print ('replaced_with_synonyms should be 10?',replaced_with_synonyms,len(replaced_with_synonyms))
+                
                 if replaced_with_synonyms:
                     tmp_text = random.choice(replaced_with_synonyms)
                 else:

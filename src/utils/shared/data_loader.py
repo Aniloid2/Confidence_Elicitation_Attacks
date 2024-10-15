@@ -65,7 +65,7 @@ def load_data(args):
         incontext_dataset_class_3 = dataset_class_3[-5:]
 
         # Combine datasets from different classes
-        dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t + dataset_class_3_t
+        dataset_class =  dataset_class_1_t + dataset_class_0_t + dataset_class_2_t + dataset_class_3_t
         # dataset_class =  dataset_class_1_t[9:20]  
 
         print(f'Total filtered dataset size: {len(dataset_class)}')
