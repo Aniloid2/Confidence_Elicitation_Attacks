@@ -3748,11 +3748,11 @@ class TextHoaxer(SearchMethod):
 
 
         # Step 1: Initialization
-        number_samples = 2
+        number_samples = self.num_transformations # 2
         self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
         self.goal_function.num_queries = self.number_of_queries
         perturbed_text = [self.random_initialization(attacked_text,words_perturb_indices) for i in range(number_samples)]
-        
+        print ('perturbed_text',perturbed_text)
         results, search_over = self.get_goal_results(perturbed_text)
         
          
