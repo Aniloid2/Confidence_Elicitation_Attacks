@@ -5,7 +5,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Argument parser for model configuration')
 
     # Define the arguments
-    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','llama3','llama3_1','phi3','llama2_13b','gemma2', 'other_model_types_here'],
+    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','llama3','llama3_1','llama3_2_1b','llama3_2_3b','llama3_2_11b','phi3','llama2_13b','gemma2', 'other_model_types_here'],
                         help='Type of the model to use')
     parser.add_argument('--task', type=str, default='strategyQA', choices=['sst2','ag_news','popQA','strategyQA', 'other_tasks_here'],
                         help='Task to perform')

@@ -128,6 +128,21 @@ MODEL_INFO = {
         'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
         'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     },
+    'llama3_2_1b': {
+        'model_name': "meta-llama/Llama-3.2-1B-Instruct",
+        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
+        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    },
+    'llama3_2_3b': {
+        'model_name': "meta-llama/Llama-3.2-3B-Instruct",
+        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
+        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    },
+    'llama3_2_11b': {
+        'model_name': "meta-llama/Llama-3.2-11B-Vision-Instruct",
+        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
+        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    },
     'gemma2':{
         'model_name': 'google/gemma-2-9b',
         'start_prompt_header':'<bos><start_of_turn>user',
