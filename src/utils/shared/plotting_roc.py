@@ -23,7 +23,7 @@ def plot_roc_curve(args,true_labels, probabilities, name_plot):
         - prompting_type: Prompting type used in the model.
         - k_pred: A parameter used for naming the saved plots.
     """
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(15, 15))
     print(f"true_labels shape: {true_labels.shape}")
     print(f"probabilities shape: {probabilities.shape}")
 
@@ -39,18 +39,20 @@ def plot_roc_curve(args,true_labels, probabilities, name_plot):
         auroc = roc_auc_score(true_labels, probabilities[:, 1])
 
     plt.plot([0, 1], [0, 1], linestyle='--', label='Random Chance')
-    plt.title(f'ROC Curve for \n Classification {args.task}/{args.model_type} \n Confidence Type:{args.confidence_type}', fontsize=35)
-    plt.xlabel('False Positive Rate', fontsize=30)
-    plt.ylabel('True Positive Rate', fontsize=30)
-    plt.legend(prop={'size': 25})
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    # plt.title(f'ROC Curve for \n Classification {args.task}/{args.model_type} \n Confidence Type:{args.confidence_type}', fontsize=45, pad=25)
+    plt.title(f'ROC Curve for \n Classification {args.task}/{args.model_type}', fontsize=45, pad=25)
+    
+    plt.xlabel('False Positive Rate', fontsize=35)
+    plt.ylabel('True Positive Rate', fontsize=35)
+    plt.legend(prop={'size': 35})
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
 
     # Save the ROC plot to a file with the name_plot variable
     jpg_filename = f'{name_plot}_roc_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.jpg'
     pdf_filename = f'{name_plot}_roc_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.pdf'
-    plt.savefig(os.path.join(args.test_folder, jpg_filename), format='jpg', dpi=300)
-    plt.savefig(os.path.join(args.test_folder, pdf_filename), format='pdf', dpi=300)
+    plt.savefig(os.path.join(args.test_folder, jpg_filename), format='jpg', dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(args.test_folder, pdf_filename), format='pdf', dpi=300, bbox_inches='tight')
     plt.close()
 
     print(f"AUROC: {auroc:.4f}")

@@ -24,7 +24,7 @@ def plot_calibration_curve(args, true_labels, probabilities, name_plot):
         - k_pred: A parameter used for naming the saved plots.
     """
     plt.rcParams.update({'font.size': 25})
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(15, 15))
 
     if args.n_classes > 2:
         true_labels_binarized = label_binarize(true_labels, classes=range(args.n_classes))
@@ -33,29 +33,41 @@ def plot_calibration_curve(args, true_labels, probabilities, name_plot):
             true_prob, pred_prob = calibration_curve(true_labels_binarized[:, i], probabilities[:, i], n_bins=10)
             plt.plot(pred_prob, true_prob, marker='o', linewidth=1, label=f'{args.dataset.label_names[i]}')
 
+        # plt.title(
+        #     f'Calibration Plot for \n Multi-Class Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
+        #     fontsize=45,
+        #     pad=25
+        # )
         plt.title(
-            f'Calibration Plot for \n Multi-Class Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
-            fontsize=35
+            f'Calibration Plot for \n Classification {args.task}/{args.model_type}', 
+            fontsize=45,
+            pad=25
         )
-        plt.ylabel('Fraction of correct classifications', fontsize=30)
+        plt.ylabel('Fraction of correct classifications', fontsize=35)
     else:
         true_prob, pred_prob = calibration_curve(true_labels, probabilities[:, 1], n_bins=10)
         plt.plot(pred_prob, true_prob, marker='o', linewidth=1, label='Calibration Plot')
+        # plt.title(
+        #     f'Calibration Plot for \n Binary Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
+        #     fontsize=45,
+        #     pad=25
+        # )
         plt.title(
-            f'Calibration Plot for \n Binary Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
-            fontsize=35
+            f'Calibration Plot for \n Classification {args.task}/{args.model_type}', 
+            fontsize=45,
+            pad=25
         )
-        plt.ylabel('Fraction of positives', fontsize=30)
+        plt.ylabel('Fraction of positives', fontsize=35)
 
-    plt.plot([0, 1], [0, 1], linestyle='--', label='Ideally calibrated')
-    plt.xlabel('Mean predicted probability', fontsize=30)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.legend(prop={'size': 25})
+    plt.plot([0, 1], [0, 1], linestyle='--', label='Ideally\ncalibrated')
+    plt.xlabel('Mean predicted probability', fontsize=35)
+    plt.xticks(fontsize=25)
+    plt.yticks(fontsize=25)
+    plt.legend(prop={'size': 35})
 
     # Save the plot to a file
-    plt.savefig(os.path.join(args.test_folder, f'{name_plot}_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.jpg'), format='jpg', dpi=300)
-    plt.savefig(os.path.join(args.test_folder, f'{name_plot}_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.pdf'), format='pdf', dpi=300)
+    plt.savefig(os.path.join(args.test_folder, f'{name_plot}_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.jpg'), format='jpg', dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(args.test_folder, f'{name_plot}_llm_{args.model_type}_{args.task}_{args.prompting_type}_{args.confidence_type}_K{args.k_pred}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
     plt.close()
 
 

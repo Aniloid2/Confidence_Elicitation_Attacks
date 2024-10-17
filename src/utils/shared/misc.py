@@ -92,7 +92,9 @@ def environment_setup():
     # os.environ["HF_HOME"] = "/mnt/hdd/brian/"# args.cache_transformers# "/mnt/hdd/brian/"
     # os.environ["TRANSFORMERS_CACHE"] = "/mnt/hdd/brian/"
     cache_dir = args.cache_transformers # "/mnt/hdd/brian/hub"
-    os.environ['TFHUB_CACHE_DIR'] = cache_dir
+    # os.environ['TFHUB_CACHE_DIR'] = cache_dir
+    # os.environ['TRANSFORMERS_CACHE'] = cache_dir
+    # os.environ['HF_DATASETS_CACHE'] = cache_dir
 
     high_level_folder = args.experiment_name_folder
     test_folder = os.path.join(high_level_folder, f'{args.model_type}_{args.task}_log_folder') 
@@ -112,8 +114,8 @@ from textattack.models.wrappers import HuggingFaceModelWrapper
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 def initialize_model_and_tokenizer(args):
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name, cache_dir=args.cache_transformers,trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(args.model_name, cache_dir=args.cache_transformers,trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
+    model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     tokenizer.pad_token = tokenizer.eos_token  # Ensure the tokenizer's pad token is set
