@@ -144,7 +144,7 @@ MODEL_INFO = {
         'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     },
     'gemma2':{
-        'model_name': 'google/gemma-2-9b',
+        'model_name': 'google/gemma-2-9b-it',
         'start_prompt_header':'<bos><start_of_turn>user',
         'end_prompt_footer':'<end_of_turn><start_of_turn>model'
     },
@@ -163,6 +163,20 @@ MODEL_INFO = {
         'start_prompt_header': "<s>[INST]",
         'end_prompt_footer': "[/INST]"
     },
+    'mistral-8b-instruct-2410': {
+        'model_name': "mistralai/Ministral-8B-Instruct-2410",
+        'start_prompt_header': "<s>[INST]",
+        'end_prompt_footer': "[/INST]"
+    },
+    'mistral-small-instruct-2409': {
+        'model_name': "mistralai/Mistral-Small-Instruct-2409",
+        'start_prompt_header': "<s>[INST]",
+        'end_prompt_footer': "[/INST]"
+    },
+    'mistral-nemo-instruct-2407': {
+        'model_name': "mistralai/Mistral-Nemo-Instruct-2407",
+        'start_prompt_header': "<s>[INST]",
+        'end_prompt_footer': "[/INST]"
+    },
 } 
- 
-
+   

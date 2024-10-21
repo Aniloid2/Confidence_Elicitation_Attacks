@@ -158,7 +158,8 @@ function run_test() {
 # List of GPU IDs to use
 
 # List of hyperparameter names
-declare -a param_names=("model_type" "task" "num_transformations" "prompting_type" "search_method" "transformation_method" "n_embeddings" "similarity_threshold" "confidence_type" "k_pred" "similarity_technique" "prompt_shot_type" "index_order_technique"  "temperature" "num_examples")
+declare -a param_names=("model_type" "task" "num_transformations" "prompting_type" "search_method" "transformation_method" "n_embeddings" "similarity_threshold" "confidence_type" "k_pred" "similarity_technique" "prompt_shot_type" "index_order_technique" "temperature" "num_examples" "max_iter_i" "query_budget")
+
 
 # Test configurations: each row corresponds to a set of hyperparameters for a specific GPU
 declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.7 500)
@@ -199,7 +200,7 @@ for gpu in "${gpus[@]}"; do
   done
 
   # Define a unique experiment name
-  experiment_name="Check_calibration_EN${params[num_examples]}_${params[prompting_type]}_${params[model_type]}_${params[task]}_NT${params[num_transformations]}_Bs${params[similarity_threshold]}_CT${params[confidence_type]}_KP${params[k_pred]}_ST${params[similarity_technique]}_PST${params[prompt_shot_type]}_IOT${params[index_order_technique]}_SM${params[search_method]}_TM${params[transformation_method]}_NE${params[n_embeddings]}_TMP${params[temperature]}"
+  experiment_name="Check_calibration_EN${params[num_examples]}_${params[prompting_type]}_${params[model_type]}_${params[task]}_NT${params[num_transformations]}_Bs${params[similarity_threshold]}_CT${params[confidence_type]}_KP${params[k_pred]}_ST${params[similarity_technique]}_PST${params[prompt_shot_type]}_IOT${params[index_order_technique]}_SM${params[search_method]}_TM${params[transformation_method]}_NE${params[n_embeddings]}_TMP${params[temperature]}_MIT${params[max_iter_i]}_QB${params[query_budget]}"
   echo "Experiment name: $experiment_name on GPU $gpu"
 
   # Convert the associative array to a list of command-line options
