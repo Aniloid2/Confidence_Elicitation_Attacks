@@ -256,14 +256,14 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # declare -a config_gpu_5=("llama3" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
 
 # LLAMA3 texthoaxer
-declare -a config_gpu_0=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_0=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 # declare -a config_gpu_2=("llama3" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_1=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_1=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 
 # Mistral v03 texthoaxer
 # declare -a config_gpu_2=("mistralv03" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 # declare -a config_gpu_2=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_3=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 
 
 
@@ -329,15 +329,36 @@ declare -a config_gpu_3=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer
 # declare -a config_gpu_6=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use_hardlabel" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5)
 
 # LLAMA3 texthoaxer
-declare -a config_gpu_0=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_1=("llama3" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_2=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_0=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 6 500)
+# declare -a config_gpu_1=("llama3" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 6 500)
+# declare -a config_gpu_2=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 6 500)
 
 
 # Mistral texthoaxer
-declare -a config_gpu_3=("mistralv03" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_4=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_5=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("mistralv03" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 6 500)
+# declare -a config_gpu_4=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 6 500)
+# declare -a config_gpu_5=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 6 500)
+
+
+# TextFooler  LLAMA3
+# declare -a config_gpu_1=("llama3_2_11b" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_2=("llama3_2_11b" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+declare -a config_gpu_0=("llama3_2_11b" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+
+# LLAMA3_2_11b sspattack
+# declare -a config_gpu_3=("llama3_2_11b" "sst2" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_4=("llama3_2_11b" "strategyQA" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+declare -a config_gpu_2=("llama3_2_11b" "ag_news" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+
+#  LLAMA3_2_11b selffool
+# declare -a config_gpu_5=("llama3_2_11b" "sst2" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_6=("llama3_2_11b" "strategyQA" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+declare -a config_gpu_4=("llama3_2_11b" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500  )
+
+# LLAMA3_2_11b texthoaxer
+declare -a config_gpu_5=("llama3_2_11b" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_0=("llama3_2_11b" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+declare -a config_gpu_6=("llama3_2_11b" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 
 
 # List of GPU IDs to use and their corresponding configurations
@@ -353,7 +374,7 @@ declare -A gpu_config_map=(
 )
 
 # List of GPU IDs to use
-gpus=( 0 1 2 3 4 5   )
+gpus=( 0 1 2 3 4 5 6 7   )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)

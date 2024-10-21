@@ -3248,7 +3248,7 @@ class SSPAttackSearch(SearchMethod):
         print ('goal_function',self.goal_function)
         
         # Step 1: Initialization
-        number_samples = 2
+        number_samples = self.num_transformations
         self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
 
         perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
