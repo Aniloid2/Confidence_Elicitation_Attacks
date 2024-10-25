@@ -183,5 +183,10 @@ MODEL_INFO = {
         'start_prompt_header': "<|im_start|>",
         'end_prompt_footer': "<|im_end|><|endoftext|>"
     },
+    'qwen2-7b-instruct': {
+        'model_name': "Qwen/Qwen2-7B-Instruct",
+        'start_prompt_header': "<|im_start|>",
+        'end_prompt_footer': "<|im_end|><|endoftext|>"
+    },
 } 
    
