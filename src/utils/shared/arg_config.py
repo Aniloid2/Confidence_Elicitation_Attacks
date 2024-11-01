@@ -5,7 +5,9 @@ def get_args():
     parser = argparse.ArgumentParser(description='Argument parser for model configuration')
 
     # Define the arguments
-    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','mistral-8b-instruct-2410','mistral-small-instruct-2409','qwen2.5-14b-instruct','qwen1.5-14b-chat','qwen2-7b-instruct','qwen2.5-7b-instruct',,'mistral-nemo-instruct-2407','llama3','llama3_1','llama3_2_1b','llama3_2_3b','llama3_2_11b','phi3','llama2_13b','gemma2', 'other_model_types_here'],
+    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','mistral-8b-instruct-2410','mistral-small-instruct-2409','qwen2.5-14b-instruct','qwen2.5-14b-instruct-int8','qwen1.5-14b-chat','qwen2-7b-instruct','qwen2.5-7b-instruct','mistral-nemo-instruct-2407','llama3','llama3_1','llama3_2_1b','llama3_2_3b','llama3_2_11b','phi3','llama2_13b','gemma2', 'other_model_types_here'],
+                        help='Type of the model to use')
+    parser.add_argument('--model_precision', type=str, default='float32', choices=['float32','float16'],
                         help='Type of the model to use')
     parser.add_argument('--task', type=str, default='strategyQA', choices=['sst2','ag_news','popQA','strategyQA', 'other_tasks_here'],
                         help='Task to perform')
@@ -38,7 +40,7 @@ def get_args():
                         help='Number of transformations to perform')
     parser.add_argument('--index_order_technique', type=str, default='prompt_top_k', choices=['prompt_top_k','random','delete' ,'other_techniques_here'],
                         help='Index order technique to use')
-    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd1/brian/hub',
+    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/brian/hub',
                         help='Directory for transformers cache')
     parser.add_argument('--cache_dir', type=str, default=os.path.expanduser('~/.cache/CEAttacks'),
                         help='Directory for caching files')
