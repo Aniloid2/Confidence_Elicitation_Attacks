@@ -188,5 +188,15 @@ MODEL_INFO = {
         'start_prompt_header': "<|im_start|>",
         'end_prompt_footer': "<|im_end|><|endoftext|>"
     },
+    'qwen2.5-14b-instruct': {
+        'model_name': "Qwen/Qwen2.5-14B-Instruct",
+        'start_prompt_header': "<|im_start|>",
+        'end_prompt_footer': "<|im_end|><|endoftext|>"
+    },
+    'qwen1.5-14b-chat': {
+        'model_name': "Qwen/Qwen1.5-14B-Chat",
+        'start_prompt_header': "<|im_start|>",
+        'end_prompt_footer': "<|im_end|><|endoftext|>"
+    },
 } 
    
