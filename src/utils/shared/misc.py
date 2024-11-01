@@ -1,4 +1,4 @@
-
+from .globals import MODEL_INFO
 
 def identify_correct_incorrect_labels(label_list, label_index):
     # Convert boolean to an index if necessary
@@ -117,12 +117,31 @@ def initialize_model_and_tokenizer(args):
     tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
     model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    def print_model_layer_dtype(model):
+        print('\nModel dtypes:')
+        for name, param in model.named_parameters():
+            print(f"Parameter: {name}, Data type: {param.dtype}")
+    # print_model_layer_dtype(model)
+    if 'precision' in MODEL_INFO[args.model_type]:
+        if MODEL_INFO[args.model_type]['precision'] == 'float32':
+            pass
+        elif MODEL_INFO[args.model_type]['precision'] == 'float16':
+            model.half()
+        else:
+            ValueError(f'Other precision types are not yet supported, current model precision is {args.model_precision}' )
+    else:
+        pass
+    # print_model_layer_dtype(model) 
+    
     model.to(device)
     tokenizer.pad_token = tokenizer.eos_token  # Ensure the tokenizer's pad token is set
     model.config.pad_token_id = tokenizer.pad_token_id
     print ('tokenizer.pad_token',tokenizer.pad_token )
     print ( 'tokenizer.pad_token_id', tokenizer.pad_token_id)
     # args.update({'model': model,'device':device, 'tokenizer':tokenizer})
+    # Check model dtype
+    
     args.model = model
     args.device = device
     args.tokenizer = tokenizer 
