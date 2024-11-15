@@ -193,3 +193,6 @@ table_plots/*
 
 texthoaxer_test1/*
 texthoaxer_test1.txt
+
+
+src/utils/shared/arg_config.py
