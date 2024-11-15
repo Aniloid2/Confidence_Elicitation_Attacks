@@ -176,7 +176,8 @@ MODEL_INFO = {
     'mistral-nemo-instruct-2407': {
         'model_name': "mistralai/Mistral-Nemo-Instruct-2407",
         'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
+        'end_prompt_footer': "[/INST]",
+        'precision': 'float16'
     },
     'qwen2.5-7b-instruct': {
         'model_name': "Qwen/Qwen2.5-7B-Instruct",
@@ -203,6 +204,11 @@ MODEL_INFO = {
         'model_name': "Qwen/Qwen2.5-14B-Instruct-GPTQ-Int8",
         'start_prompt_header': "<|im_start|>",
         'end_prompt_footer': "<|im_end|><|endoftext|>"
+    },
+    'gpt-4o-llama3': {
+        'model_name': "meta-llama/Meta-Llama-3-8B-Instruct",
+        'start_prompt_header': "",
+        'end_prompt_footer': ""
     },
 } 
    

@@ -164,13 +164,16 @@ class Step2KPredAvg(BasePredictor):
 
         generate_args = {
             "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
+            "attention_mask": inputs['attention_mask'], 
             "do_sample": True,  # enable sampling
             "top_k": 40,  # top-k sampling
             "top_p": 0.92,  # nucleus sampling probability
             "temperature": self.temperature,  # sampling temperature
             "max_new_tokens": 200,
             'pad_token_id': self.tokenizer.eos_token_id
+        }
+        extra_args = {
+            "prompt": prompt,
         }
 
         # with torch.no_grad():
@@ -182,7 +185,7 @@ class Step2KPredAvg(BasePredictor):
         # print('prompt', prompt)
         # print("Generated Prediction Text:", generated_text) 
 
-        generated_text = self.prompt_class._call_model(generate_args)
+        generated_text = self.prompt_class._call_model(generate_args,extra_args)
 
         # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
         # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
@@ -267,7 +270,7 @@ class Step2KPredAvg(BasePredictor):
         inputs = self.tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
         generate_args = {
             "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
+            "attention_mask": inputs['attention_mask'], 
             "do_sample": True,
             "top_k": 40,
             "top_p": 0.92,
@@ -275,7 +278,10 @@ class Step2KPredAvg(BasePredictor):
             "max_new_tokens": 300,
             'pad_token_id': self.tokenizer.eos_token_id
         }
-        generated_text = self.prompt_class._call_model(generate_args)
+        extra_args = {
+            "prompt": confidence_prompt,
+        }
+        generated_text = self.prompt_class._call_model(generate_args,extra_args)
         # with torch.no_grad():
         #     outputs = self.model.generate(**generate_args)
 
