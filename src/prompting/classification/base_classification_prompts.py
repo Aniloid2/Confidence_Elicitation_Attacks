@@ -136,7 +136,7 @@ class BaseClassificationPrompt:
         result_list.extend(['null'] * (self.k_pred - len(result_list)))
         return result_list
 
-    def _call_model(self,generate_args):
+    def _call_model(self,generate_args,extra_args):
         with torch.no_grad():
             outputs = self.model.generate(**generate_args)
 

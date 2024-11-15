@@ -205,5 +205,10 @@ MODEL_INFO = {
         'start_prompt_header': "<|im_start|>",
         'end_prompt_footer': "<|im_end|><|endoftext|>"
     },
+    'gpt-4o-llama3': {
+        'model_name': "meta-llama/Meta-Llama-3-8B-Instruct",
+        'start_prompt_header': "",
+        'end_prompt_footer': ""
+    },
 } 
    

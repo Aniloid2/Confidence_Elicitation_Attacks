@@ -186,13 +186,17 @@ testing_empirical_confidence_1.0/*
 testing_empirical_confidence_1.0.txt
 
 
-bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
-bash_scripts/attack_orchestration/attack_all_models_tasks.sh
+# bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
+# bash_scripts/attack_orchestration/attack_all_models_tasks.sh
 
 table_plots/*
 
 texthoaxer_test1/*
 texthoaxer_test1.txt
 
+ 
 
-src/utils/shared/arg_config.py
+
+perturbing*
+
+bash_scripts*

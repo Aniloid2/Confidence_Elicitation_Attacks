@@ -5,7 +5,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Argument parser for model configuration')
 
     # Define the arguments
-    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','mistral-8b-instruct-2410','mistral-small-instruct-2409','qwen2.5-14b-instruct','qwen2.5-14b-instruct-int8','qwen1.5-14b-chat','qwen2-7b-instruct','qwen2.5-7b-instruct','mistral-nemo-instruct-2407','llama3','llama3_1','llama3_2_1b','llama3_2_3b','llama3_2_11b','phi3','llama2_13b','gemma2', 'other_model_types_here'],
+    parser.add_argument('--model_type', type=str, default='llama3', choices=['llama2','mistral','mistralv03','mistral-8b-instruct-2410','mistral-small-instruct-2409','qwen2.5-14b-instruct','qwen2.5-14b-instruct-int8','qwen1.5-14b-chat','qwen2-7b-instruct','qwen2.5-7b-instruct','mistral-nemo-instruct-2407','llama3','gpt-4o-llama3','llama3_1','llama3_2_1b','llama3_2_3b','llama3_2_11b','phi3','llama2_13b','gemma2', 'other_model_types_here'],
                         help='Type of the model to use')
     parser.add_argument('--model_precision', type=str, default='float32', choices=['float32','float16'],
                         help='Type of the model to use')

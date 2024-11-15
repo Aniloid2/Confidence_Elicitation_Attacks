@@ -1466,6 +1466,53 @@ from src.inference.inference_config import DYNAMIC_INFERENCE
 args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
 args.predictor.predictor_container = PredictionContainer()
 
+if 'gpt-4o' in args.model_type: 
+    # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
+    
+    import requests
+    import json
+    def _call_model_API(self,generate_args,extra_args):
+        api_key = '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'
+        print ('generate_args',generate_args)
+        url = 'https://api.openai.com/v1/chat/completions'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}',
+        }
+        payload = {
+            'model': 'gpt-4o',
+            'messages': [
+                {'role': 'system', 'content': "You are an expert assistant"},
+                {'role': 'user', 'content': extra_args['prompt']},
+            ],
+            'max_tokens': generate_args['max_new_tokens'],
+            'n': 1,
+            'stop': None,
+            'temperature': generate_args['temperature'],
+            # 'logprobs': True,
+            # 'top_logprobs': 5,
+            'logprobs': False, 
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        print ('response',response)
+        if response.status_code == 200:
+            response_data = response.json()
+            print ('response_data',response_data)
+            choice = response_data['choices'][0]
+            message_content = choice['message']['content']
+            print ('message_content',message_content)
+            return message_content
+        else:
+            print(f"Error: {response.status_code}")
+            print(response.text)
+            return None
+
+
+    from src.prompting.classification import BaseClassificationPrompt
+    args.predictor.prompt_class._call_model = _call_model_API.__get__(args.predictor.prompt_class,BaseClassificationPrompt)
+
+
 
 # if args.prompting_type == 'step2_k_pred_avg':
 #     predictor = Step2KPredAvg(**vars(args))
