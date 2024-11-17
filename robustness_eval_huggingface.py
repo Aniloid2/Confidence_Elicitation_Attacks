@@ -1468,11 +1468,10 @@ args.predictor.predictor_container = PredictionContainer()
 
 if 'gpt-4o' in args.model_type: 
     # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
-    
     import requests
     import json
     def _call_model_API(self,generate_args,extra_args):
-        api_key = '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'
+        api_key = ''
         print ('generate_args',generate_args)
         url = 'https://api.openai.com/v1/chat/completions'
         headers = {
@@ -1494,19 +1493,42 @@ if 'gpt-4o' in args.model_type:
             'logprobs': False, 
         }
 
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        print ('response',response)
-        if response.status_code == 200:
-            response_data = response.json()
-            print ('response_data',response_data)
-            choice = response_data['choices'][0]
-            message_content = choice['message']['content']
-            print ('message_content',message_content)
-            return message_content
-        else:
-            print(f"Error: {response.status_code}")
-            print(response.text)
-            return None
+        # response = requests.post(url, headers=headers, data=json.dumps(payload))
+        # print ('response',response)
+        # if response.status_code == 200:
+        #     response_data = response.json()
+        #     print ('response_data',response_data)
+        #     choice = response_data['choices'][0]
+        #     message_content = choice['message']['content']
+        #     print ('message_content',message_content)
+        #     return message_content
+        # else:
+        #     print(f"Error: {response.status_code}")
+        #     print(response.text)
+        #     return None
+        max_retries = 10
+        wait_time = 60  # seconds
+
+        for attempt in range(max_retries):
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            print('response', response)
+
+            if response.status_code == 200:
+                response_data = response.json()
+                print('response_data', response_data)
+                choice = response_data['choices'][0]
+                message_content = choice['message']['content']
+                print('message_content', message_content)
+                return message_content
+            else:
+                print(f"Error: {response.status_code}")
+                print(response.text)
+
+                if attempt < max_retries - 1:  # Don't wait after the last attempt
+                    print(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+
+        return None
 
 
     from src.prompting.classification import BaseClassificationPrompt
