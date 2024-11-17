@@ -1470,6 +1470,7 @@ if 'gpt-4o' in args.model_type:
     # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
     import requests
     import json
+    import time
     def _call_model_API(self,generate_args,extra_args):
         api_key = ''
         print ('generate_args',generate_args)
