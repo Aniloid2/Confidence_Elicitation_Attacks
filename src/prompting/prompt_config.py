@@ -1,6 +1,7 @@
 
 
 from .classification import *
+from .generation import *
 
 DYNAMIC_PROMPT = {
     
@@ -10,13 +11,20 @@ DYNAMIC_PROMPT = {
                 'ag_news':AgNewsPrompts,
                 'strategyQA':StrategyQAPrompts,
                 'sst2':SST2Prompts,
-                'mnli':BaseClassificationPrompt,
+                'mnli':MNLIPrompts,
+                'rte':RTEPrompts,
+                'qnli':QNLIPrompts,
+                'qqp':QQPPrompts,
             },
+        'generation':
+            {
+                'triviaQA': TriviaQAPrompts
+             },
 
 
         'sequence_to_sequence':
             {
-                'to_implement':AgNewsPrompts
+                'to_implement':TriviaQAPrompts
             },
 
 

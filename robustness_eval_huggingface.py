@@ -1,16 +1,35 @@
-import numpy as np
-from datasets import load_dataset
+
+import os 
+
+import numpy as np 
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 from sklearn.metrics import confusion_matrix, accuracy_score
 import torch
 import re
-import matplotlib.pyplot as plt
-
-from numpy.random import dirichlet 
-import os 
-
+import matplotlib.pyplot as plt 
+from numpy.random import dirichlet  
+ 
 
 import random
+
+# os.environ['HF_DATASETS_CACHE'] =  '/mnt/hdd/brian/datasets'
+
+from src.arg_parser.arg_config import get_args
+args = get_args()
+
+from src.arg_parser.set_cache import set_huggingface_cache
+set_huggingface_cache(args)
+
+# os.environ['HF_DATASETS_CACHE'] =  '/mnt/hdd/brian/datasets'
+# print (os.environ['HF_DATASETS_CACHE']) 
+
+# cache_dir = args.cache_transformers # "/mnt/hdd/brian/hub", '/mnt/hdd/brian/' 
+# os.environ['HF_DATASETS_CACHE'] = cache_dir + 'datasets'
+# print (os.environ['HF_DATASETS_CACHE'])
+ 
+from src.utils.shared.misc import environment_setup
+args = environment_setup(args)
+
 # seed = 42
 # np.random.seed(seed)
 # torch.manual_seed(seed)
@@ -1093,7 +1112,8 @@ def predict_sentiment_and_verbal_confidence(text,task):
         probs[-1] = 1.0  # Only null has confidence 1
         return 'null', probs, 1.0
 
-from textattack.datasets import HuggingFaceDataset
+
+ 
 # def load_data(dataset_name): 
 #     task = dataset_name
 #     if task == 'sst2':
@@ -1319,8 +1339,7 @@ from textattack.datasets import HuggingFaceDataset
 #         print("Task not supported.")
 
 
- 
-
+  
 import argparse
 from src.utils.shared.globals import CONFIDENCE_LEVELS, CONFIDENCE_MAP,TASK_N_CLASSES,MODEL_INFO # ,TASK_LABEL_TO_NAME, TASK_NAME_TO_LABEL
 
@@ -1383,8 +1402,8 @@ from src.utils.shared.globals import CONFIDENCE_LEVELS, CONFIDENCE_MAP,TASK_N_CL
 # os.environ['TFHUB_CACHE_DIR'] = cache_dir
 # # texts, true_labels = load_data(task)
 
-from src.utils.shared.misc import environment_setup
-args = environment_setup()
+# from src.utils.shared.misc import environment_setup
+# args = environment_setup()
 
 
 args.n_classes =  TASK_N_CLASSES[args.task] 
@@ -1555,12 +1574,13 @@ confidences=[]
 smaller_true_labels = []
 counter_null = 0
 # for  text, true_label in zip(texts, true_labels):
-for  datapoint in args.dataset:
-    # print ('datapoint',datapoint)
+for datapoint in args.dataset:
+    # print ('datapoint',datapoint) 
     text, true_label = datapoint
 
+ 
     print ('text true label',text,true_label)
-    
+     
     # expected_prediction = label_names[true_label]
     # if prompting_type == '2step':
     #     guess, probs, confidence  = predict_sentiment_and_verbal_confidence_2steps(text,task) 
@@ -1582,15 +1602,22 @@ for  datapoint in args.dataset:
     
     prediction_label = args.predictor.prompt_class.task_name_to_label[guess] #TASK_NAME_TO_LABEL
 
-    args.predictor.predictor_container.add_true_label(true_label)
-    args.predictor.predictor_container.add_probability(probs)
-    args.predictor.predictor_container.add_confidence(confidence)
+
+
 
     if args.task == 'popQA':
         true_label=1
     elif args.task =='strategyQA': 
         true_label = int(true_label) 
-
+    elif args.task == 'triviaQA':
+        true_label = 1 if guess == 'true' else 0
+        # true_label = 1
+    
+    args.predictor.predictor_container.add_true_label(true_label)
+    args.predictor.predictor_container.add_probability(probs)
+    args.predictor.predictor_container.add_confidence(confidence)
+    
+    
     predictions.append(prediction_label)
     # Take the probability of the positive label for calibration curve
     # probabilities.append(probs[1])

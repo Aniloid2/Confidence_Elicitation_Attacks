@@ -9,9 +9,9 @@ def get_args():
                         help='Type of the model to use')
     parser.add_argument('--model_precision', type=str, default='float32', choices=['float32','float16'],
                         help='Type of the model to use')
-    parser.add_argument('--task', type=str, default='strategyQA', choices=['sst2','ag_news','popQA','strategyQA', 'other_tasks_here'],
+    parser.add_argument('--task', type=str, default='strategyQA', choices=['sst2','ag_news','popQA','strategyQA','triviaQA', 'mnli','rte','qqp','qnli', 'other_tasks_here'],
                         help='Task to perform')
-    parser.add_argument('--task_structure', type=str, default='classification', choices=['classification'],
+    parser.add_argument('--task_structure', type=str, default='classification', choices=['classification','generation'],
                         help='What is the task strtructure, for classification we expect a static label list across all samples. In future we may extend to sequence to sequence modelling, dynamic label classification etc') 
     parser.add_argument('--confidence_type', type=str, default='weighted_confidence', choices=['verbal_confidence','weighted_confidence','sherman_kent', 'yougov','single_token_mix'],
                         help='type of confidence levels')
@@ -40,7 +40,7 @@ def get_args():
                         help='Number of transformations to perform')
     parser.add_argument('--index_order_technique', type=str, default='prompt_top_k', choices=['prompt_top_k','random','delete' ,'other_techniques_here'],
                         help='Index order technique to use')
-    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd1/brian/hub',
+    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd/brian/hub',
                         help='Directory for transformers cache')
     parser.add_argument('--cache_dir', type=str, default=os.path.expanduser('~/.cache/CEAttacks'),
                         help='Directory for caching files')
