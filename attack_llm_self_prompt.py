@@ -278,7 +278,7 @@ if 'gpt-4o' in args.model_type:
     import requests
     import json
     def _call_model_API(self,generate_args,extra_args):
-        api_key = ''
+        api_key = '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'
         print ('generate_args',generate_args)
         url = 'https://api.openai.com/v1/chat/completions'
         headers = {
