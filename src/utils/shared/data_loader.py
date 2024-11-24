@@ -1,10 +1,22 @@
 
-from textattack.datasets import HuggingFaceDataset
+
+import os
 # from datasets import load_dataset 
+def load_huggingface_dataset(name, split, per_class_samples):
+        from textattack.datasets import HuggingFaceDataset
+        from datasets import load_dataset 
+        dataset = load_dataset(name,split, split='validation')
+        print(f"{name} dataset loaded successfully", type(dataset), 'column names', dataset.column_names)
+        dataset = HuggingFaceDataset(dataset, split=split, shuffle=True)
+        label_names = dataset.label_names if hasattr(dataset, 'label_names') else None
+        return dataset, label_names
+
 def load_data(args):
-    from datasets import load_dataset 
+    
     task = args.task
     if task == 'sst2': 
+        from textattack.datasets import HuggingFaceDataset
+        from datasets import load_dataset 
         print(f"Loading SST2 dataset from 'stanfordnlp/sst2'...")
         strategy_dataset = load_dataset('stanfordnlp/sst2', split='validation')#.select(range(500)) # example: taking 50 samples
         print(f"SST2 dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
@@ -34,6 +46,8 @@ def load_data(args):
         return dataset_class, label_names
 
     elif task == 'ag_news':
+        from textattack.datasets import HuggingFaceDataset
+        from datasets import load_dataset 
         print(f"Loading Ag News dataset from 'fancyzhx/ag_news'...")
         strategy_dataset = load_dataset('fancyzhx/ag_news', split='test')#.select(range(500)) # example: taking 50 samples
         print(f"Ag News dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
@@ -77,6 +91,7 @@ def load_data(args):
         return dataset_class, label_names 
 
     elif task == 'popQA':
+        from textattack.datasets import HuggingFaceDataset
         from datasets import load_dataset
         import json
         from collections import defaultdict
@@ -163,6 +178,7 @@ def load_data(args):
         
         return dataset_class_t, label_names
     elif task == 'strategyQA':
+        from textattack.datasets import HuggingFaceDataset
         from datasets import load_dataset 
         print(f"Loading StrategyQA dataset from 'ChilleD/StrategyQA'...")
         strategy_dataset = load_dataset('ChilleD/StrategyQA', split='test').select(range(500)) # example: taking 50 samples
@@ -183,7 +199,57 @@ def load_data(args):
         print(f'Total filtered dataset size for StrategyQA: {len(strategy_dataset)}')
         print(f'In-context samples for StrategyQA: {strategy_incontext_dataset_class}')
         return strategy_dataset_class_t, label_names
+    elif task == 'triviaQA':
+        from textattack.datasets import HuggingFaceDataset
+        from datasets import load_dataset
+        split = 'validation'
+        print(f"Loading TriviaQA {split} dataset from 'mandarjoshi/trivia_qa'...")
+        dataset = load_dataset("mandarjoshi/trivia_qa", "rc", split=split)
+        print(f"TriviaQA {split} dataset loaded successfully", len(dataset))
+        dataset = dataset.shuffle(seed=42).select(range(2000))
+        dataset = dataset.filter(lambda example: example['entity_pages']['wiki_context'])
+        label_names = ['false','true'] 
+
+        # dataset = dataset.rename_column("question", "text")
+        # dataset = dataset.rename_column("answer", "answers")
+        dataset = dataset.rename_column("question_id", "title")
+        def extract_context_and_rename(example):
+            # Extract the 'wiki_context' data from 'entity_pages'
+            context = example['entity_pages']['wiki_context']
+            context = ' '.join( context[0].split(' ')[:100])
+            example['context'] = context
+            return example
+
+        def extract_answers_and_rename(example):
+            # Extract the 'wiki_context' data from 'entity_pages'
+            example['answers'] = example['answer']['normalized_aliases'] 
+            return example
+
+        dataset = dataset.map(extract_context_and_rename)
+        dataset = dataset.map(extract_answers_and_rename)
+
+        dataset = dataset.remove_columns(['question_source'])
+        # dataset = dataset.remove_columns(['question_id'])
+        dataset = dataset.remove_columns(['search_results'])
+        dataset = dataset.remove_columns(['entity_pages'])
+
+        dataset = HuggingFaceDataset(dataset, split="validation", shuffle=True)
+        print(f"Converted triviaQA to PyTorch Dataset", type(dataset)) 
+            
+        dataset_class = []
+        dataset_class = [((text['question'],text['context']), answers) for (text, answers) in dataset] 
+        dataset_class_t = dataset_class[:args.num_examples] 
+        incontext_dataset_class = dataset_class[-5:]
+ 
+        # print("Column names:", dataset.column_names)
+
+        print(f'Total filtered dataset size for triviaQA: {len(dataset_class_t)}')
+        print(f'In-context samples for triviaQA: {incontext_dataset_class}') 
+        return dataset_class_t , label_names
+
     elif task == 'mnli':
+        from textattack.datasets import HuggingFaceDataset
+        from datasets import load_dataset 
         print("Loading MNLI dataset from 'nyu-mll/multi_nli'...")
         # Load the validation split of the MNLI dataset
         strategy_dataset = load_dataset('nyu-mll/multi_nli', split='validation_matched')
@@ -194,9 +260,9 @@ def load_data(args):
         label_names = dataset.label_names
 
         # Split dataset by label
-        dataset_class_0 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 0]  # Neutral
-        dataset_class_1 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 1]  # Entailment
-        dataset_class_2 = [(text['premise'], text['hypothesis'], label) for (text, label) in dataset if label == 2]  # Contradiction
+        dataset_class_0 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 0]  # Neutral
+        dataset_class_1 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 1]  # Entailment
+        dataset_class_2 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 2]  # Contradiction
 
         # Create samples per class
         dataset_class_0_t = dataset_class_0[:per_class_samples]
@@ -210,8 +276,39 @@ def load_data(args):
 
         # Combine datasets
         dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t
-
+        
         return dataset_class, label_names
+    elif task == 'rte':
+        print("Loading RTE dataset...")
+        dataset, label_names = load_huggingface_dataset('glue', 'rte', args.num_examples // 2)
+        dataset_class_0 = [((text['sentence1'], text['sentence2']), label) for (text, label) in dataset if label == 0]
+        dataset_class_1 = [((text['sentence1'], text['sentence2']), label) for (text, label) in dataset if label == 1]
+        dataset_class_0_t = dataset_class_0[:args.num_examples // 2]
+        dataset_class_1_t = dataset_class_1[:args.num_examples // 2]
+        dataset_class = dataset_class_0_t + dataset_class_1_t
+        return dataset_class, label_names
+
+    elif task == 'qnli':
+        print("Loading QNLI dataset...")
+        dataset, label_names = load_huggingface_dataset('glue', 'qnli', args.num_examples // 2)
+        dataset_class_0 = [((text['question'], text['sentence']), label) for (text, label) in dataset if label == 0]
+        dataset_class_1 = [((text['question'], text['sentence']), label) for (text, label) in dataset if label == 1]
+        dataset_class_0_t = dataset_class_0[:args.num_examples // 2]
+        dataset_class_1_t = dataset_class_1[:args.num_examples // 2]
+        dataset_class = dataset_class_0_t + dataset_class_1_t
+        return dataset_class, label_names
+
+    elif task == 'qqp':
+        print("Loading QQP dataset...")
+        dataset, label_names = load_huggingface_dataset('glue', 'qqp', args.num_examples // 2)
+        dataset_class_0 = [((text['question1'], text['question2']), label) for (text, label) in dataset if label == 0]
+        dataset_class_1 = [((text['question1'], text['question2']), label) for (text, label) in dataset if label == 1]
+        dataset_class_0_t = dataset_class_0[:args.num_examples // 2]
+        dataset_class_1_t = dataset_class_1[:args.num_examples // 2]
+        dataset_class = dataset_class_0_t + dataset_class_1_t
+        return dataset_class, label_names
+
+
     else:
         print("Task not supported.")
 

@@ -1,5 +1,5 @@
 from .globals import MODEL_INFO
-
+import os
 def identify_correct_incorrect_labels(label_list, label_index):
     # Convert boolean to an index if necessary
     if isinstance(label_index, bool):
@@ -24,14 +24,13 @@ def set_stopwords():
         extended_stopwords.add(word.capitalize())
     return extended_stopwords
 
+
+
+
 import random
 import numpy as np
 import torch
-from src.utils.shared.arg_config import get_args
-import os
- 
-
-def set_seed(seed):
+def set_seed(seed): 
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
@@ -47,7 +46,7 @@ def print_args_human_readable(namespace):
  
 import logging 
 from datetime import datetime
-def set_logging(test_folder, logging_level = 'debug'): 
+def set_logging(test_folder, logging_level = 'debug'):  
     logger = logging.getLogger('Calibra')
     # Prevent propagation
     # logger.propagate = False 
@@ -77,13 +76,16 @@ def set_logging(test_folder, logging_level = 'debug'):
      
     return logger
 
-def environment_setup():
-    
+def environment_setup(args):
     
      
+    # from src.arg_parser.arg_config import get_args
+    # args = get_args()
 
-    args = get_args()
+    # cache_dir = args.cache_transformers # "/mnt/hdd/brian/hub"
+    # os.environ['HF_DATASETS_CACHE'] = cache_dir + 'datasets'
 
+  
     set_seed(args.seed)
     
     print_args_human_readable(args)
@@ -91,7 +93,7 @@ def environment_setup():
     
     # os.environ["HF_HOME"] = "/mnt/hdd/brian/"# args.cache_transformers# "/mnt/hdd/brian/"
     # os.environ["TRANSFORMERS_CACHE"] = "/mnt/hdd/brian/"
-    cache_dir = args.cache_transformers # "/mnt/hdd/brian/hub"
+    
     # os.environ['TFHUB_CACHE_DIR'] = cache_dir
     # os.environ['TRANSFORMERS_CACHE'] = cache_dir
     # os.environ['HF_DATASETS_CACHE'] = cache_dir
@@ -110,8 +112,8 @@ def environment_setup():
  
     return  args
 
-from textattack.models.wrappers import HuggingFaceModelWrapper
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 def initialize_model_and_tokenizer(args):
     tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )

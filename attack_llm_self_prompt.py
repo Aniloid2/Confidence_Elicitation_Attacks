@@ -40,6 +40,14 @@ import os
 
 from numpy.random import dirichlet
 
+from src.arg_parser.arg_config import get_args
+args = get_args()
+
+from src.arg_parser.set_cache import set_huggingface_cache
+set_huggingface_cache(args)
+
+from src.utils.shared.misc import environment_setup
+args = environment_setup(args)
 
 # from src.utils.shared.misc import self.predictor.prompt_class._identify_correct_incorrect_labels
 
@@ -74,9 +82,9 @@ from numpy.random import dirichlet
 # cache_dir = args.cache_transformers # "/mnt/hdd/brian/hub"
 # os.environ['TFHUB_CACHE_DIR'] = cache_dir
 
-from src.utils.shared.misc import environment_setup
+# from src.utils.shared.misc import environment_setup
 
-args  = environment_setup() 
+# args  = environment_setup() 
 
 # high_level_folder = args.experiment_name_folder
 #     # Replace 'desired_log_folder' with your folder name

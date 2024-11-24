@@ -67,8 +67,10 @@ def predictor_evaluation(args,predictor):
                     print ('Base Calibration Metrics')
                     args.logging.info(f'Base Calibration Metrics {predictor_name}')
                     from src.utils.shared import calculate_roc_metrics, plot_roc_curve,  plot_calibration_curve, calculate_ece_for_all_classes
+                    
                     calculate_roc_metrics(args, true_labels, probabilities)
                     plot_roc_curve(args, true_labels, probabilities, name_plot = name_plot_calibration)
+                    
                     calculate_ece_for_all_classes(args, true_labels, probabilities) 
                     plot_calibration_curve(args, true_labels, probabilities, name_plot =name_plot_calibration) 
 
@@ -77,8 +79,10 @@ def predictor_evaluation(args,predictor):
                     name_plot_roc = f'{predictor_name}_filtered_probs'
                     print ('Filtered Calibration Metrics')
                     args.logging.info(f'Filtered Calibration Metrics {predictor_name}')
+                    
                     calculate_roc_metrics(args, filtered_true_labels, filtered_probabilities)
                     plot_roc_curve(args, filtered_true_labels, filtered_probabilities, name_plot = name_plot_roc)
+                    
                     calculate_ece_for_all_classes(args, filtered_true_labels, filtered_probabilities) 
                     plot_calibration_curve(args, filtered_true_labels, filtered_probabilities, name_plot = name_plot_roc) 
 
@@ -89,3 +93,6 @@ def predictor_evaluation(args,predictor):
                 else:
                     # Skip operation if the list is empty
                     print(f"Skipping {predictor_name} because no results.")
+
+
+ 

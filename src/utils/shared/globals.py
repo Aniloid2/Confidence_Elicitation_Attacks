@@ -110,6 +110,11 @@ TASK_N_CLASSES = {
     'ag_news': 4,
     'popQA': 2,
     'strategyQA': 2,
+    'triviaQA': 2,
+    'mnli': 3,
+    'qqp': 2,
+    'rte': 2,
+    'qnli': 2,
 }
 
 MODEL_INFO = {
