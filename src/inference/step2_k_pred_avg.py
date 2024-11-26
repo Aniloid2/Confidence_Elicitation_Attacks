@@ -330,9 +330,24 @@ class Step2KPredAvg(BasePredictor):
         #for all datasets have a correct, incorrect and null bucket
 
 
+        # need to put aggregataors in their own little module
+        # guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.prompt_class._aggregate(weighted_counts,results_post_process,confidence_numerical_results)
 
-        guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.prompt_class._aggregate(weighted_counts,results_post_process,confidence_numerical_results)
-
+        # guess_result_with_confidence = guess_result
+        # second_order_uncertainty = None
+        # if len(confidence_numerical_results) > 0:
+        #     conf = confidence_numerical_results[0]
+        # else:
+        #     conf = 0
+        # # confidence_numerical_results
+        # if guess_result == self.prompt_class.label_list[0]:
+        #     empirical_mean = [conf,1-conf,0]
+        # elif guess_result == self.prompt_class.label_list[1]:
+        #     empirical_mean =[1-conf,conf,0]
+        # else:
+        #     empirical_mean =[0,0,1]
+        
+        # probabilities = empirical_mean
 
         # return guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities
 
@@ -417,6 +432,7 @@ class Step2KPredAvg(BasePredictor):
         
         confidence_result = max(probabilities)
         
+        # guess_result = self.prompt_class._label_to_index(guess_result)
         return guess_result, empirical_mean, confidence_result
         # return guess_result, probabilities, confidence_result
 

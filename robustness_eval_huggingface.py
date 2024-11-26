@@ -8,15 +8,14 @@ import torch
 import re
 import matplotlib.pyplot as plt 
 from numpy.random import dirichlet  
- 
+import json 
 
 import random
 
 # os.environ['HF_DATASETS_CACHE'] =  '/mnt/hdd/brian/datasets'
 
 from src.arg_parser.arg_config import get_args
-args = get_args()
-
+args = get_args()  
 from src.arg_parser.set_cache import set_huggingface_cache
 set_huggingface_cache(args)
 
@@ -28,8 +27,7 @@ set_huggingface_cache(args)
 # print (os.environ['HF_DATASETS_CACHE'])
  
 from src.utils.shared.misc import environment_setup
-args = environment_setup(args)
-
+args = environment_setup(args) 
 # seed = 42
 # np.random.seed(seed)
 # torch.manual_seed(seed)
@@ -60,256 +58,256 @@ args = environment_setup(args)
 
 
 
-def predict_sentiment_2(text):
+# def predict_sentiment_2(text):
 
-    # insert prompt here
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(device)
-    with torch.no_grad():
-        outputs = model(**inputs)
-    logits = outputs.logits[:, -1, :]
-    label_0_prob = logits[:, tokenizer.vocab['▁negative']].item()
-    label_1_prob = logits[:, tokenizer.vocab['▁positive']].item()
-    probs_normalized = torch.softmax(torch.tensor([label_0_prob, label_1_prob]), dim=0)
-    sentiment = 1 if label_1_prob > label_0_prob else 0
-    sentiment_ret = 'positive' if sentiment == 1 else 'negative'
-    print ('entiment, probs_normalized.numpy(),max(probs_normalized)',sentiment, probs_normalized.numpy(),max(probs_normalized))
-    return sentiment_ret, probs_normalized.numpy(),max(probs_normalized)  # Return probabilities along with sentiment
+#     # insert prompt here
+#     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(device)
+#     with torch.no_grad():
+#         outputs = model(**inputs)
+#     logits = outputs.logits[:, -1, :]
+#     label_0_prob = logits[:, tokenizer.vocab['▁negative']].item()
+#     label_1_prob = logits[:, tokenizer.vocab['▁positive']].item()
+#     probs_normalized = torch.softmax(torch.tensor([label_0_prob, label_1_prob]), dim=0)
+#     sentiment = 1 if label_1_prob > label_0_prob else 0
+#     sentiment_ret = 'positive' if sentiment == 1 else 'negative'
+#     print ('entiment, probs_normalized.numpy(),max(probs_normalized)',sentiment, probs_normalized.numpy(),max(probs_normalized))
+#     return sentiment_ret, probs_normalized.numpy(),max(probs_normalized)  # Return probabilities along with sentiment
 
 
-def predict_sentiment_and_confidence(text):
+# def predict_sentiment_and_confidence(text):
     
 
-    prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') 
-    the following sentiment. Give ONLY the guess and verbal confidence, no other words or
-    explanation. For example:\n\nGuess: <most likely guess, either positive or negative; not
-    a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just
-    the confidence!>\n\nThe sentiment is: ${text} Sentiment & confidence:[/INST]"""
+#     prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') 
+#     the following sentiment. Give ONLY the guess and verbal confidence, no other words or
+#     explanation. For example:\n\nGuess: <most likely guess, either positive or negative; not
+#     a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just
+#     the confidence!>\n\nThe sentiment is: ${text} Sentiment & confidence:[/INST]"""
 
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
      
-    # Get model predictions as text
-    generate_args = {
-            "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
-            "do_sample": True,  # enable sampling
-            "top_k": 40,  # top-k sampling
-            "top_p": 0.92,  # nucleus sampling probability
-            "temperature": 0.7,  # sampling temperature
-            "max_new_tokens":200
-        }
+#     # Get model predictions as text
+#     generate_args = {
+#             "input_ids": inputs['input_ids'],
+#             "attention_mask": inputs['attention_mask'],
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 0.92,  # nucleus sampling probability
+#             "temperature": 0.7,  # sampling temperature
+#             "max_new_tokens":200
+#         }
  
-    with torch.no_grad():
-        # outputs = model.generate(**inputs, max_new_tokens=200,temperature = 0.7 ,top_k= 1)
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         # outputs = model.generate(**inputs, max_new_tokens=200,temperature = 0.7 ,top_k= 1)
+#         outputs = model.generate(**generate_args)
      
-        # full_text  = tokenizer.decode(outputs[0], skip_special_tokens=True)
+#         # full_text  = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    # Display the generated text from the model
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens,skip_special_tokens=True)
-    print("Generated Text:", generated_text)
+#     # Display the generated text from the model
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens,skip_special_tokens=True)
+#     print("Generated Text:", generated_text)
 
-    # Use regex to extract sentiment and confidence
-    match_sentiment = re.search(r'positive|POSITIVE|Positive|negative|NEGATIVE|Negative', generated_text)
-    match_confidence = re.search(r"[-+]?\d*\.?\d+", generated_text)
-    print ('match_sentiment',match_sentiment,'match_confidence',match_confidence)
+#     # Use regex to extract sentiment and confidence
+#     match_sentiment = re.search(r'positive|POSITIVE|Positive|negative|NEGATIVE|Negative', generated_text)
+#     match_confidence = re.search(r"[-+]?\d*\.?\d+", generated_text)
+#     print ('match_sentiment',match_sentiment,'match_confidence',match_confidence)
 
 
 
-    if match_sentiment and match_confidence:
-        sentiment_result = match_sentiment.group(0).lower()
-        confidence_result = float(match_confidence.group(0)) /100   # Append '%'
+#     if match_sentiment and match_confidence:
+#         sentiment_result = match_sentiment.group(0).lower()
+#         confidence_result = float(match_confidence.group(0)) /100   # Append '%'
         
         
-        if sentiment_result == 'positive':
-            probs = np.array([1-confidence_result,confidence_result])
-        else:
-            probs = np.array([confidence_result,1-confidence_result])
-        return sentiment_result, probs ,confidence_result
-    else: 
-        return 'null', np.array([0,0]) , 0.0
+#         if sentiment_result == 'positive':
+#             probs = np.array([1-confidence_result,confidence_result])
+#         else:
+#             probs = np.array([confidence_result,1-confidence_result])
+#         return sentiment_result, probs ,confidence_result
+#     else: 
+#         return 'null', np.array([0,0]) , 0.0
 
 
-def scale_vector_by_confidence(vector, confidence, margin=0.02):
-        # Normalize the confidence value to a range of 0 to 1
-        print ('vector',vector)
-        normalized_confidence = confidence #/ 100.0
+# def scale_vector_by_confidence(vector, confidence, margin=0.02):
+#         # Normalize the confidence value to a range of 0 to 1
+#         print ('vector',vector)
+#         normalized_confidence = confidence #/ 100.0
 
-        # Create an almost equalized vector with a slight margin
-        half_margin = margin / 2.0
-        equalized_vector = [0.5 + half_margin if i == 0 else 0.5 - half_margin for i in range(len(vector))]
+#         # Create an almost equalized vector with a slight margin
+#         half_margin = margin / 2.0
+#         equalized_vector = [0.5 + half_margin if i == 0 else 0.5 - half_margin for i in range(len(vector))]
 
-        # Interpolate between the equalized vector and the original vector
-        scaled_vector = [
-            (1 - normalized_confidence) * equalized_value + normalized_confidence * original_value
-            for equalized_value, original_value in zip(equalized_vector, vector)
-        ]
+#         # Interpolate between the equalized vector and the original vector
+#         scaled_vector = [
+#             (1 - normalized_confidence) * equalized_value + normalized_confidence * original_value
+#             for equalized_value, original_value in zip(equalized_vector, vector)
+#         ]
 
-        # Ensure the scaled vector sums to 1 by re-normalizing
-        sum_scaled_vector = sum(scaled_vector)
-        normalized_scaled_vector = [value / sum_scaled_vector for value in scaled_vector]
+#         # Ensure the scaled vector sums to 1 by re-normalizing
+#         sum_scaled_vector = sum(scaled_vector)
+#         normalized_scaled_vector = [value / sum_scaled_vector for value in scaled_vector]
 
-        return normalized_scaled_vector
+#         return normalized_scaled_vector
 
-def predict_sentiment_and_verbal_confidence_k_pred_avg(text,task, expected_prediction):
-    k_pred = 10
-    if task not in ['sst2', 'ag_news']:
-        raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+# def predict_sentiment_and_verbal_confidence_k_pred_avg(text,task, expected_prediction):
+#     k_pred = 10
+#     if task not in ['sst2', 'ag_news']:
+#         raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-    if task == 'sst2':
-        guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
-        class_number  = 2
-        label_list = label_names# ['positive', 'negative']
-    elif task == 'ag_news':
-        guess_pattern = r'(world|business|tech|science|sports)'
-        class_number  = 4
-        label_list = ['world','business', 'tech','science','tech/sci', 'sports']
+#     if task == 'sst2':
+#         guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
+#         class_number  = 2
+#         label_list = label_names# ['positive', 'negative']
+#     elif task == 'ag_news':
+#         guess_pattern = r'(world|business|tech|science|sports)'
+#         class_number  = 4
+#         label_list = ['world','business', 'tech','science','tech/sci', 'sports']
 
-    task_dictionary_counts = {'sst2':{ 'negative': 0, 'positive': 0, 'null': 0 }, 'ag_news':{'world':0,'sports':0,'business':0,'sci/tech':0,'null':0}}
-    task_dictionary_confidences = {'sst2':{ 'negative': 0, 'positive': 0, 'null': 0 }, 'ag_news':{'world':0,'sports':0,'business':0,'sci/tech':0,'null':0}}
+#     task_dictionary_counts = {'sst2':{ 'negative': 0, 'positive': 0, 'null': 0 }, 'ag_news':{'world':0,'sports':0,'business':0,'sci/tech':0,'null':0}}
+#     task_dictionary_confidences = {'sst2':{ 'negative': 0, 'positive': 0, 'null': 0 }, 'ag_news':{'world':0,'sports':0,'business':0,'sci/tech':0,'null':0}}
         
 
 
 
-    if task == 'sst2':
-        prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a coma, for example [Negative, Positive, Positive, Negative ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
+#     if task == 'sst2':
+#         prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a coma, for example [Negative, Positive, Positive, Negative ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
     
-    elif task == 'ag_news':
+#     elif task == 'ag_news':
         
-        options = 'world, business, tech, science, sports'  # we separeate tech/science into two different prediction categories, but treat them as one label
+#         options = 'world, business, tech, science, sports'  # we separeate tech/science into two different prediction categories, but treat them as one label
         
-        prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either {options}; not a complete sentence, just the guesses!>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
+#         prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either {options}; not a complete sentence, just the guesses!>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
         
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
 
-    # Get model predictions as text
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,  # enable sampling
-        "top_k": 40,  # top-k sampling
-        "top_p": 0.92,  # nucleus sampling probability
-        "temperature": 0.7,  # sampling temperature
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
+#     # Get model predictions as text
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,  # enable sampling
+#         "top_k": 40,  # top-k sampling
+#         "top_p": 0.92,  # nucleus sampling probability
+#         "temperature": 0.7,  # sampling temperature
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
 
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
-    print ('prompt', prompt)
-    print("Generated Prediction Text:", generated_text) 
-    # Use regex to extract the guess (sentiment or category) and verbal confidence
-    # match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
-    # if match_guess:
-    #     guess_result = match_guess.group(0).lower()
-    #     if guess_result not in label_list:
-    #         guess_result = 'null'
-    # else:
-    #     probs = np.zeros(class_number+1)
-    #     probs[-1] = 1.0  # Only null has confidence 1
-    #     return 'null', probs, 1.0
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#     print ('prompt', prompt)
+#     print("Generated Prediction Text:", generated_text) 
+#     # Use regex to extract the guess (sentiment or category) and verbal confidence
+#     # match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
+#     # if match_guess:
+#     #     guess_result = match_guess.group(0).lower()
+#     #     if guess_result not in label_list:
+#     #         guess_result = 'null'
+#     # else:
+#     #     probs = np.zeros(class_number+1)
+#     #     probs[-1] = 1.0  # Only null has confidence 1
+#     #     return 'null', probs, 1.0
 
-    # Extract guesses, assuming they're separated by commas and ignoring case
-    results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
-    results = [result for result in results if result in label_list]
-    # If fewer results than k_pred, fill with 'null'
-    results.extend(['null'] * (k_pred - len(results)))
-    print ('results',results,expected_prediction)
-    correct_predictions = sum(1 for sentiment in results if sentiment == expected_prediction)
-    confidence_empirical = (correct_predictions / len(results)) * 100
-    # Manually count occurrences
+#     # Extract guesses, assuming they're separated by commas and ignoring case
+#     results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+#     results = [result for result in results if result in label_list]
+#     # If fewer results than k_pred, fill with 'null'
+#     results.extend(['null'] * (k_pred - len(results)))
+#     print ('results',results,expected_prediction)
+#     correct_predictions = sum(1 for sentiment in results if sentiment == expected_prediction)
+#     confidence_empirical = (correct_predictions / len(results)) * 100
+#     # Manually count occurrences
 
-    # sentiment_counts = {k:0 for k in label_list}
-    # sentiment_counts['null'] = 0
-    # print ('count',sentiment_counts)
-    # for guess in results:
-    #     if guess in sentiment_counts:
-    #         sentiment_counts[guess] += 1
-    #     else:
-    #         sentiment_counts[guess] = 1
+#     # sentiment_counts = {k:0 for k in label_list}
+#     # sentiment_counts['null'] = 0
+#     # print ('count',sentiment_counts)
+#     # for guess in results:
+#     #     if guess in sentiment_counts:
+#     #         sentiment_counts[guess] += 1
+#     #     else:
+#     #         sentiment_counts[guess] = 1
 
-    # # percentages = {key: (value / k_pred) * 100 for key, value in sentiment_counts.items()} 
-    # # print ('percentages',percentages)
+#     # # percentages = {key: (value / k_pred) * 100 for key, value in sentiment_counts.items()} 
+#     # # print ('percentages',percentages)
  
-    # sentiment_confidences = {k:0 for k in label_list}
-    # sentiment_confidences['null'] = 0
-    # for sentiment, number_of_results in sentiment_counts.items():
-    #     sentiment_confidences[sentiment] = (number_of_results / len(results))
+#     # sentiment_confidences = {k:0 for k in label_list}
+#     # sentiment_confidences['null'] = 0
+#     # for sentiment, number_of_results in sentiment_counts.items():
+#     #     sentiment_confidences[sentiment] = (number_of_results / len(results))
 
  
-    # print(f"Results for '{text}':")
-    # print(f"Positive: {sentiment_counts['positive']}, Negative: {sentiment_counts['negative']}, Null: {sentiment_counts['null']}")
-    # # print(f"Average model confidence: {average_confidence}%")
-    # print(f"Empirical confidence: {confidence_empirical}%")
-    # max_class = max(sentiment_counts, key=sentiment_counts.get)
-    # print ('max_class',max_class,expected_prediction)
+#     # print(f"Results for '{text}':")
+#     # print(f"Positive: {sentiment_counts['positive']}, Negative: {sentiment_counts['negative']}, Null: {sentiment_counts['null']}")
+#     # # print(f"Average model confidence: {average_confidence}%")
+#     # print(f"Empirical confidence: {confidence_empirical}%")
+#     # max_class = max(sentiment_counts, key=sentiment_counts.get)
+#     # print ('max_class',max_class,expected_prediction)
 
-    for sentiment in results:
-        task_dictionary_counts[task][sentiment] += 1
+#     for sentiment in results:
+#         task_dictionary_counts[task][sentiment] += 1
     
-    # sentiment_confidences = { 'positive': 0, 'negative': 0, 'null': 0 }
-    for sentiment, number_of_results in task_dictionary_counts[task].items():
-        task_dictionary_confidences[task][sentiment] = (number_of_results / len(results))
+#     # sentiment_confidences = { 'positive': 0, 'negative': 0, 'null': 0 }
+#     for sentiment, number_of_results in task_dictionary_counts[task].items():
+#         task_dictionary_confidences[task][sentiment] = (number_of_results / len(results))
 
-    # average_confidence = sum(confidence for _, confidence in results) / len(results)
+#     # average_confidence = sum(confidence for _, confidence in results) / len(results)
 
-    print(f"Results for '{text}':")
-    print(f"Counter: {task_dictionary_counts[task]}")
-    # print(f"Average model confidence: {average_confidence}%")
-    print(f"Empirical confidence: {confidence_empirical}%")
-    max_class = max(task_dictionary_counts[task], key=task_dictionary_counts[task].get)
-    print ('max_class',max_class,expected_prediction)
-    print ('empricial:',expected_prediction,confidence_empirical,task_dictionary_confidences[task])
+#     print(f"Results for '{text}':")
+#     print(f"Counter: {task_dictionary_counts[task]}")
+#     # print(f"Average model confidence: {average_confidence}%")
+#     print(f"Empirical confidence: {confidence_empirical}%")
+#     max_class = max(task_dictionary_counts[task], key=task_dictionary_counts[task].get)
+#     print ('max_class',max_class,expected_prediction)
+#     print ('empricial:',expected_prediction,confidence_empirical,task_dictionary_confidences[task])
 
 
-    guess_result = max_class
-    confidence_result = confidence_empirical/100
-    if guess_result != 'null':
-        if task == 'sst2':
-            probs = np.array([task_dictionary_confidences[task]['negative'],
-                task_dictionary_confidences[task]['positive'],
-                task_dictionary_confidences[task]['null']])
-            # if guess_result == 'positive':
-                # probs = np.array([task_dictionary_confidences[self.task]['negative'],task_dictionary_confidences[self.task]['positive'],task_dictionary_confidences[self.task]['null']])
-                # probs = np.array([1-confidence_result,confidence_result,0.0])
-            # else:
-            #     probs = np.array([task_dictionary_confidences[self.task]['negative'],task_dictionary_confidences[self.task]['positive'],task_dictionary_confidences[self.task]['null']])
-                # probs = np.array([confidence_result,1-confidence_result,0.0])
-            return guess_result, probs ,confidence_result
-        elif task == 'ag_news':
-            # granularity = 4 # how many confidence labels do we have in confidence elicitation
-            # ignore_classes  = 1 # ignore null and the current class
-            # other_level_candidates = class_number
+#     guess_result = max_class
+#     confidence_result = confidence_empirical/100
+#     if guess_result != 'null':
+#         if task == 'sst2':
+#             probs = np.array([task_dictionary_confidences[task]['negative'],
+#                 task_dictionary_confidences[task]['positive'],
+#                 task_dictionary_confidences[task]['null']])
+#             # if guess_result == 'positive':
+#                 # probs = np.array([task_dictionary_confidences[self.task]['negative'],task_dictionary_confidences[self.task]['positive'],task_dictionary_confidences[self.task]['null']])
+#                 # probs = np.array([1-confidence_result,confidence_result,0.0])
+#             # else:
+#             #     probs = np.array([task_dictionary_confidences[self.task]['negative'],task_dictionary_confidences[self.task]['positive'],task_dictionary_confidences[self.task]['null']])
+#                 # probs = np.array([confidence_result,1-confidence_result,0.0])
+#             return guess_result, probs ,confidence_result
+#         elif task == 'ag_news':
+#             # granularity = 4 # how many confidence labels do we have in confidence elicitation
+#             # ignore_classes  = 1 # ignore null and the current class
+#             # other_level_candidates = class_number
             
-            # confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
-            # confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
-            probs = np.array([task_dictionary_confidences[task]['world'],
-            task_dictionary_confidences[task]['sports'],
-            task_dictionary_confidences[task]['business'],
-            task_dictionary_confidences[task]['sci/tech'],
-            task_dictionary_confidences[task]['null'],
-            ])
-            print ('probs',probs)
-            # if guess_result == 'world':
-            #     probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
-            # elif guess_result == 'sports' :
-            #     probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
-            # elif guess_result == 'business':
-            #     probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
-            # if guess_result == 'tech' or 'science' or 'tech/science':
-            #     guess_result = 'tech/sci'
-                # probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
-            return guess_result, probs ,confidence_result
-    else:        
-        probs = np.zeros(class_number+1)
-        probs[-1] = 1.0  # Only null has confidence 1
-        return 'null', probs, 1.0
+#             # confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
+#             # confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
+#             probs = np.array([task_dictionary_confidences[task]['world'],
+#             task_dictionary_confidences[task]['sports'],
+#             task_dictionary_confidences[task]['business'],
+#             task_dictionary_confidences[task]['sci/tech'],
+#             task_dictionary_confidences[task]['null'],
+#             ])
+#             print ('probs',probs)
+#             # if guess_result == 'world':
+#             #     probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
+#             # elif guess_result == 'sports' :
+#             #     probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
+#             # elif guess_result == 'business':
+#             #     probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
+#             # if guess_result == 'tech' or 'science' or 'tech/science':
+#             #     guess_result = 'tech/sci'
+#                 # probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
+#             return guess_result, probs ,confidence_result
+#     else:        
+#         probs = np.zeros(class_number+1)
+#         probs[-1] = 1.0  # Only null has confidence 1
+#         return 'null', probs, 1.0
         
     
 # def predict_sentiment_and_verbal_confidence_2step_k_pred_avg(text,task, expected_prediction):
@@ -524,593 +522,593 @@ def predict_sentiment_and_verbal_confidence_k_pred_avg(text,task, expected_predi
         
 #         return guess_result, probs ,confidence_result
     
-import json
-def predict_sentiment_and_verbal_confidence_2step_k_pred_avg(datapoint,label_names=None):
-    k_pred = 1
-    # if task not in ['sst2', 'ag_news', 'popQA']:
-    #     raise ValueError("Unsupported task. Please choose 'sst2', 'ag_news', or 'popQA'.")
+# import json
+# def predict_sentiment_and_verbal_confidence_2step_k_pred_avg(datapoint,label_names=None):
+#     k_pred = 1
+#     # if task not in ['sst2', 'ag_news', 'popQA']:
+#     #     raise ValueError("Unsupported task. Please choose 'sst2', 'ag_news', or 'popQA'.")
 
-    # Custom processing for PopQA
-    if task == 'popQA': 
-        data_point = {'question':datapoint[0], 'possible_answers':datapoint[1]}
-        text = data_point['question']
+#     # Custom processing for PopQA
+#     if task == 'popQA': 
+#         data_point = {'question':datapoint[0], 'possible_answers':datapoint[1]}
+#         text = data_point['question']
 
-        possible_answers = json.loads(data_point['possible_answers'])
-        label_names = possible_answers['correct'] + possible_answers['incorrect']
-        print ('label_names', label_names)
+#         possible_answers = json.loads(data_point['possible_answers'])
+#         label_names = possible_answers['correct'] + possible_answers['incorrect']
+#         print ('label_names', label_names)
 
-        expected_prediction = possible_answers['correct']
-        incorrect_answers = possible_answers['incorrect']
-        guess_pattern = '|'.join(label_names)
-        class_number = len(label_names)
+#         expected_prediction = possible_answers['correct']
+#         incorrect_answers = possible_answers['incorrect']
+#         guess_pattern = '|'.join(label_names)
+#         class_number = len(label_names)
 
-        # Create task-specific dictionaries for PopQA
-        task_dictionary_counts_correct = {'popQA':{label: 0 for label in expected_prediction}}
-        task_dictionary_counts_incorrect = {'popQA':{label: 0 for label in incorrect_answers}}
+#         # Create task-specific dictionaries for PopQA
+#         task_dictionary_counts_correct = {'popQA':{label: 0 for label in expected_prediction}}
+#         task_dictionary_counts_incorrect = {'popQA':{label: 0 for label in incorrect_answers}}
 
-        task_dictionary_confidences = {'popQA':{label: 0 for label in label_names}}
-        task_dictionary_confidences['null'] = 0
+#         task_dictionary_confidences = {'popQA':{label: 0 for label in label_names}}
+#         task_dictionary_confidences['null'] = 0
 
-        task_dictionary_counts = {'popQA':{label: 0 for label in label_names}}
-        task_dictionary_counts['null'] = 0
+#         task_dictionary_counts = {'popQA':{label: 0 for label in label_names}}
+#         task_dictionary_counts['null'] = 0
 
-        # Create a sample list for examples in the prompt
-        sampled_answers = random.sample(label_names, min(5, len(label_names)))
-        sampled_answers_str = ', '.join(label_names)
-        sampled_confidences_str =', '.join(CONFIDENCE_LEVELS[confidence_type])
-        print ('sampled_confidences_str',sampled_confidences_str)
-        prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following question. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses; not a complete sentence, just the guesses! Separated by a comma, for example [Answer1, Answer2, Answer3 ...]>\n\nThe question is: ${data_point['question']} Guesses:{end_prompt_footer}"""
-    else:
-        print ('datapoint',datapoint)
-        if task == 'sst2':
-            guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
-            class_number = 2
-            label_list = label_names  # ['positive', 'negative']
-            label_index = datapoint[1]
-        elif task == 'ag_news':
-            guess_pattern = r'(world|business|tech|science|sports)'
-            class_number = 4
-            label_list = label_names  # ['positive', 'negative']
-            label_index = datapoint[1]
-        elif task == 'strategyQA':
-            guess_pattern = r'(true|TRUE|True|false|FALSE|False)'
-            class_number = 2
-            label_list = ['false', 'true']
-            label_index = 1 if datapoint[1] else 0
+#         # Create a sample list for examples in the prompt
+#         sampled_answers = random.sample(label_names, min(5, len(label_names)))
+#         sampled_answers_str = ', '.join(label_names)
+#         sampled_confidences_str =', '.join(CONFIDENCE_LEVELS[confidence_type])
+#         print ('sampled_confidences_str',sampled_confidences_str)
+#         prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following question. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses; not a complete sentence, just the guesses! Separated by a comma, for example [Answer1, Answer2, Answer3 ...]>\n\nThe question is: ${data_point['question']} Guesses:{end_prompt_footer}"""
+#     else:
+#         print ('datapoint',datapoint)
+#         if task == 'sst2':
+#             guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
+#             class_number = 2
+#             label_list = label_names  # ['positive', 'negative']
+#             label_index = datapoint[1]
+#         elif task == 'ag_news':
+#             guess_pattern = r'(world|business|tech|science|sports)'
+#             class_number = 4
+#             label_list = label_names  # ['positive', 'negative']
+#             label_index = datapoint[1]
+#         elif task == 'strategyQA':
+#             guess_pattern = r'(true|TRUE|True|false|FALSE|False)'
+#             class_number = 2
+#             label_list = ['false', 'true']
+#             label_index = 1 if datapoint[1] else 0
 
-        print ('label_index',label_index) 
-        text = datapoint[0]
-        expected_prediction = [label_list[label_index]]
-        print ('sets',set(label_list) , set([label_list[label_index]])) 
-        incorrect_answers = list (set(label_list) -  set([label_list[label_index]])) 
-        print ('text', text)
-        print ('expec', expected_prediction) 
-        print ('expected_prediction',expected_prediction)
-        print ('incorrect_answers',incorrect_answers)
-        task_dictionary_counts = {task: {label: 0 for label in label_list}}
-        task_dictionary_counts[task]['null'] = 0
+#         print ('label_index',label_index) 
+#         text = datapoint[0]
+#         expected_prediction = [label_list[label_index]]
+#         print ('sets',set(label_list) , set([label_list[label_index]])) 
+#         incorrect_answers = list (set(label_list) -  set([label_list[label_index]])) 
+#         print ('text', text)
+#         print ('expec', expected_prediction) 
+#         print ('expected_prediction',expected_prediction)
+#         print ('incorrect_answers',incorrect_answers)
+#         task_dictionary_counts = {task: {label: 0 for label in label_list}}
+#         task_dictionary_counts[task]['null'] = 0
 
-        task_dictionary_confidences = {task: {label: 0 for label in label_list}}
-        task_dictionary_confidences[task]['null'] = 0
-        # Create task-specific dictionaries for PopQA
-        task_dictionary_counts_correct = {task :{label: 0 for label in expected_prediction}}
-        task_dictionary_counts_incorrect = {task:{label: 0 for label in incorrect_answers}}
+#         task_dictionary_confidences = {task: {label: 0 for label in label_list}}
+#         task_dictionary_confidences[task]['null'] = 0
+#         # Create task-specific dictionaries for PopQA
+#         task_dictionary_counts_correct = {task :{label: 0 for label in expected_prediction}}
+#         task_dictionary_counts_incorrect = {task:{label: 0 for label in incorrect_answers}}
 
-        sampled_confidences_str =', '.join(CONFIDENCE_LEVELS[confidence_type])
-        print ('sampled_confidences_str',sampled_confidences_str)
+#         sampled_confidences_str =', '.join(CONFIDENCE_LEVELS[confidence_type])
+#         print ('sampled_confidences_str',sampled_confidences_str)
         
-        if task == 'sst2':
-            prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
+#         if task == 'sst2':
+#             prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
 
-        elif task == 'ag_news':
-            options = 'world, business, tech, science, sports'  # we separate tech/science into two different prediction categories, but treat them as one label
-            prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either {options}; not a complete sentence, just the guesses! Separated by a comma, for example [Sport, Business, Sport, Politics, Sci/Tech ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
-        elif task == 'strategyQA':
-            # prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either true orfalse; not a complete sentence, just the guesses! Separated by a comma, for example [True, False, False, True ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
-            # prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses, for example [True, False, False, True ...]. Only output your answer nothing else!\n\nStatement: {text} Answer:{end_prompt_footer}"""
-            # prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text} Answer:{end_prompt_footer}"""
+#         elif task == 'ag_news':
+#             options = 'world, business, tech, science, sports'  # we separate tech/science into two different prediction categories, but treat them as one label
+#             prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either {options}; not a complete sentence, just the guesses! Separated by a comma, for example [Sport, Business, Sport, Politics, Sci/Tech ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
+#         elif task == 'strategyQA':
+#             # prompt = f"""{start_prompt_header}Provide your {k_pred} best guess for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either true orfalse; not a complete sentence, just the guesses! Separated by a comma, for example [True, False, False, True ...]>\n\nThe text is:${text} Guesses:{end_prompt_footer}"""
+#             # prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses, for example [True, False, False, True ...]. Only output your answer nothing else!\n\nStatement: {text} Answer:{end_prompt_footer}"""
+#             # prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text} Answer:{end_prompt_footer}"""
             
-            prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false?\n\nStatement: {text} Answer:{end_prompt_footer}"""
+#             prompt = f"""{start_prompt_header}You are a factual question answering model, Is the following statement true or false?\n\nStatement: {text} Answer:{end_prompt_footer}"""
     
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
 
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,  # enable sampling
-        "top_k": 40,  # top-k sampling
-        "top_p": 0.92,  # nucleus sampling probability
-        "temperature": 0.7,  # sampling temperature
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,  # enable sampling
+#         "top_k": 40,  # top-k sampling
+#         "top_p": 0.92,  # nucleus sampling probability
+#         "temperature": 0.7,  # sampling temperature
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
 
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
-    print('prompt', prompt)
-    print("Generated Prediction Text:", generated_text) 
-
-
-    # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
-    pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
-    # Find all matches in the text
-    matches = pattern.findall(generated_text)
-    # Convert all matches to lowercase (optional, for consistency)
-    results = [match.lower() for match in matches]
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#     print('prompt', prompt)
+#     print("Generated Prediction Text:", generated_text) 
 
 
-
-    # # Extract guesses, assuming they're separated by commas and ignoring case
-    # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
-    # results = [result for result in results if result in label_list]# else 'null' for result in results]
-    # # If fewer results than k_pred, fill with 'null'
-    results.extend(['null'] * (k_pred - len(results)))
+#     # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
+#     pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
+#     # Find all matches in the text
+#     matches = pattern.findall(generated_text)
+#     # Convert all matches to lowercase (optional, for consistency)
+#     results = [match.lower() for match in matches]
 
 
 
-    print('results', results, expected_prediction)
-    correct_predictions = sum(1 for sentiment in results if sentiment in expected_prediction)
-    confidence_empirical = (correct_predictions / len(results)) * 100
-    print('correct_predictions',correct_predictions)
-    for result in results:
-        if result in task_dictionary_counts[task]:
-            task_dictionary_counts[task][result] += 1
-        else:
-            task_dictionary_counts[task]['null'] +=1
+#     # # Extract guesses, assuming they're separated by commas and ignoring case
+#     # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+#     # results = [result for result in results if result in label_list]# else 'null' for result in results]
+#     # # If fewer results than k_pred, fill with 'null'
+#     results.extend(['null'] * (k_pred - len(results)))
+
+
+
+#     print('results', results, expected_prediction)
+#     correct_predictions = sum(1 for sentiment in results if sentiment in expected_prediction)
+#     confidence_empirical = (correct_predictions / len(results)) * 100
+#     print('correct_predictions',correct_predictions)
+#     for result in results:
+#         if result in task_dictionary_counts[task]:
+#             task_dictionary_counts[task][result] += 1
+#         else:
+#             task_dictionary_counts[task]['null'] +=1
         
-    for sentiment, number_of_results in task_dictionary_counts[task].items():
-        task_dictionary_confidences[sentiment] = (number_of_results / len(results))
+#     for sentiment, number_of_results in task_dictionary_counts[task].items():
+#         task_dictionary_confidences[sentiment] = (number_of_results / len(results))
 
     
     
 
-    for result in results:
-        if result in task_dictionary_counts_correct[task]:
-            task_dictionary_counts_correct[task][result]+=1
-        elif result in task_dictionary_counts_incorrect[task]:
-            task_dictionary_counts_incorrect[task][result]+=1
+#     for result in results:
+#         if result in task_dictionary_counts_correct[task]:
+#             task_dictionary_counts_correct[task][result]+=1
+#         elif result in task_dictionary_counts_incorrect[task]:
+#             task_dictionary_counts_incorrect[task][result]+=1
 
-    print(f"Results for '{text}':")
-    print(f"Counter: {task_dictionary_counts}")
-    print(f"Empirical confidence: {confidence_empirical}%")
-    max_class = max(task_dictionary_counts[task], key=task_dictionary_counts[task].get)
-    print('max_class', max_class, expected_prediction)
-    print ('task_dictionary_counts_correct[task]',task_dictionary_counts_correct[task])
-    print ('task_dictionary_counts_incorrect[task]', task_dictionary_counts_incorrect[task])
+#     print(f"Results for '{text}':")
+#     print(f"Counter: {task_dictionary_counts}")
+#     print(f"Empirical confidence: {confidence_empirical}%")
+#     max_class = max(task_dictionary_counts[task], key=task_dictionary_counts[task].get)
+#     print('max_class', max_class, expected_prediction)
+#     print ('task_dictionary_counts_correct[task]',task_dictionary_counts_correct[task])
+#     print ('task_dictionary_counts_incorrect[task]', task_dictionary_counts_incorrect[task])
 
-    guess_result = max_class
-    guesses_output = results
+#     guess_result = max_class
+#     guesses_output = results
     
-    if task == 'sst2':
-        # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{end_prompt_footer}"""
-        confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
+#     if task == 'sst2':
+#         # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{end_prompt_footer}"""
+#         confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
     
-    elif task == 'ag_news':
-        confidence_prompt = f"""{start_prompt_header}Provide your {k_pred} best guesses for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: \n\nThe text is:${text} Guesses: {guesses_output} Provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences:  Confidences:{end_prompt_footer}"""
-    elif task == 'popQA':
-        confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${data_point['question']}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{end_prompt_footer}"""
-    elif task == 'strategyQA':
-        # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either true or false; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
-        # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
-        # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
-        confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guess.\n\nStatement: {text}$. The guess were: {guesses_output}, given the guess provide the verbal confidences that your guess us correct. \n\nFor example:\n\Confidence: <the confidence, from either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, for example [{sampled_confidences_str} ...]; just the confidence!> Confidence:{end_prompt_footer}"""
+#     elif task == 'ag_news':
+#         confidence_prompt = f"""{start_prompt_header}Provide your {k_pred} best guesses for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: \n\nThe text is:${text} Guesses: {guesses_output} Provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences:  Confidences:{end_prompt_footer}"""
+#     elif task == 'popQA':
+#         confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${data_point['question']}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{end_prompt_footer}"""
+#     elif task == 'strategyQA':
+#         # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either true or false; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
+#         # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
+#         # confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {CONFIDENCE_LEVELS[confidence_type]} that your guesses are correct, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{end_prompt_footer}"""
+#         confidence_prompt = f"""{start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {k_pred} guess.\n\nStatement: {text}$. The guess were: {guesses_output}, given the guess provide the verbal confidences that your guess us correct. \n\nFor example:\n\Confidence: <the confidence, from either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, for example [{sampled_confidences_str} ...]; just the confidence!> Confidence:{end_prompt_footer}"""
     
-    print('confidence_prompt', confidence_prompt)
-    inputs = tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,
-        "top_k": 40,
-        "top_p": 0.92,
-        "temperature": 0.7,
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
+#     print('confidence_prompt', confidence_prompt)
+#     inputs = tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,
+#         "top_k": 40,
+#         "top_p": 0.92,
+#         "temperature": 0.7,
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
 
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
-    print("Generated Confidence Text:", generated_text) 
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#     print("Generated Confidence Text:", generated_text) 
 
-    confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type]) 
-    confidence_guesses = re.findall(confidence_options, generated_text, flags=re.IGNORECASE)
-    confidence_guesses = [match.lower() for match in confidence_guesses]
-    print('confidence_guesses', confidence_guesses)
-    confidence_list = CONFIDENCE_LEVELS[confidence_type]
-    print('confidence_list', confidence_list)
-    confidence_results = [result for result in confidence_guesses if result in confidence_list]
-    confidence_results.extend(['null'] * (k_pred - len(confidence_results)))
-    confidence_map = CONFIDENCE_MAP[confidence_type]
+#     confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type]) 
+#     confidence_guesses = re.findall(confidence_options, generated_text, flags=re.IGNORECASE)
+#     confidence_guesses = [match.lower() for match in confidence_guesses]
+#     print('confidence_guesses', confidence_guesses)
+#     confidence_list = CONFIDENCE_LEVELS[confidence_type]
+#     print('confidence_list', confidence_list)
+#     confidence_results = [result for result in confidence_guesses if result in confidence_list]
+#     confidence_results.extend(['null'] * (k_pred - len(confidence_results)))
+#     confidence_map = CONFIDENCE_MAP[confidence_type]
 
-    confidence_numerical_results = [
-        confidence_map[result] if result != 'null' else min(confidence_map.values()) 
-        for result in confidence_results
-    ] 
-    print('confidence_numerical_results', confidence_numerical_results) 
-    print('guesses_output', guesses_output)
+#     confidence_numerical_results = [
+#         confidence_map[result] if result != 'null' else min(confidence_map.values()) 
+#         for result in confidence_results
+#     ] 
+#     print('confidence_numerical_results', confidence_numerical_results) 
+#     print('guesses_output', guesses_output)
 
-    weighted_counts = {label: 0.0 for label in label_list}
-    weighted_counts['null'] = 0.0
+#     weighted_counts = {label: 0.0 for label in label_list}
+#     weighted_counts['null'] = 0.0
 
 
-    for sentiment, confidence in zip(guesses_output, confidence_numerical_results):
-        if confidence:
+#     for sentiment, confidence in zip(guesses_output, confidence_numerical_results):
+#         if confidence:
             
-            weighted_counts[sentiment] += confidence
-        else:
-            weighted_counts[sentiment] += 1
+#             weighted_counts[sentiment] += confidence
+#         else:
+#             weighted_counts[sentiment] += 1
     
 
-    for result, confidence in zip(guesses_output, confidence_numerical_results):
-        if result in task_dictionary_counts_correct[task]:
-            task_dictionary_counts_correct[task][result]+=confidence
-        elif result in task_dictionary_counts_incorrect[task]:
-            task_dictionary_counts_incorrect[task][result]+=confidence
+#     for result, confidence in zip(guesses_output, confidence_numerical_results):
+#         if result in task_dictionary_counts_correct[task]:
+#             task_dictionary_counts_correct[task][result]+=confidence
+#         elif result in task_dictionary_counts_incorrect[task]:
+#             task_dictionary_counts_incorrect[task][result]+=confidence
     
-    weighted_counts_binary = {'incorrect':sum(task_dictionary_counts_incorrect[task].values()),
-                            'correct':sum(task_dictionary_counts_correct[task].values()),
-                            'null':weighted_counts['null']}
-    #for all datasets have a correct, incorrect and null bucket
+#     weighted_counts_binary = {'incorrect':sum(task_dictionary_counts_incorrect[task].values()),
+#                             'correct':sum(task_dictionary_counts_correct[task].values()),
+#                             'null':weighted_counts['null']}
+#     #for all datasets have a correct, incorrect and null bucket
 
-    def compute_dirichlet_statistics(weighted_counts, label_list):
-        print('weighted_counts', weighted_counts)
+#     def compute_dirichlet_statistics(weighted_counts, label_list):
+#         print('weighted_counts', weighted_counts)
 
-        # You mentioned 'weighted_counts_binary' in your request, but it seems missing.
-        # Assuming it's another dictionary similar to weighted_counts. For now, we skip this.
-        # print('weighted_counts_binary', weighted_counts_binary)  
+#         # You mentioned 'weighted_counts_binary' in your request, but it seems missing.
+#         # Assuming it's another dictionary similar to weighted_counts. For now, we skip this.
+#         # print('weighted_counts_binary', weighted_counts_binary)  
 
-        alpha_prior = 1.0
-        alpha = {label: weighted_counts[label] + alpha_prior for label in label_list}
-        alpha['null'] = weighted_counts['null'] + alpha_prior
-        {pos:9, neg:8, null:1}
-        alpha_values = list(alpha.values())
-        sample_size = 1000
-        dirichlet_distribution = dirichlet(alpha_values, size=sample_size)
-        samples_ternary = [(p[0], p[1], p[2]) for p in dirichlet_distribution]  
-        empirical_means = np.mean(dirichlet_distribution, axis=0)
-        empirical_means_ternary = (empirical_means[0], empirical_means[1], empirical_means[2])
-        print('empirical_means', empirical_means) 
+#         alpha_prior = 1.0
+#         alpha = {label: weighted_counts[label] + alpha_prior for label in label_list}
+#         alpha['null'] = weighted_counts['null'] + alpha_prior
+#         {pos:9, neg:8, null:1}
+#         alpha_values = list(alpha.values())
+#         sample_size = 1000
+#         dirichlet_distribution = dirichlet(alpha_values, size=sample_size)
+#         samples_ternary = [(p[0], p[1], p[2]) for p in dirichlet_distribution]  
+#         empirical_means = np.mean(dirichlet_distribution, axis=0)
+#         empirical_means_ternary = (empirical_means[0], empirical_means[1], empirical_means[2])
+#         print('empirical_means', empirical_means) 
 
-        def dirichlet_variance(alpha):
-            alpha_0 = sum(alpha)
-            variances = [(alpha_i * (alpha_0 - alpha_i)) / (alpha_0 ** 2 * (alpha_0 + 1)) for alpha_i in alpha]
-            return variances
+#         def dirichlet_variance(alpha):
+#             alpha_0 = sum(alpha)
+#             variances = [(alpha_i * (alpha_0 - alpha_i)) / (alpha_0 ** 2 * (alpha_0 + 1)) for alpha_i in alpha]
+#             return variances
 
-        alpha_vector = list(alpha.values())
-        second_order_uncertainty = dirichlet_variance(alpha_vector)
-        probabilities = dirichlet_distribution[0] 
+#         alpha_vector = list(alpha.values())
+#         second_order_uncertainty = dirichlet_variance(alpha_vector)
+#         probabilities = dirichlet_distribution[0] 
         
-        print("Counts:", task_dictionary_counts)
-        print("Numerical Confidences:", confidence_numerical_results)
-        print("Weighted Counts:", weighted_counts)
-        print("Alpha Vector:", alpha_vector)
-        print("Probabilities:", probabilities)
-        print("Second Order Uncertainty:", second_order_uncertainty) 
-        return alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities 
+#         print("Counts:", task_dictionary_counts)
+#         print("Numerical Confidences:", confidence_numerical_results)
+#         print("Weighted Counts:", weighted_counts)
+#         print("Alpha Vector:", alpha_vector)
+#         print("Probabilities:", probabilities)
+#         print("Second Order Uncertainty:", second_order_uncertainty) 
+#         return alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities 
 
-    alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts,weighted_counts.keys())
-    # alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts_binary,weighted_counts_binary.keys())
+#     alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts,weighted_counts.keys())
+#     # alpha, dirichlet_distribution, empirical_means, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts_binary,weighted_counts_binary.keys())
     
-    confidence_result = max(probabilities)
+#     confidence_result = max(probabilities)
 
 
-    # sys.exit()
-    return guess_result, probabilities, confidence_result
+#     # sys.exit()
+#     return guess_result, probabilities, confidence_result
 
-def predict_sentiment_and_verbal_confidence_2steps(text, expected_sentiment):
-    if task not in ['sst2', 'ag_news']:
-        raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+# def predict_sentiment_and_verbal_confidence_2steps(text, expected_sentiment):
+#     if task not in ['sst2', 'ag_news']:
+#         raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-    if task == 'sst2':
-        guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
-        class_number  = 2
-        label_list = ['positive', 'negative']
-    elif task == 'ag_news':
-        guess_pattern = r'(world|business|tech|science|sports)'
-        class_number  = 4
-        label_list = ['world','business', 'tech','science','tech/sci', 'sports']
-
-
+#     if task == 'sst2':
+#         guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
+#         class_number  = 2
+#         label_list = ['positive', 'negative']
+#     elif task == 'ag_news':
+#         guess_pattern = r'(world|business|tech|science|sports)'
+#         class_number  = 4
+#         label_list = ['world','business', 'tech','science','tech/sci', 'sports']
 
 
-    if task == 'sst2':
-        prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess:{end_prompt_footer}"""
+
+
+#     if task == 'sst2':
+#         prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess:{end_prompt_footer}"""
     
-    elif task == 'ag_news':
+#     elif task == 'ag_news':
         
-        options = 'world, business, tech, science, sports'  # we separeate tech/science into two different prediction categories, but treat them as one label
+#         options = 'world, business, tech, science, sports'  # we separeate tech/science into two different prediction categories, but treat them as one label
         
-        prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess:{end_prompt_footer}"""
+#         prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess:{end_prompt_footer}"""
         
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
 
-    # Get model predictions as text
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,  # enable sampling
-        "top_k": 40,  # top-k sampling
-        "top_p": 0.92,  # nucleus sampling probability
-        "temperature": 0.7,  # sampling temperature
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
+#     # Get model predictions as text
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,  # enable sampling
+#         "top_k": 40,  # top-k sampling
+#         "top_p": 0.92,  # nucleus sampling probability
+#         "temperature": 0.7,  # sampling temperature
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
 
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-    print("Generated Prediction Text:", generated_text)
+#     print("Generated Prediction Text:", generated_text)
 
-    # Use regex to extract the guess (sentiment or category) and verbal confidence
-    match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
-    if match_guess:
-        guess_result = match_guess.group(0).lower()
-        if guess_result not in label_list:
-            guess_result = 'null'
-    else:
-        probs = np.zeros(class_number+1)
-        probs[-1] = 1.0  # Only null has confidence 1
-        return 'null', probs, 1.0
+#     # Use regex to extract the guess (sentiment or category) and verbal confidence
+#     match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
+#     if match_guess:
+#         guess_result = match_guess.group(0).lower()
+#         if guess_result not in label_list:
+#             guess_result = 'null'
+#     else:
+#         probs = np.zeros(class_number+1)
+#         probs[-1] = 1.0  # Only null has confidence 1
+#         return 'null', probs, 1.0
 
-    # confidence_prompt = f"""[INST]Provide the verbal confidence that your guess is correct ('lowest', 'low', 'medium','high', 'highest') Give ONLY the verbal confidence, no other words or explanation. For example: Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> The text is: "{text}" with guess: "{guess_result}" Confidence:[/INST]"""
-    # if task == 'sst2':
-    #     confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
+#     # confidence_prompt = f"""[INST]Provide the verbal confidence that your guess is correct ('lowest', 'low', 'medium','high', 'highest') Give ONLY the verbal confidence, no other words or explanation. For example: Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> The text is: "{text}" with guess: "{guess_result}" Confidence:[/INST]"""
+#     # if task == 'sst2':
+#     #     confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
     
-    # elif task == 'ag_news':
-    #     confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
+#     # elif task == 'ag_news':
+#     #     confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
 
-    if task == 'sst2':
-        confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
-    elif task == 'ag_news':
-        confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
-
-
-
-    inputs = tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,
-        "top_k": 40,
-        "top_p": 0.92,
-        "temperature": 0.7,
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
-
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
-
-    print("Generated Confidence Text:", generated_text) 
-    # sorted_confidence_options = sorted(CONFIDENCE_LEVELS[confidence_type], key=len, reverse=True) 
-    # print ('sorted_confidence_options',sorted_confidence_options)
-    confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type])
-    # confidence_options = '|'.join(sorted_confidence_options) 
-    match_verbal_confidence = re.search(fr'\b({confidence_options})\b', generated_text, flags=re.IGNORECASE)
-
-    # match_verbal_confidence = re.search(r'\b(lowest|low|medium|high|highest)\b', generated_text, flags=re.IGNORECASE)
-    print('match_guess', match_guess, 'match_confidence', match_verbal_confidence)
-
-    # confidence_map = {
-    #     'lowest': 0,
-    #     'low': 25,
-    #     'medium': 50,
-    #     'high': 75,
-    #     'highest': 100
-    # }
-    confidence_map = CONFIDENCE_MAP[confidence_type]
-
-    if not match_verbal_confidence:
-        guess_result = match_guess.group(0).lower()
-        # match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
-        # confidence_result = float(match_confidence) / 100  # Normalize confidence
-        confidence_result = 1.0
+#     if task == 'sst2':
+#         confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
+#     elif task == 'ag_news':
+#         confidence_prompt = f"""{start_prompt_header}Provide your best guess for the following news article ({options}). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either {options}; not a complete sentence, just the guess!>\n\nThe text is:${text} Guess: {guess_result} Provide the verbal confidence that your guess is correct. Give ONLY the verbal confidence, no other words or explanation.\n\nFor example:\n\Confidence: <the confidence, either {CONFIDENCE_LEVELS[confidence_type]} that your guess is correct, without any extra commentary whatsoever; just the confidence!> Confidence:{end_prompt_footer}"""
 
 
-        if guess_result not in label_list:
-            guess_result = 'null'
 
-        # Handle probabilities for different categories
-        probs = np.zeros(class_number)
-        if guess_result != 'null':
-            if task == 'sst2':
-                if guess_result == 'positive':
+#     inputs = tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,
+#         "top_k": 40,
+#         "top_p": 0.92,
+#         "temperature": 0.7,
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-                    probs = np.array([0.0,1.0,0.0]) 
-                else:
-                    probs = np.array([1.0,0.0,0.0])
-                return guess_result, probs ,confidence_result
-            elif task == 'ag_news':
-                granularity = 4 # how many confidence labels do we have in confidence elicitation
-                ignore_classes  = 1 # ignore null and the current class
-                other_level_candidates = class_number
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+
+#     print("Generated Confidence Text:", generated_text) 
+#     # sorted_confidence_options = sorted(CONFIDENCE_LEVELS[confidence_type], key=len, reverse=True) 
+#     # print ('sorted_confidence_options',sorted_confidence_options)
+#     confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type])
+#     # confidence_options = '|'.join(sorted_confidence_options) 
+#     match_verbal_confidence = re.search(fr'\b({confidence_options})\b', generated_text, flags=re.IGNORECASE)
+
+#     # match_verbal_confidence = re.search(r'\b(lowest|low|medium|high|highest)\b', generated_text, flags=re.IGNORECASE)
+#     print('match_guess', match_guess, 'match_confidence', match_verbal_confidence)
+
+#     # confidence_map = {
+#     #     'lowest': 0,
+#     #     'low': 25,
+#     #     'medium': 50,
+#     #     'high': 75,
+#     #     'highest': 100
+#     # }
+#     confidence_map = CONFIDENCE_MAP[confidence_type]
+
+#     if not match_verbal_confidence:
+#         guess_result = match_guess.group(0).lower()
+#         # match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
+#         # confidence_result = float(match_confidence) / 100  # Normalize confidence
+#         confidence_result = 1.0
+
+
+#         if guess_result not in label_list:
+#             guess_result = 'null'
+
+#         # Handle probabilities for different categories
+#         probs = np.zeros(class_number)
+#         if guess_result != 'null':
+#             if task == 'sst2':
+#                 if guess_result == 'positive':
+
+#                     probs = np.array([0.0,1.0,0.0]) 
+#                 else:
+#                     probs = np.array([1.0,0.0,0.0])
+#                 return guess_result, probs ,confidence_result
+#             elif task == 'ag_news':
+#                 granularity = 4 # how many confidence labels do we have in confidence elicitation
+#                 ignore_classes  = 1 # ignore null and the current class
+#                 other_level_candidates = class_number
                 
-                confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
-                confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
-                if guess_result == 'world':
-                    probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
-                elif guess_result == 'sports' :
-                    probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
-                elif guess_result == 'business':
-                    probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
-                elif guess_result == 'tech' or 'science' or 'tech/science':
-                    guess_result = 'tech/sci'
-                    probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
-                return guess_result, probs ,confidence_result
+#                 confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
+#                 confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
+#                 if guess_result == 'world':
+#                     probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
+#                 elif guess_result == 'sports' :
+#                     probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
+#                 elif guess_result == 'business':
+#                     probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
+#                 elif guess_result == 'tech' or 'science' or 'tech/science':
+#                     guess_result = 'tech/sci'
+#                     probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
+#                 return guess_result, probs ,confidence_result
 
-    guess_result = match_guess.group(0).lower()
-    match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
-    confidence_result = float(match_confidence) / 100  # Normalize confidence
+#     guess_result = match_guess.group(0).lower()
+#     match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
+#     confidence_result = float(match_confidence) / 100  # Normalize confidence
 
 
-    if guess_result not in label_list:
-        guess_result = 'null'
+#     if guess_result not in label_list:
+#         guess_result = 'null'
 
-    # Handle probabilities for different categories
-    probs = np.zeros(class_number)
-    if guess_result != 'null':
-        if task == 'sst2':
-            if guess_result == 'positive':
-                probs = np.array(scale_vector_by_confidence([0,1],confidence_result) + [0.0])
-                # probs = np.array([1-confidence_result,confidence_result,0.0])
-            else:
-                probs = np.array(scale_vector_by_confidence([1,0],confidence_result) + [0.0])
-                # probs = np.array([confidence_result,1-confidence_result,0.0])
-            print ('probs 2step',probs)
-            return guess_result, probs ,confidence_result
-        elif task == 'ag_news':
-            granularity = 4 # how many confidence labels do we have in confidence elicitation
-            ignore_classes  = 1 # ignore null and the current class
-            other_level_candidates = class_number
+#     # Handle probabilities for different categories
+#     probs = np.zeros(class_number)
+#     if guess_result != 'null':
+#         if task == 'sst2':
+#             if guess_result == 'positive':
+#                 probs = np.array(scale_vector_by_confidence([0,1],confidence_result) + [0.0])
+#                 # probs = np.array([1-confidence_result,confidence_result,0.0])
+#             else:
+#                 probs = np.array(scale_vector_by_confidence([1,0],confidence_result) + [0.0])
+#                 # probs = np.array([confidence_result,1-confidence_result,0.0])
+#             print ('probs 2step',probs)
+#             return guess_result, probs ,confidence_result
+#         elif task == 'ag_news':
+#             granularity = 4 # how many confidence labels do we have in confidence elicitation
+#             ignore_classes  = 1 # ignore null and the current class
+#             other_level_candidates = class_number
             
-            confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
-            confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
-            if guess_result == 'world':
-                conf_vec = scale_vector_by_confidence([1.0,0.0,0.0,0.0],confidence_result)
-                probs = np.array(conf_vec+[0.0])
-                # probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
-            elif guess_result == 'sports' :
-                conf_vec = scale_vector_by_confidence([0.0,1.0,0.0,0.0],confidence_result)
-                probs = np.array(conf_vec+[0.0])
-                # probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
-            elif guess_result == 'business':
-                conf_vec = scale_vector_by_confidence([0.0,0.0,1.0,0.0],confidence_result)
-                probs = np.array(conf_vec+[0.0])
-                # probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
-            elif guess_result == 'tech' or 'science' or 'tech/science':
-                guess_result = 'tech/sci'
-                conf_vec = scale_vector_by_confidence([0.0,0.0,0.0,1.0],confidence_result)
-                probs = np.array(conf_vec+[0.0])
-                # probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
-            return guess_result, probs ,confidence_result
+#             confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
+#             confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
+#             if guess_result == 'world':
+#                 conf_vec = scale_vector_by_confidence([1.0,0.0,0.0,0.0],confidence_result)
+#                 probs = np.array(conf_vec+[0.0])
+#                 # probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
+#             elif guess_result == 'sports' :
+#                 conf_vec = scale_vector_by_confidence([0.0,1.0,0.0,0.0],confidence_result)
+#                 probs = np.array(conf_vec+[0.0])
+#                 # probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
+#             elif guess_result == 'business':
+#                 conf_vec = scale_vector_by_confidence([0.0,0.0,1.0,0.0],confidence_result)
+#                 probs = np.array(conf_vec+[0.0])
+#                 # probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
+#             elif guess_result == 'tech' or 'science' or 'tech/science':
+#                 guess_result = 'tech/sci'
+#                 conf_vec = scale_vector_by_confidence([0.0,0.0,0.0,1.0],confidence_result)
+#                 probs = np.array(conf_vec+[0.0])
+#                 # probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
+#             return guess_result, probs ,confidence_result
         
 
-    return guess_result, probs, confidence_result
+#     return guess_result, probs, confidence_result
 
 
 
-def predict_sentiment_and_verbal_confidence(text,task):
-    if task not in ['sst2', 'ag_news']:
-        raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+# def predict_sentiment_and_verbal_confidence(text,task):
+#     if task not in ['sst2', 'ag_news']:
+#         raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-    if task == 'sst2':
-        guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
-        class_number  = 2
-        label_list = ['positive', 'negative']
-    elif task == 'ag_news':
-        guess_pattern = r'(world|business|tech|science|sports)'
-        class_number  = 4
-        label_list = ['world','business', 'tech','science','tech/sci', 'sports']
+#     if task == 'sst2':
+#         guess_pattern = r'(positive|POSITIVE|Positive|negative|NEGATIVE|Negative)'
+#         class_number  = 2
+#         label_list = ['positive', 'negative']
+#     elif task == 'ag_news':
+#         guess_pattern = r'(world|business|tech|science|sports)'
+#         class_number  = 4
+#         label_list = ['world','business', 'tech','science','tech/sci', 'sports']
 
   
   
 
-    if task == 'sst2':
-        prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') for the following sentiment. Give ONLY the guess and verbal confidence, no other words or explanation. For example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!>\n\nThe text is: ${text} Sentiment & confidence:[/INST]"""
-    elif task == 'ag_news':
-        prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') for the following news article. Give ONLY the guess and verbal confidence, no other words or explanation. For example:\n\nGuess: <most likely guess, either world, sports, business or tech/science; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!>\n\nThe text is: ${text} News type & confidence:[/INST]"""
+#     if task == 'sst2':
+#         prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') for the following sentiment. Give ONLY the guess and verbal confidence, no other words or explanation. For example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!>\n\nThe text is: ${text} Sentiment & confidence:[/INST]"""
+#     elif task == 'ag_news':
+#         prompt = f"""[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium','high', 'highest') for the following news article. Give ONLY the guess and verbal confidence, no other words or explanation. For example:\n\nGuess: <most likely guess, either world, sports, business or tech/science; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', 'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the confidence!>\n\nThe text is: ${text} News type & confidence:[/INST]"""
 
     
 
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
+#     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(device)
 
-    # Get model predictions as text
-    generate_args = {
-        "input_ids": inputs['input_ids'],
-        "attention_mask": inputs['attention_mask'],
-        "do_sample": True,  # enable sampling
-        "top_k": 40,  # top-k sampling
-        "top_p": 0.92,  # nucleus sampling probability
-        "temperature": 0.7,  # sampling temperature
-        "max_new_tokens": 200,
-        'pad_token_id': tokenizer.eos_token_id
-    }
+#     # Get model predictions as text
+#     generate_args = {
+#         "input_ids": inputs['input_ids'],
+#         "attention_mask": inputs['attention_mask'],
+#         "do_sample": True,  # enable sampling
+#         "top_k": 40,  # top-k sampling
+#         "top_p": 0.92,  # nucleus sampling probability
+#         "temperature": 0.7,  # sampling temperature
+#         "max_new_tokens": 200,
+#         'pad_token_id': tokenizer.eos_token_id
+#     }
 
-    with torch.no_grad():
-        outputs = model.generate(**generate_args)
+#     with torch.no_grad():
+#         outputs = model.generate(**generate_args)
 
-    prompt_length = len(inputs['input_ids'][0])
-    generated_tokens = outputs[0][prompt_length:]
-    generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#     prompt_length = len(inputs['input_ids'][0])
+#     generated_tokens = outputs[0][prompt_length:]
+#     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-    print("Generated Text:", generated_text)
+#     print("Generated Text:", generated_text)
 
-    # Use regex to extract the guess (sentiment or category) and verbal confidence
-    match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
+#     # Use regex to extract the guess (sentiment or category) and verbal confidence
+#     match_guess = re.search(guess_pattern, generated_text, flags=re.IGNORECASE)
 
-    confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type])
-    match_verbal_confidence = re.search(fr'\b({confidence_options})\b', generated_text, flags=re.IGNORECASE)
-    # match_verbal_confidence = re.search(r'\b(lowest|low|medium|high|highest)\b', generated_text, flags=re.IGNORECASE)
+#     confidence_options = '|'.join(CONFIDENCE_LEVELS[confidence_type])
+#     match_verbal_confidence = re.search(fr'\b({confidence_options})\b', generated_text, flags=re.IGNORECASE)
+#     # match_verbal_confidence = re.search(r'\b(lowest|low|medium|high|highest)\b', generated_text, flags=re.IGNORECASE)
  
 
-    print('match_guess', match_guess, 'match_confidence', match_verbal_confidence)
+#     print('match_guess', match_guess, 'match_confidence', match_verbal_confidence)
 
-    confidence_map = {
-        'lowest': 0,
-        'low': 25,
-        'medium': 50,
-        'high': 75,
-        'highest': 100
-    }
+#     confidence_map = {
+#         'lowest': 0,
+#         'low': 25,
+#         'medium': 50,
+#         'high': 75,
+#         'highest': 100
+#     }
 
-    if match_guess and match_verbal_confidence:
-        guess_result = match_guess.group(0).lower()
-        match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
-        confidence_result = float(match_confidence) / 100  # Normalize confidence
+#     if match_guess and match_verbal_confidence:
+#         guess_result = match_guess.group(0).lower()
+#         match_confidence = confidence_map[match_verbal_confidence.group(0).lower()]
+#         confidence_result = float(match_confidence) / 100  # Normalize confidence
 
 
-        if guess_result not in label_list:
-            guess_result = 'null'
+#         if guess_result not in label_list:
+#             guess_result = 'null'
 
-        # Handle probabilities for different categories
-        probs = np.zeros(class_number)
-        if guess_result != 'null':
-            if task == 'sst2':
-                if guess_result == 'positive':
+#         # Handle probabilities for different categories
+#         probs = np.zeros(class_number)
+#         if guess_result != 'null':
+#             if task == 'sst2':
+#                 if guess_result == 'positive':
 
-                    probs = np.array([1-confidence_result,confidence_result,0.0])
-                else:
-                    probs = np.array([confidence_result,1-confidence_result,0.0])
-                return guess_result, probs ,confidence_result
-            elif task == 'ag_news':
-                granularity = 4 # how many confidence labels do we have in confidence elicitation
-                ignore_classes  = 1 # ignore null and the current class
-                other_level_candidates = class_number
+#                     probs = np.array([1-confidence_result,confidence_result,0.0])
+#                 else:
+#                     probs = np.array([confidence_result,1-confidence_result,0.0])
+#                 return guess_result, probs ,confidence_result
+#             elif task == 'ag_news':
+#                 granularity = 4 # how many confidence labels do we have in confidence elicitation
+#                 ignore_classes  = 1 # ignore null and the current class
+#                 other_level_candidates = class_number
                 
-                confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
-                confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
-                if guess_result == 'world':
-                    probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
-                elif guess_result == 'sports' :
-                    probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
-                elif guess_result == 'business':
-                    probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
-                elif guess_result == 'tech' or 'science' or 'tech/science':
-                    probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
-                return guess_result, probs ,confidence_result
+#                 confidence_split = ((100-((100/granularity)*ignore_classes))/other_level_candidates)/100
+#                 confidence_split = (1 - confidence_result)/ 3 # 1-conf to see how much confidene we have left
+#                 if guess_result == 'world':
+#                     probs = np.array([confidence_result,confidence_split,confidence_split,confidence_split,0.0])
+#                 elif guess_result == 'sports' :
+#                     probs = np.array([confidence_split,confidence_result,confidence_split,confidence_split,0.0])
+#                 elif guess_result == 'business':
+#                     probs = np.array([confidence_split,confidence_split,confidence_result,confidence_split,0.0])
+#                 elif guess_result == 'tech' or 'science' or 'tech/science':
+#                     probs = np.array([confidence_split,confidence_split,confidence_split,confidence_result,0.0])
+#                 return guess_result, probs ,confidence_result
             
 
-        return guess_result, probs, confidence_result
-    else:
-        probs = np.zeros(class_number+1)
-        probs[-1] = 1.0  # Only null has confidence 1
-        return 'null', probs, 1.0
+#         return guess_result, probs, confidence_result
+#     else:
+#         probs = np.zeros(class_number+1)
+#         probs[-1] = 1.0  # Only null has confidence 1
+#         return 'null', probs, 1.0
 
 
  
@@ -1413,6 +1411,8 @@ args.confidence_map_dict = CONFIDENCE_MAP[args.confidence_type]
 # args.task_name_to_lebel_dict = TASK_NAME_TO_LABEL[args.task]
 model_info = MODEL_INFO[args.model_type]
 
+
+
 from src.utils.shared import load_data
 data_to_evaluate, label_names = load_data(args)
 
@@ -1443,7 +1443,7 @@ args.dataset =  SimpleDataset(data_to_evaluate,label_names = label_names )
 
 
 print("Dataset loaded successfully.",args.dataset)
-args.confidence_type = 'weighted_confidence'
+# args.confidence_type = 'weighted_confidence'
 
 
 
@@ -1469,8 +1469,7 @@ args.end_prompt_footer = model_info['end_prompt_footer']
 # args.device = device
 # args.model = model
 from src.utils.shared.misc import initialize_model_and_tokenizer
-args = initialize_model_and_tokenizer(args)
-
+args = initialize_model_and_tokenizer(args) 
 from src.containers import AbstractPredictor, BasePredictorResults, ClassifierPredictorResults
 
 class PredictionContainer(AbstractPredictor):

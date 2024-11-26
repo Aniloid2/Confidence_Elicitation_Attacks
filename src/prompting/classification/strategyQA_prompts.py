@@ -13,16 +13,20 @@ class StrategyQAPrompts(BaseClassificationPrompt):
         self.task_dictionary_counts_incorrect = None
          
     def _predict_prompt(self, text):
-        
-        prompt = f"""{self.start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses, for example [True, False, False, True ...]. Only output your answer nothing else!\n\nStatement: {text} Answer:{self.end_prompt_footer}"""
-        #         
-
+        if self.k_pred == 1:
+            prompt = f"""{self.start_prompt_header}You are a factual question answering model. Is the following statement true or false? Output one guess, for example [True] or [False]. Only output your answer, nothing else!\n\nStatement: {text} Answer:{self.end_prompt_footer}"""
+ 
+        else:
+            prompt = f"""{self.start_prompt_header}You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses, for example [True, False, False, True ...]. Only output your answer nothing else!\n\nStatement: {text} Answer:{self.end_prompt_footer}"""
+ 
         return prompt
 
     def _confidence_prompt(self, text, guesses_output):
-        
-        confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_options} that your guesses are correct, for example [{self.confidence_options} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
-        #    
+        if self.k_pred == 1:
+            confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of an answer being correct. The previous prompt was: "You are a factual question answering model. Is the following statement true or false? Output one guess." \n\nStatement: {text}. The guess was: {guesses_output}. Given this guess, provide the verbal confidence that your guess is correct. \n\nFor example:\n\nConfidence: <the confidence, chosen from {self.confidence_options}, that your guess is correct, for example [{self.confidence_options[0]}]; just the confidence!> Confidence:{self.end_prompt_footer}"""
+        else:
+            confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_options} that your guesses are correct, for example [{self.confidence_options} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+ 
         return confidence_prompt
 
     def _predict_and_confidence_prompt(self, text):
