@@ -4,6 +4,7 @@
 CONFIDENCE_LEVELS = {
     'verbal_confidence': ['lowest', 'low', 'medium', 'high', 'highest'],
     'weighted_confidence': ['lowest', 'low', 'medium', 'high', 'highest'],
+    'verbal_numerical_confidence': ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'],
     'sherman_kent': ['almost certainly', 'highly likely', 'very good chance', 'probable', 'likely', 'probably', 'we believe', 'better than even', 'about even', 'we doubt', 'improbable', 'unlikely', 'probably not', 'little chance', 'almost no chance', 'highly unlikely', 'chances are slight'],
     'yougov': ['Very unlikely', 'Unlikely', 'Not very likely', "Probably won't", 'Quite unlikely', 'Outside chance', 'Maybe', 'Might happen', 'Possibly', 'More likely than not', 'Quite likely', 'Likely', 'Probably will', 'Very likely', 'Almost certain'],
     'single_token_mix': ['Certain', 'Probable', 'Probably', 'Likely', 'Possibly', 'Maybe', 'Improbable', 'Unlikely', 'Impossible'],
@@ -24,6 +25,19 @@ CONFIDENCE_MAP = {'verbal_confidence':{
                         'medium': 3,
                         'high': 4,
                         'highest': 5
+                    },
+                    'verbal_numerical_confidence':{
+                        '0.0': 0.0,
+                        '0.1': 0.1,
+                        '0.2': 0.2,
+                        '0.3': 0.3,
+                        '0.4': 0.4,
+                        '0.5': 0.5,
+                        '0.6': 0.6,
+                        '0.7': 0.7,
+                        '0.8': 0.8,
+                        '0.9': 0.9,
+                        '1.0': 1.0,
                     },
                     'sherman_kent': {
                         'almost certainly':95,

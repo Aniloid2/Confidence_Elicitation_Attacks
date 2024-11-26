@@ -18,13 +18,13 @@ class BaseClassificationPrompt:
         
         self.label_list = self._lower_labels(self.dataset.label_names) #[label.lower() for label in self.dataset.label_names]  # ['positive', 'negative']
         self.label_list_with_null = self._labels_add_null(self.label_list)
+ 
         self.confidence_list = CONFIDENCE_LEVELS[self.confidence_type]
         self.confidence_map = CONFIDENCE_MAP[self.confidence_type]
 
         # options for prompts to choose from
         self.prediction_options = ', '.join(self.label_list) 
-        self.confidence_options = ', '.join(self.confidence_list) 
-
+        self.confidence_options = ', '.join(self.confidence_list)  
         # self._initialize_guess_pattern_prediction()
         self._initialize_guess_pattern_confidence()
 
@@ -38,7 +38,7 @@ class BaseClassificationPrompt:
         print ('predict_prompt:', prompt)
 
         return prompt
-    
+       
     def _predict_prompt(self, text):
         
         prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guess for the following text ({self.prediction_options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either ({self.prediction_options}); not a complete sentence, just the guesses! Separated by a comma, for example [{self.prediction_options} ... x{self.k_pred}]>\n\nThe text is:${text} Guesses:{self.end_prompt_footer}"""
@@ -136,8 +136,11 @@ class BaseClassificationPrompt:
         label_list = label_list + ['null']
         return label_list
     
-    def _extend_with_null(self,result_list):
-        result_list.extend(['null'] * (self.k_pred - len(result_list)))
+    def _extend_with_null(self,result_list, local_k_pred=None):
+        if local_k_pred:
+            result_list.extend(['null'] * (local_k_pred - len(result_list)))
+        else:
+            result_list.extend(['null'] * (self.k_pred - len(result_list)))
         return result_list
     
     def _extract_answer_prompt(self,generated_text): 
@@ -161,6 +164,11 @@ class BaseClassificationPrompt:
         guess_result = max(self.task_dictionary_counts[self.task], key=self.task_dictionary_counts[self.task].get)
         return guess_result
     
+    def _label_to_index(self,label):
+        position = self.label_list_with_null.index(label)
+        return position
+
+
     def _aggregate(self, weighted_counts,results_post_process,confidence_numerical_results):
         for pred, confidence in zip(results_post_process, confidence_numerical_results):
             if confidence:

@@ -36,8 +36,8 @@ class EmpiricalConfidence(BasePredictor):
         
     
 
-    def _query_model_and_return_result_list(self,generate_args):
-        generated_text = self.prompt_class._call_model(generate_args)
+    def _query_model_and_return_result_list(self,generate_args,extra_args):
+        generated_text = self.prompt_class._call_model(generate_args,extra_args)
 
         # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
         # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
@@ -48,11 +48,12 @@ class EmpiricalConfidence(BasePredictor):
         results = [match.lower() for match in matches]
         return results
 
-    def _perform_multiple_predictions(self,generate_args,  n=20):
+    def _perform_multiple_predictions(self,generate_args,extra_args,  n=20):
+        n = self.k_pred
         results = []
         for _ in range(n):
-            result = self._query_model_and_return_result_list(generate_args)
-            result = self.prompt_class._extend_with_null(result)
+            result = self._query_model_and_return_result_list(generate_args,extra_args)
+            result = self.prompt_class._extend_with_null(result,1)
             results.append(result)
         return results
     def predict_and_confidence(self, datapoint):
@@ -63,6 +64,8 @@ class EmpiricalConfidence(BasePredictor):
         print ('label_index_text',text,label_index)
         expected_prediction, incorrect_answers = self.prompt_class._identify_correct_incorrect_labels(label_index)
         self.prompt_class._initialize_correct_incorrect_predictions(label_index)
+        self.prompt_class._initialize_guess_pattern_prediction(datapoint,self.prompt_class.label_list)
+        
         prompt = self.prompt_class._predict_prompt_singular(text )
  
         
@@ -80,6 +83,9 @@ class EmpiricalConfidence(BasePredictor):
             "max_new_tokens": 200,
             'pad_token_id': self.tokenizer.eos_token_id
         }
+        extra_args = {
+            "prompt": prompt,
+        }
 
         # with torch.no_grad():
         #     outputs = self.model.generate(**generate_args)
@@ -89,7 +95,7 @@ class EmpiricalConfidence(BasePredictor):
         # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
         # print('prompt', prompt)
         # print("Generated Prediction Text:", generated_text) 
-        results = self._perform_multiple_predictions(generate_args)
+        results = self._perform_multiple_predictions(generate_args, extra_args)
         # in this case results in a list of results
         print ('results',  results)
         results = [result for sublist in results for result in sublist]

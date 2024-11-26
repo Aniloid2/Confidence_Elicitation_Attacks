@@ -1775,6 +1775,7 @@ class HuggingFaceLLMWrapper(ModelWrapper):
         self.device = next(self.model.parameters()).device
         # print ('device',self.device)
         logit_list = []
+        predictions = []
         for t in text_input_list:
             datapoint = (t,ground_truth_output)
             
@@ -1842,7 +1843,8 @@ class HuggingFaceLLMWrapper(ModelWrapper):
             if guess == 'null': # return the logits with original label at 1
                 probs = torch.zeros(self.n_classes+1, dtype=torch.float16)
                 probs[-1] = 1.0
-
+             
+            predictions.append(guess)
             logit_list.append(torch.tensor(probs, device=self.device)) 
             
             
@@ -1851,7 +1853,8 @@ class HuggingFaceLLMWrapper(ModelWrapper):
         print ('logit list:',logit_list)
         logit_tensor = torch.stack(logit_list)
         print('logit_tensor:', logit_tensor)
-        return logit_tensor
+        return logit_tensor 
+        # return (logit_tensor,predictions)
 
 
 
@@ -2895,7 +2898,7 @@ from textattack.goal_functions import ClassificationGoalFunction
 # we have the goal function class accessible in the beamsearch class, set a hyperparameter to true when we start the transformation inf? this can then be accessed 
 # by the huggingface class?
 
-class CustomConfidenceGoalFunction(UntargetedClassification):
+class Prediction_And_Confidence_GoalFunction(UntargetedClassification):
     def __init__(self, *args, target_max_score=None, **kwargs):
         self.target_max_score = target_max_score
         super().__init__(*args, **kwargs)
@@ -2910,7 +2913,8 @@ class CustomConfidenceGoalFunction(UntargetedClassification):
         # print ('true_label_confidence is goal complete',true_label_confidence, self.lower_bound <= true_label_confidence <= self.upper_bound)
         
         # return self.lower_bound <= true_label_confidence <= self.upper_bound
-    
+        
+        
         # print ('true_label_confidence is goal complete',model_output[self.ground_truth_output])
         if self.target_max_score:
             print ('1')
@@ -3019,7 +3023,196 @@ class CustomConfidenceGoalFunction(UntargetedClassification):
         return results, self.num_queries == self.query_budget
 
 
-goal_function = CustomConfidenceGoalFunction(model_wrapper,query_budget=args.query_budget)
+class PredictionGoalFunction(UntargetedClassification):
+    def __init__(self, *args, target_max_score=None, **kwargs):
+        self.target_max_score = target_max_score
+        super().__init__(*args, **kwargs)
+
+    def _is_goal_complete(self, model_output, _):
+        # """
+        # Check if the confidence of the true label is within the target range.
+        # """
+        # print ('model_output',model_output,self.ground_truth_output, model_output.softmax(dim=-1))
+        # # true_label_confidence = model_output.softmax(dim=-1)[self.ground_truth_output].item()
+        # true_label_confidence = model_output[self.ground_truth_output].item()
+        # print ('true_label_confidence is goal complete',true_label_confidence, self.lower_bound <= true_label_confidence <= self.upper_bound)
+        
+        # return self.lower_bound <= true_label_confidence <= self.upper_bound
+        # model_prediction = model_output[0]
+        # model_probabilities = model_output[1]
+        # print ('model_prediction',model_prediction)
+        # print ('model_probabilities',model_probabilities)
+        print ('self.prediction',self.prediction)
+        # print ('true_label_confidence is goal complete',model_output[self.ground_truth_output])
+
+        print ('self.ground_truth_output',self.ground_truth_output) 
+        return self.prediction[0] != self.ground_truth_output
+        # if self.target_max_score:
+        #     print ('1')
+        #     return model_output[self.ground_truth_output] < self.target_max_score
+        # elif (model_output.numel() == 1) and isinstance(
+        #     self.ground_truth_output, float
+        # ):  
+        #     print ('2')
+        #     return abs(self.ground_truth_output - model_output.item()) >= 0.5
+        # else:
+        #     print ('3', model_output.argmax(),self.ground_truth_output, model_output.argmax() != self.ground_truth_output)
+        #     return model_output.argmax() != self.ground_truth_output
+
+    def _get_score(self, model_output, _):
+        # If the model outputs a single number and the ground truth output is
+        # a float, we assume that this is a regression task.
+        # print ('true_label_confidence is get score',model_output[self.ground_truth_output],1 - model_output[self.ground_truth_output])
+        if (model_output.numel() == 1) and isinstance(self.ground_truth_output, float):
+            return abs(model_output.item() - self.ground_truth_output)
+        else:
+            # print ('model output get score',model_output,self.ground_truth_output, 1 - model_output[self.ground_truth_output])
+
+            # issue here, need to change so that it's not 1-, but instead is current prediction score
+            # we are doing now [negative 0.7000, positive 0.2500, null 0.0500], 1-0.25 because ground truth point 1, but we want
+            # confidence 0.7
+            return 1 - model_output[self.ground_truth_output]
+        
+        
+    def _call_model_uncached(self, attacked_text_list):
+        """Queries model and returns outputs for a list of AttackedText
+        objects."""
+        if not len(attacked_text_list):
+            return []
+        
+ 
+        inputs = [at.tokenizer_input for at in attacked_text_list]
+        outputs = []
+        i = 0
+        while i < len(inputs):
+            batch = inputs[i : i + self.batch_size]
+            batch_preds = self.model(batch,self.ground_truth_output)
+
+            # Some seq-to-seq models will return a single string as a prediction
+            # for a single-string list. Wrap these in a list.
+            if isinstance(batch_preds, str):
+                batch_preds = [batch_preds]
+
+            # Get PyTorch tensors off of other devices.
+            if isinstance(batch_preds, torch.Tensor):
+                batch_preds = batch_preds.cpu()
+
+            if isinstance(batch_preds, list):
+                outputs.extend(batch_preds)
+            elif isinstance(batch_preds, np.ndarray):
+                # outputs.append(batch_preds)
+                outputs.append(torch.tensor(batch_preds))
+            else:
+                outputs.append(batch_preds)
+            i += self.batch_size
+
+        if isinstance(outputs[0], torch.Tensor):
+            outputs = torch.cat(outputs, dim=0)
+        elif isinstance(outputs[0], np.ndarray):
+            outputs = np.concatenate(outputs).ravel()
+
+        assert len(inputs) == len(
+            outputs
+        ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+
+        return self._process_model_outputs(attacked_text_list, outputs)
+    
+    def _process_model_outputs(self, inputs, scores):
+        """Processes and validates a list of model outputs.
+
+        This is a task-dependent operation. For example, classification
+        outputs need to have a softmax applied.
+        """
+        # Automatically cast a list or ndarray of predictions to a tensor. 
+        # try:
+        self.prediction = scores[0][1]
+        scores = scores[0][0]
+        # except Exception as e:
+        #     print ('e',e)
+        # scores = scores[0]
+        print ('scores',scores)
+        if isinstance(scores, list) or isinstance(scores, np.ndarray):
+            scores = torch.tensor(scores)
+
+        # Ensure the returned value is now a tensor.
+        if not isinstance(scores, torch.Tensor):
+            raise TypeError(
+                "Must have list, np.ndarray, or torch.Tensor of "
+                f"scores. Got type {type(scores)}"
+            )
+
+        # Validation check on model score dimensions
+        if scores.ndim == 1:
+            # Unsqueeze prediction, if it's been squeezed by the model.
+            if len(inputs) == 1:
+                scores = scores.unsqueeze(dim=0)
+            else:
+                raise ValueError(
+                    f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+                )
+        elif scores.ndim != 2:
+            # If model somehow returns too may dimensions, throw an error.
+            raise ValueError(
+                f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+            )
+        elif scores.shape[0] != len(inputs):
+            # If model returns an incorrect number of scores, throw an error.
+            raise ValueError(
+                f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+            )
+        elif not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
+            # Values in each row should sum up to 1. The model should return a
+            # set of numbers corresponding to probabilities, which should add
+            # up to 1. Since they are `torch.float` values, allow a small
+            # error in the summation.
+            scores = torch.nn.functional.softmax(scores, dim=1)
+            if not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
+                raise ValueError("Model scores do not add up to 1.")
+        return scores.cpu()
+        
+    def get_results(self, attacked_text_list, check_skip=False): 
+        # this is what get_goal_results in search function calls indirectly so get_goal_results=get_results
+        """For each attacked_text object in attacked_text_list, returns a
+        result consisting of whether or not the goal has been achieved, the
+        output for display purposes, and a score.
+
+        Additionally returns whether the search is over due to the query
+        budget.
+        """
+        print ('attacked_text_list',attacked_text_list,check_skip)
+        print ('self.num_queries',self.num_queries)
+        results = []
+        if self.query_budget < float("inf"):
+            queries_left = self.query_budget - self.num_queries 
+            attacked_text_list = attacked_text_list[:queries_left]
+        self.num_queries += len(attacked_text_list)
+        model_outputs = self._call_model(attacked_text_list)
+        for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
+            # self.prediction = raw_output[1]
+            # raw_output = raw_output[0]
+
+            displayed_output = self._get_displayed_output(raw_output)
+            goal_status = self._get_goal_status(
+                raw_output, attacked_text, check_skip=check_skip
+            )
+            goal_function_score = self._get_score(raw_output, attacked_text)
+            results.append(
+                self._goal_function_result_type()(
+                    attacked_text,
+                    raw_output,
+                    displayed_output,
+                    goal_status,
+                    goal_function_score,
+                    self.num_queries,
+                    self.ground_truth_output,
+                )
+            )
+        return results, self.num_queries == self.query_budget
+
+
+
+goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,query_budget=args.query_budget)
+# goal_function = PredictionGoalFunction(model_wrapper,query_budget=args.query_budget)
 # goal_function = UntargetedClassification(model_wrapper)
 
 
