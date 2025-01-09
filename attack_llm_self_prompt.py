@@ -206,7 +206,7 @@ if args.similarity_technique == 'USE':
         window_size = None 
         skip_text_shorter_than_window=False
 
-
+    
     use_constraint = UniversalSentenceEncoder(
                 threshold=use_threshold,
                 metric="angular",

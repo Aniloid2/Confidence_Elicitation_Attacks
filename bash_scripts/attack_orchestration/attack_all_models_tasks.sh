@@ -381,25 +381,28 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # # declare -a config_gpu_6=("gemma2" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 
 # TextFooler  qwen2.5 
-# declare -a config_gpu_0=("qwen2.5-7b-instruct" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
-declare -a config_gpu_1=("qwen2.5-7b-instruct" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
-# declare -a config_gpu_0=("qwen2.5-7b-instruct" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_0=("qwen2.5-14b-instruct" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_1=("qwen2.5-14b-instruct" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_0=("qwen2.5-14b-instruct" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
 
 # Gemma 2 9b it  sspattack
-# declare -a config_gpu_2=("qwen2.5-7b-instruct" "sst2" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
-declare -a config_gpu_3=("qwen2.5-7b-instruct" "strategyQA" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
-# declare -a config_gpu_2=("qwen2.5-7b-instruct" "ag_news" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_2=("qwen2.5-14b-instruct" "sst2" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_3=("qwen2.5-14b-instruct" "strategyQA" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_2=("qwen2.5-14b-instruct" "ag_news" 2 "step2_k_pred_avg" "sspattack" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
 
 #  Gemma 2 9b it  selffool
-# declare -a config_gpu_4=("qwen2.5-7b-instruct" "sst2" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
-declare -a config_gpu_5=("qwen2.5-7b-instruct" "strategyQA" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
-# declare -a config_gpu_4=("qwen2.5-7b-instruct" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500  )
+# declare -a config_gpu_4=("qwen2.5-14b-instruct" "sst2" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_5=("qwen2.5-14b-instruct" "strategyQA" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 )
+# declare -a config_gpu_4=("qwen2.5-14b-instruct" "ag_news" 20 "step2_k_pred_avg" "black_box" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500  )
 
 # Gemma 2 9b it  texthoaxer
-# declare -a config_gpu_6=("qwen2.5-7b-instruct" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_7=("qwen2.5-7b-instruct" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
-# declare -a config_gpu_6=("qwen2.5-7b-instruct" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_6=("qwen2.5-14b-instruct" "sst2" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_0=("qwen2.5-14b-instruct" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_6=("qwen2.5-14b-instruct" "ag_news" 2 "step2_k_pred_avg" "texthoaxer" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 
+declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "verbal_numerical_confidence" 1 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "verbal_numerical_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+declare -a config_gpu_3=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "verbal_numerical_confidence" 1 "USE" "zs" "random" 0.001 500 5 500)
 
 
 
@@ -408,15 +411,11 @@ declare -A gpu_config_map=(
   [0]="config_gpu_0"
   [1]="config_gpu_1"
   [2]="config_gpu_2"
-  [3]="config_gpu_3"
-  [4]="config_gpu_4"
-  [5]="config_gpu_5"
-  [6]="config_gpu_6"
-  [7]="config_gpu_7"
+  [3]="config_gpu_3" 
 )
 
 # List of GPU IDs to use
-gpus=( 0 1 2 3 4 5 6 7   )
+gpus=( 0 1 2 3  )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)

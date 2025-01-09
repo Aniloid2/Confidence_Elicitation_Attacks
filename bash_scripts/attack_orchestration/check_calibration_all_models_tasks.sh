@@ -177,9 +177,41 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 # declare -a config_gpu_0=("qwen1.5-14b-chat-int8" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
 # declare -a config_gpu_1=("qwen1.5-14b-chat-int8" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
 
-declare -a config_gpu_0=("qwen2.5-14b-instruct" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_2=("qwen2.5-14b-instruct" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
-declare -a config_gpu_3=("qwen2.5-14b-instruct" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_0=("qwen2.5-14b-instruct" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("qwen2.5-14b-instruct" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("qwen2.5-14b-instruct" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+
+# declare -a config_gpu_0=("mistral-nemo-instruct-2407" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("mistral-nemo-instruct-2407" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("mistral-nemo-instruct-2407" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+
+#gpt-4o-llama3
+# declare -a config_gpu_0=("gpt-4o-llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("gpt-4o-llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("gpt-4o-llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500)
+
+# declare -a config_gpu_0=("llama3" "rte" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("llama3" "qqp" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("llama3" "qnli" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_1=("llama3" "mnli" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+
+# declare -a config_gpu_0=("mistralv03" "rte" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("mistralv03" "qqp" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("mistralv03" "qnli" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_1=("mistralv03" "mnli" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+
+ 
+# declare -a config_gpu_0=("llama3" "sst2" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 1 500 5 500)
+# declare -a config_gpu_1=("llama3" "ag_news" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 1 500 5 500)
+# declare -a config_gpu_3=("llama3" "strategyQA" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 1 500 5 500)
+
+# declare -a config_gpu_0=("mistralv03" "sst2" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 1 500 5 500)
+# declare -a config_gpu_1=("mistralv03" "ag_news" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 1 500 5 500)
+# declare -a config_gpu_3=("mistralv03" "strategyQA" 1 "empirical_confidence" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 1 500 5 500)
+
+declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "weighted_confidence" 1 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_2=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "verbal_numerical_confidence" 20 "USE" "zs" "random" 0.001 500 5 500)
+# declare -a config_gpu_3=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_search_use" "word_swap_embedding" 10 0.5 "verbal_numerical_confidence" 1 "USE" "zs" "random" 0.001 500 5 500)
 
  
 # List of GPU IDs to use and their corresponding configurations
@@ -187,14 +219,10 @@ declare -A gpu_config_map=(
   [0]="config_gpu_0"
   [1]="config_gpu_1"
   [2]="config_gpu_2"
-  [3]="config_gpu_3"
-  [4]="config_gpu_4"
-  [5]="config_gpu_5"
-  [6]="config_gpu_6"
-  [7]="config_gpu_7"
+  [3]="config_gpu_3" 
 )
 
-gpus=( 0 1 2 3 4 5 6 7   )
+gpus=( 0 1 2 3    )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)
