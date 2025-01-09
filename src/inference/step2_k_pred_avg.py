@@ -331,7 +331,7 @@ class Step2KPredAvg(BasePredictor):
 
 
         # need to put aggregataors in their own little module
-        # guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.prompt_class._aggregate(weighted_counts,results_post_process,confidence_numerical_results)
+        guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.prompt_class._aggregate(weighted_counts,results_post_process,confidence_numerical_results)
 
         # guess_result_with_confidence = guess_result
         # second_order_uncertainty = None

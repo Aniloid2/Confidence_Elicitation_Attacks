@@ -486,15 +486,11 @@ declare -A gpu_config_map=(
   [0]="config_gpu_0"
   [1]="config_gpu_1"
   [2]="config_gpu_2"
-  [3]="config_gpu_3"
-  [4]="config_gpu_4"
-  [5]="config_gpu_5"
-  [6]="config_gpu_6"
-  [7]="config_gpu_7"
+  [3]="config_gpu_3" 
 )
 
 # List of GPU IDs to use
-gpus=( 0 1 2 3 4 5 6 7   )
+gpus=( 0 1 2 3  )
 
 # If you want to test on specific GPUs, you can directly assign the `gpus` array like below
 # gpus=(3)
