@@ -1,0 +1,485 @@
+Selected transformation method 'self_word_sub' is of type 'sentence_level'.
+Selected transformation method 'sst2' is of type 'classification'.
+Arguments Namespace:
+  - Model type: llama3
+  - Model precision: float32
+  - Task: sst2
+  - Task structure: classification
+  - Confidence type: weighted_confidence
+  - Prompting type: step2_k_pred_avg
+  - Search method: black_box
+  - Transformation method: self_word_sub
+  - N embeddings: 10
+  - Prompt shot type: zs
+  - K pred: 20
+  - Max iter i: 5
+  - Query budget: 500
+  - Num examples: 500
+  - Similarity technique: USE
+  - Similarity threshold: 0.5
+  - Num transformations: 20
+  - Index order technique: random
+  - Cache transformers: /mnt/hdd/brian/
+  - Cache dir: /home/brian/.cache/CEAttacks
+  - Experiment name folder: llmselffool_test1
+  - Temperature: 0.001
+  - Ternary plot: False
+  - Seed: 42
+  - Transformation type: sentence_level
+  - Task type: classification
+high_level_folder: llmselffool_test1
+test_folder: llmselffool_test1/llama3_sst2_log_folder
+tokenizer.pad_token <|eot_id|>
+tokenizer.pad_token_id 128009
+Loading SST2 dataset from 'stanfordnlp/sst2'...
+SST2 dataset loaded successfully <class 'datasets.arrow_dataset.Dataset'> column names ['idx', 'sentence', 'label']
+types <class 'datasets.arrow_dataset.Dataset'> True
+Saving to: llmselffool_test1/llama3_sst2_log_folder EN500_MTllama3_TAsst2_PTstep2_k_pred_avg_PSTzs_STUSE_NT20
+Attack(
+  (search_method): BlackBoxSearch(
+    (num_transformations):  20
+  )
+  (goal_function):  Prediction_And_Confidence_GoalFunction
+  (transformation):  LLMSelfWordSubstitutionW1
+  (constraints): 
+    (0): WordEmbeddingDistance(
+        (embedding):  WordEmbedding
+        (min_cos_sim):  0.5
+        (cased):  False
+        (include_unknown_words):  True
+        (compare_against_original):  True
+      )
+    (1): PartOfSpeech(
+        (tagger_type):  nltk
+        (tagset):  universal
+        (allow_verb_noun_swap):  True
+        (compare_against_original):  True
+      )
+    (2): RepeatModification
+    (3): StopwordModification
+    (4): InputColumnModification(
+        (matching_column_labels):  ['premise', 'hypothesis']
+        (columns_to_ignore):  {'premise'}
+      )
+  (is_black_box):  True
+) 
+
+attacked_text_list [<AttackedText "it 's a charming and often affecting journey . ">] True
+self.num_queries 0
+label_index_text it 's a charming and often affecting journey .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$it 's a charming and often affecting journey .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for 'it 's a charming and often affecting journey . ':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Empirical confidence: 100.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 20}
+task_dictionary_counts_incorrect[task] {'negative': 0}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$it 's a charming and often affecting journey . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+The text is: it's a charming and often affecting journey.
+
+The guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive']
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+empirical_mean [0.01279359 0.97486934 0.01233707]
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+Weighted Counts: {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+Alpha Vector: [1.0, 81.0, 1.0]
+Probabilities: [0.00975015 0.9858009  0.00444895]
+Second Order Uncertainty: [0.0001417027835956563, 0.00027994940173776, 0.0001417027835956563]
+guess positive [0.01279359 0.97486934 0.01233707] 0.9858008977506003
+logit list: [tensor([0.0128, 0.9749, 0.0123], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0128, 0.9749, 0.0123]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([0, 1, 2, 3, 4, 5, 6, 7]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+Here is the transformed sentence:
+
+"It's a dull and often unconvincing journey."
+
+I replaced "charming" with "dull" (a antonym) and "affecting" with "unconvincing" (a antonym). The new sentence conveys a negative tone, whereas the original sentence was positive.
+Generated_sentence: Here is the transformed sentence:
+
+"It's a dull and often unconvincing journey."
+
+I replaced "charming" with "dull" (a antonym) and "affecting" with "unconvincing" (a antonym). The new sentence conveys a negative tone, whereas the original sentence was positive.
+generated_text: 
+
+It's a dull and often unconvincing journey.
+New_sentence: It's a dull and often unconvincing journey.
+att sen new indices <AttackedText "It's a dull and often unconvincing journey."> {'original_index_map': array([0, 1, 2, 3, 4, 5, 6]), 'modified_indices': set()}
+att sen new words ["It's", 'a', 'dull', 'and', 'often', 'unconvincing', 'journey'] 7
+att sen new indices2 <AttackedText "It's a dull and often unconvincing journey."> {'original_index_map': array([0, 1, 2, 3, 4, 5, 6]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "it 's a charming and often affecting journey . ">}
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] True
+self.num_queries 0
+label_index_text allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Negative
+Results for 'allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ':
+Counter: {'sst2': {'negative': 1, 'positive': 19, 'null': 0}}
+Empirical confidence: 95.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 19}
+task_dictionary_counts_incorrect[task] {'negative': 1}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'negative'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, highest
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'negative'] ['negative', 'positive']
+weighted_counts+conf {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+  {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+empirical_mean [0.07187843 0.91672683 0.01139474]
+Counts: {'sst2': {'negative': 1, 'positive': 19, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+Weighted Counts: {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+Alpha Vector: [6.0, 77.0, 1.0]
+Probabilities: [0.09915957 0.88983456 0.01100588]
+Second Order Uncertainty: [0.00078031212484994, 0.0008986928104575163, 0.00013838868880885688]
+guess positive [0.07187843 0.91672683 0.01139474] 0.8898345575942684
+logit list: [tensor([0.0719, 0.9167, 0.0114], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0719, 0.9167, 0.0114]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+The new sentence is:
+
+"warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker."
+
+This sentence meets the conditions:
+1. The semantic meaning remains unchanged, as it still describes the possibility of Nolan's career trajectory.
+2. The new sentence is classified as negative, as it expresses a warning that Nolan may not achieve a major career, and that his work may be unoriginal.
+Generated_sentence: The new sentence is:
+
+"warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker."
+
+This sentence meets the conditions:
+1. The semantic meaning remains unchanged, as it still describes the possibility of Nolan's career trajectory.
+2. The new sentence is classified as negative, as it expresses a warning that Nolan may not achieve a major career, and that his work may be unoriginal.
+generated_text: 
+
+warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker.
+New_sentence: warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker.
+att sen new indices <AttackedText "warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16]), 'modified_indices': set()}
+att sen new words ['warns', 'us', 'that', 'nolan', 'is', 'unlikely', 'to', 'achieve', 'a', 'major', 'career', 'as', 'a', 'commercial', 'yet', 'unoriginal', 'filmmaker'] 17
+att sen new indices2 <AttackedText "warns us that nolan is unlikely to achieve a major career as a commercial yet unoriginal filmmaker."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">}
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . ">] True
+self.num_queries 0
+label_index_text the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for 'the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . ':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Empirical confidence: 100.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 20}
+task_dictionary_counts_incorrect[task] {'negative': 0}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+The text is: the film's narrative is somewhat predictable and relies heavily on familiar tropes.
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, highest
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 81.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 81.0, 'null': 0.0}
+empirical_mean [0.01177044 0.97610319 0.01212637]
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+Weighted Counts: {'negative': 0.0, 'positive': 81.0, 'null': 0.0}
+Alpha Vector: [1.0, 82.0, 1.0]
+Probabilities: [0.03125817 0.95294655 0.01579528]
+Second Order Uncertainty: [0.00013838868880885688, 0.0002734427104175003, 0.00013838868880885688]
+guess positive [0.01177044 0.97610319 0.01212637] 0.9529465516105803
+logit list: [tensor([0.0118, 0.9761, 0.0121], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0118, 0.9761, 0.0121]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+Here is the modified sentence:
+
+The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+
+I replaced the word "astounding" with "disappointing" to create a negative sentence while keeping the rest of the sentence intact.
+Generated_sentence: Here is the modified sentence:
+
+The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+
+I replaced the word "astounding" with "disappointing" to create a negative sentence while keeping the rest of the sentence intact.
+generated_text: 
+
+The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+New_sentence: The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+att sen new indices <AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]), 'modified_indices': set()}
+att sen new words ['The', 'acting', 'costumes', 'music', 'cinematography', 'and', 'sound', 'are', 'all', 'disappointing', 'given', 'the', "production's", 'austere', 'locales'] 15
+att sen new indices2 <AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . ">}
+transformed_text_candidates [<AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.">] 1
+valid_candidates [<AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.">] 1
+attacked_text_list [<AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.">] False
+self.num_queries 1
+label_index_text The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales. 1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales. Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Negative, Positive
+Results for 'The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.':
+Counter: {'sst2': {'negative': 19, 'positive': 1, 'null': 0}}
+Empirical confidence: 5.0%
+max_class negative ['positive']
+task_dictionary_counts_correct[task] {'positive': 1}
+task_dictionary_counts_incorrect[task] {'negative': 19}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.$ the guesses were: ['negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, highest
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+guesses_output ['negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'negative', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 76.0, 'positive': 5.0, 'null': 0.0}
+  {'negative': 76.0, 'positive': 5.0, 'null': 0.0}
+empirical_mean [0.91682657 0.07195445 0.01121897]
+Counts: {'sst2': {'negative': 19, 'positive': 1, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+Weighted Counts: {'negative': 76.0, 'positive': 5.0, 'null': 0.0}
+Alpha Vector: [77.0, 6.0, 1.0]
+Probabilities: [0.93523795 0.05781937 0.00694269]
+Second Order Uncertainty: [0.0008986928104575163, 0.00078031212484994, 0.00013838868880885688]
+guess negative [0.91682657 0.07195445 0.01121897] 0.9352379453678964
+logit list: [tensor([0.9168, 0.0720, 0.0112], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.9168, 0.0720, 0.0112]], device='cuda:0', dtype=torch.float64)
+3 tensor(0) 1 tensor(True)
+results_before_null_filter [GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+  (ground_truth_output): 1
+  (model_output): 0
+  (score): 0.9280455450904141
+)]
+null_label 2
+results_after_null_filter [GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.
+  (ground_truth_output): 1
+  (model_output): 0
+  (score): 0.9280455450904141
+)]
+successful adv sample  2 1
+color_method None
+attacked_text_list [<AttackedText "although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . ">] True
+self.num_queries 0
+label_index_text although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Negative, Positive, Positive, Positive, Negative, Positive, Positive, Positive, Positive, Negative, Positive, Positive, Positive, Positive, Negative, Positive, Positive
+Results for 'although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . ':
+Counter: {'sst2': {'negative': 4, 'positive': 16, 'null': 0}}
+Empirical confidence: 80.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 16}
+task_dictionary_counts_incorrect[task] {'negative': 4}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . $ the guesses were: ['positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>

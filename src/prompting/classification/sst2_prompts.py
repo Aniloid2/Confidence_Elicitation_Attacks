@@ -19,7 +19,7 @@ class SST2Prompts(BaseClassificationPrompt):
         if self.k_pred == 1:
             prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guess for the following text (positive, negative). Give ONLY the guess, no other words or explanation.\n\nFor example:\n\nGuess: <most likely guess, either positive or negative; not a complete sentence, just the guess! Separated by a comma, for example [Negative]>\n\nThe text is:${text} Guess:{self.end_prompt_footer}"""
         else:
-            prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x{self.k_pred}]>\n\nThe text is:${text} Guesses:{self.end_prompt_footer}"""
+            prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x{self.k_pred}]>\n\nThe text is:${text} Guesses:{self.end_prompt_footer}"""
         print ('predict_prompt:', prompt)
 
         return prompt

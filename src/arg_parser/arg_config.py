@@ -52,9 +52,44 @@ def get_args():
                         help='Plot the dirichlet distribution if True of the entire dataset')
     parser.add_argument('--seed', type=int, default=42,
                         help='Set seed')
+    
+    args = parser.parse_args()
+    
+    method_to_type = {
+        'word_swap_embedding': 'word_level',
+        'sspattack': 'word_level',
+        'texthoaxer': 'word_level',
+        'self_word_sub': 'sentence_level', # This is technically a word level attack, however, since the model can generate anything we have to treat it more like a sentence level attack since my current constraints can't keep track of which word changes unless it's an 1 to 1 mapping.
+    }
+    selected_method = args.transformation_method
+    if selected_method in method_to_type:
+        args.transformation_type = method_to_type[selected_method]
+    else:
+        args.transformation_type = 'sentence_level'
+    print(f"Selected transformation method '{selected_method}' is of type '{method_to_type[selected_method]}'.")
+
+    # we use this mostly to define which constraints to use on the tasks. for example strategyQA will have a NoNounConstraint since otherwise we may change name of places and people
+    task_to_type = {
+        'sst2': 'classification',
+        'ag_news': 'classification',
+        'mnli': 'classification',
+        'rte': 'classification',
+        'qqp': 'classification',
+        'qnli': 'classification', # it's convenient to classify it as classification althou it's technically question answering
+        'strategyQA': 'question_answering',
+        'triviaQA': 'question_answering', 
+    }
+
+    selected_task = args.task
+    if selected_task in task_to_type:
+        args.task_type = task_to_type[selected_task]
+    else:
+        args.task_type = 'classification'
+    print(f"Selected transformation method '{selected_task}' is of type '{task_to_type[selected_task]}'.")
+
 
     # Parse the arguments
-    return parser.parse_args()
+    return args
  
 
  

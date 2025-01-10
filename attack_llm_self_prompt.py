@@ -26,7 +26,8 @@ from textattack.constraints.pre_transformation import (
 )
 
 from textattack.constraints.semantics import WordEmbeddingDistance
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+# from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+from src.custom_constraints.sentence_encoders import UniversalSentenceEncoder
 from textattack.constraints.semantics.bert_score import BERTScore
 from textattack.constraints.grammaticality import PartOfSpeech
 import sys
@@ -192,21 +193,11 @@ import math
 if args.similarity_technique == 'USE':
     angular_use_threshold = args.similarity_threshold
     # use_threshold = 0.5
-    use_threshold = 1 - (angular_use_threshold) / math.pi
-    if args.transformation_method == 'word_swap_embedding':
-        compare_against_original = True
-        window_size = None 
-        skip_text_shorter_than_window=False
-    elif args.transformation_method == 'sspattack' :
-        compare_against_original = True
-        window_size = None 
-        skip_text_shorter_than_window=False
-    else:
-        compare_against_original = True
-        window_size = None 
-        skip_text_shorter_than_window=False
+    use_threshold = 1 - (angular_use_threshold) / math.pi 
+    compare_against_original = True
+    window_size = None 
+    skip_text_shorter_than_window=False 
 
-    
     use_constraint = UniversalSentenceEncoder(
                 threshold=use_threshold,
                 metric="angular",
@@ -220,14 +211,15 @@ elif args.similarity_technique == 'BERTScore':
     use_constraint = BERTScore(min_bert_score =bert_score)
 
 
-if args.transformation_method == 'sspattack': 
-    pass
-elif args.transformation_method == 'texthoaxer': 
-    pass
-else:
-    constraints.append(use_constraint) 
+# if args.transformation_method == 'sspattack': 
+    
+#     pass
+# elif args.transformation_method == 'texthoaxer': 
+#     pass
+# else:
+#     constraints.append(use_constraint) 
 
-args.use_constraint = use_constraint
+args.use_constraint = use_constraint # passing epsilon bound as a argument allows to use it more flexibly, currently textattack applies it after a get_transformations call if we add it as a constraint
 
 
 constraints.append(WordEmbeddingDistance(min_cos_sim=0.5))
@@ -237,15 +229,26 @@ input_column_modification = InputColumnModification(
 )
 constraints.append(input_column_modification)
 
-if args.task == 'strategyQA':
+
+if args.task_type == 'question_answering':
     constraints.append(PartOfSpeech(allow_verb_noun_swap=False))
-    if args.transformation_method == 'self_word_sub':
-        pass
-    else:
+    if args.method_type == 'word_level':
         from src.custom_constraints.swap_constraints import NoNounConstraint
         constraints.append(NoNounConstraint())
 else:
     constraints.append(PartOfSpeech(allow_verb_noun_swap=True))
+
+# if args.task == 'strategyQA':
+#     constraints.append(PartOfSpeech(allow_verb_noun_swap=False))
+#     if args.transformation_method == 'self_word_sub':
+#         pass
+#     else:
+#         from src.custom_constraints.swap_constraints import NoNounConstraint
+#         constraints.append(NoNounConstraint())
+# else:
+#     constraints.append(PartOfSpeech(allow_verb_noun_swap=True))
+
+
 
 
 
@@ -3278,6 +3281,34 @@ class BlackBoxSearch(SearchMethod):
             # random.shuffle(transformed_text_candidates)
             # transformed_text_candidates = transformed_text_candidates[:min(self.num_transformations, len(transformed_text_candidates))]
             print ('transformed_text_candidates',transformed_text_candidates,len(transformed_text_candidates))
+            valid_candidates = []
+            for candidate in transformed_text_candidates:
+                # similarity = self.use_constraint.similarity_function(
+                #     initial_result.attacked_text.text, 
+                #     candidate.text
+                # )
+                # print ('similarity',similarity)
+                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+                # sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, candidate.text])
+
+                # if not isinstance(sim_final_original, torch.Tensor):
+                #     sim_final_original = torch.tensor(sim_final_original)
+
+                # if not isinstance(sim_final_pert, torch.Tensor):
+                #     sim_final_pert = torch.tensor(sim_final_pert)
+
+                # sim_score2 = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+                # print ('sim_score transform1',sim_score,round(sim_score, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
+                
+                # print ('sim_score transform2',sim_score2,round(sim_score2, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
+                # sim_score = round(sim_score, 4)
+                if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
+                    valid_candidates.append(candidate)
+
+            # Now, valid_candidates only contains those candidates that meet the USE constraint
+            print('valid_candidates', valid_candidates, len(valid_candidates))
+            transformed_text_candidates = valid_candidates
+
             if not transformed_text_candidates:
                 continue # try to get another transformation 
 
@@ -5622,14 +5653,47 @@ class GreedySearch_USE(SearchMethod):
         # pick two indexes and modify them
         while i < len(index_order) and not search_over:
             if i > self.max_iter_i:
+                print ('reached max i',i)
                 break
             transformed_text_candidates = self.get_transformations(
                 cur_result.attacked_text,
                 original_text=initial_result.attacked_text,
                 indices_to_modify=[index_order[i]],
-            )
+            ) 
+            print ('transformed_text_candidates',i,transformed_text_candidates,len(transformed_text_candidates))
             i += 1
-            print ('transformed_text_candidates',transformed_text_candidates,len(transformed_text_candidates))
+            # apply filtering operation
+            # for i,tranform in enumerate(transformed_text_candidates):
+            #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, tranform.text])
+
+            #     if not isinstance(sim_final_original, torch.Tensor):
+            #         sim_final_original = torch.tensor(sim_final_original)
+
+            #     if not isinstance(sim_final_pert, torch.Tensor):
+            #         sim_final_pert = torch.tensor(sim_final_pert)
+
+            #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+            #     print ('sim_score transform',sim_score, (1 - (args.similarity_threshold) / math.pi))
+            #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+            #         continue
+
+            valid_candidates = []
+            for candidate in transformed_text_candidates:
+                # similarity = self.use_constraint.similarity_function(
+                #     initial_result.attacked_text.text, 
+                #     candidate.text
+                # )
+                # print ('similarity',similarity)
+                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+                
+                
+                if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
+                    valid_candidates.append(candidate)
+
+            # Now, valid_candidates only contains those candidates that meet the USE constraint
+            print('valid_candidates', valid_candidates, len(valid_candidates))
+            transformed_text_candidates = valid_candidates
+
             if len(transformed_text_candidates) == 0:
                 continue
             results, search_over = self.get_goal_results(transformed_text_candidates)
@@ -5657,10 +5721,29 @@ class GreedySearch_USE(SearchMethod):
                 continue 
             if cur_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
                 candidate = cur_result.attacked_text
-                try:
-                    similarity_score = candidate.attack_attrs["similarity_score"]
-                except KeyError:
-                    break
+                # try:
+                #     similarity_score = candidate.attack_attrs["similarity_score"]
+                # except KeyError:
+                #     break
+
+                sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
+
+                if not isinstance(sim_final_original, torch.Tensor):
+                    sim_final_original = torch.tensor(sim_final_original)
+
+                if not isinstance(sim_final_pert, torch.Tensor):
+                    sim_final_pert = torch.tensor(sim_final_pert)
+
+                sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+                print ('sim_score success',sim_score, (1 - (args.similarity_threshold) / math.pi))
+                
+                
+                # if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+                #     continue
+                sim_score = round(sim_score, 4)
+                similarity_score = sim_score 
+
+
                 if similarity_score > max_similarity:
                     max_similarity = similarity_score
                     best_result = cur_result
@@ -5669,7 +5752,23 @@ class GreedySearch_USE(SearchMethod):
         if best_result: 
             return best_result
         else:
-            return cur_result 
+            return cur_result
+        # else:
+        #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
+
+        #     if not isinstance(sim_final_original, torch.Tensor):
+        #         sim_final_original = torch.tensor(sim_final_original)
+
+        #     if not isinstance(sim_final_pert, torch.Tensor):
+        #         sim_final_pert = torch.tensor(sim_final_pert)
+
+        #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+        #     print ('sim_score end',sim_score, (1 - (args.similarity_threshold) / math.pi))
+        #     # print ('prev similarity_score',similarity_score)
+        #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+        #         return []
+        #     else:
+        #         return cur_result 
 
     @property
     def is_black_box(self):

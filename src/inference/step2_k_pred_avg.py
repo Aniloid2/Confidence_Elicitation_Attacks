@@ -160,8 +160,7 @@ class Step2KPredAvg(BasePredictor):
         self.prompt_class._initialize_guess_pattern_prediction(datapoint,self.prompt_class.label_list)
         
         prompt = self.prompt_class._predict_prompt(text )
- 
-        print ('prompt',prompt)
+  
         print ('expected_prediction',expected_prediction)
         
 
