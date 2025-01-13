@@ -66,6 +66,7 @@ Attack(
 
 attacked_text_list [<AttackedText "it 's a charming and often affecting journey . ">] True
 self.num_queries 0
+text_input_list ["it 's a charming and often affecting journey . "]
 label_index_text it 's a charming and often affecting journey .  1
 predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
 
@@ -187,6 +188,7 @@ ending queries 1 20
 color_method None
 attacked_text_list [<AttackedText "allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] True
 self.num_queries 0
+text_input_list ['allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ']
 label_index_text allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker .  1
 predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
 
@@ -309,6 +311,7 @@ ending queries 1 20
 color_method None
 attacked_text_list [<AttackedText "the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . ">] True
 self.num_queries 0
+text_input_list ["the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales . "]
 label_index_text the acting , costumes , music , cinematography and sound are all astounding given the production 's austere locales .  1
 predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
 
@@ -388,6 +391,7 @@ transformed_text_candidates [<AttackedText "The acting, costumes, music, cinemat
 valid_candidates [<AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.">] 1
 attacked_text_list [<AttackedText "The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales.">] False
 self.num_queries 1
+text_input_list ["The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales."]
 label_index_text The acting, costumes, music, cinematography, and sound are all disappointing given the production's austere locales. 1
 predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
 
@@ -455,6 +459,7 @@ successful adv sample  2 1
 color_method None
 attacked_text_list [<AttackedText "although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . ">] True
 self.num_queries 0
+text_input_list ['although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . ']
 label_index_text although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women .  1
 predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
 
@@ -483,3 +488,514 @@ The text is:$although laced with humor and a few fanciful touches , the film is 
 
 For example:
 \Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, high, low, high, high, high, low, high, high, high, high, low, high, high, high, high, low, high, high
+confidence_guesses ['high', 'high', 'high', 'low', 'high', 'high', 'high', 'low', 'high', 'high', 'high', 'high', 'low', 'high', 'high', 'high', 'high', 'low', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive', 'positive', 'positive', 'negative', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 8.0, 'positive': 64.0, 'null': 0.0}
+  {'negative': 8.0, 'positive': 64.0, 'null': 0.0}
+empirical_mean [0.11905035 0.86747726 0.01347239]
+Counts: {'sst2': {'negative': 4, 'positive': 16, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 4, 4]
+Weighted Counts: {'negative': 8.0, 'positive': 64.0, 'null': 0.0}
+Alpha Vector: [9.0, 65.0, 1.0]
+Probabilities: [0.08834236 0.90482355 0.0068341 ]
+Second Order Uncertainty: [0.0013894736842105264, 0.0015204678362573099, 0.00017309941520467836]
+guess positive [0.11905035 0.86747726 0.01347239] 0.9048235471895754
+logit list: [tensor([0.1191, 0.8675, 0.0135], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.1191, 0.8675, 0.0135]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+Here is the new sentence:
+
+Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.
+
+I replaced "humor" with "irony" and "refreshingly" with "dishearteningly" to create a negative tone, while keeping the same meaning as the original sentence.
+Generated_sentence: Here is the new sentence:
+
+Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.
+
+I replaced "humor" with "irony" and "refreshingly" with "dishearteningly" to create a negative tone, while keeping the same meaning as the original sentence.
+generated_text: 
+
+Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.
+New_sentence: Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.
+att sen new indices <AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18]), 'modified_indices': set()}
+att sen new words ['Although', 'laced', 'with', 'irony', 'and', 'a', 'few', 'far-fetched', 'elements', 'the', 'film', 'is', 'a', 'dishearteningly', 'serious', 'look', 'at', 'young', 'women'] 19
+att sen new indices2 <AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "although laced with humor and a few fanciful touches , the film is a refreshingly serious look at young women . ">}
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "Although laced with irony and a few far-fetched elements, the film is a dishearteningly serious look at young women.">] 1
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance . ">] True
+self.num_queries 0
+text_input_list ["you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance . "]
+label_index_text you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for 'you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance . ':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Empirical confidence: 100.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 20}
+task_dictionary_counts_incorrect[task] {'negative': 0}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest
+confidence_guesses ['highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+empirical_mean [0.00931287 0.98174079 0.00894634]
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+Weighted Counts: {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+Alpha Vector: [1.0, 101.0, 1.0]
+Probabilities: [0.01064595 0.98822709 0.00112696]
+Second Order Uncertainty: [9.24469064727336e-05, 0.00018308112850482536, 9.24469064727336e-05]
+guess positive [0.00931287 0.98174079 0.00894634] 0.9882270895326801
+logit list: [tensor([0.0093, 0.9817, 0.0089], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0093, 0.9817, 0.0089]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+Here is the modified sentence:
+
+"You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama."
+
+This sentence satisfies the conditions:
+
+1. The semantic meaning of the new sentence is the same as the original sentence, which is that one doesn't need to have a specific understanding or knowledge to appreciate/enjoy the film.
+2. The new sentence is classified as negative because it uses words with negative connotations such as "tolerate" and "awkward", whereas the original sentence is positive.
+Generated_sentence: Here is the modified sentence:
+
+"You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama."
+
+This sentence satisfies the conditions:
+
+1. The semantic meaning of the new sentence is the same as the original sentence, which is that one doesn't need to have a specific understanding or knowledge to appreciate/enjoy the film.
+2. The new sentence is classified as negative because it uses words with negative connotations such as "tolerate" and "awkward", whereas the original sentence is positive.
+generated_text: 
+
+Here is the generated text:
+
+You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama.
+New_sentence: Here is the generated text:
+
+You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama.
+att sen new indices <AttackedText "Here is the generated text:
+
+You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18, 19, 20, 21]), 'modified_indices': set()}
+att sen new words ['Here', 'is', 'the', 'generated', 'text', 'You', "don't", 'have', 'to', 'understand', 'the', 'plot', 'to', 'tolerate', 'the', "film's", 'awkward', 'mix', 'of', 'slapstick', 'and', 'melodrama'] 22
+att sen new indices2 <AttackedText "Here is the generated text:
+
+You don't have to understand the plot to tolerate the film's awkward mix of slapstick and melodrama."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18, 19, 20, 21]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "you do n't have to know about music to appreciate the film 's easygoing blend of comedy and romance . ">}
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+transformed_text_candidates [] 0
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "the mesmerizing performances of the leads keep the film grounded and keep the audience riveted . ">] True
+self.num_queries 0
+text_input_list ['the mesmerizing performances of the leads keep the film grounded and keep the audience riveted . ']
+label_index_text the mesmerizing performances of the leads keep the film grounded and keep the audience riveted .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$the mesmerizing performances of the leads keep the film grounded and keep the audience riveted .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for 'the mesmerizing performances of the leads keep the film grounded and keep the audience riveted . ':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Empirical confidence: 100.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 20}
+task_dictionary_counts_incorrect[task] {'negative': 0}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$the mesmerizing performances of the leads keep the film grounded and keep the audience riveted . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest
+confidence_guesses ['highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+empirical_mean [0.00967328 0.98003673 0.01028999]
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+Weighted Counts: {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+Alpha Vector: [1.0, 101.0, 1.0]
+Probabilities: [0.00309085 0.99104755 0.0058616 ]
+Second Order Uncertainty: [9.24469064727336e-05, 0.00018308112850482536, 9.24469064727336e-05]
+guess positive [0.00967328 0.98003673 0.01028999] 0.991047549541616
+logit list: [tensor([0.0097, 0.9800, 0.0103], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0097, 0.9800, 0.0103]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.
+
+(Note: I replaced "keep" with "fail to" and "riveted" with "disinterested" to create a negative sentence that conveys the opposite meaning of the original sentence.)
+Generated_sentence: The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.
+
+(Note: I replaced "keep" with "fail to" and "riveted" with "disinterested" to create a negative sentence that conveys the opposite meaning of the original sentence.)
+generated_text: 
+
+The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.
+New_sentence: The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.
+att sen new indices <AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15]), 'modified_indices': set()}
+att sen new words ['The', 'mesmerizing', 'performances', 'of', 'the', 'leads', 'fail', 'to', 'captivate', 'the', 'film', 'and', 'leave', 'the', 'audience', 'disinterested'] 16
+att sen new indices2 <AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "the mesmerizing performances of the leads keep the film grounded and keep the audience riveted . ">}
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "The mesmerizing performances of the leads fail to captivate the film and leave the audience disinterested.">] 1
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity . ">] True
+self.num_queries 0
+text_input_list ["we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity . "]
+label_index_text we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive
+Results for 'we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity . ':
+Counter: {'sst2': {'negative': 10, 'positive': 10, 'null': 0}}
+Empirical confidence: 50.0%
+max_class negative ['positive']
+task_dictionary_counts_correct[task] {'positive': 10}
+task_dictionary_counts_incorrect[task] {'negative': 10}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity . $ the guesses were: ['negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, low, high, high, medium, high, high, low, high, medium, high, low, high, high, medium, high, low, high, high
+confidence_guesses ['high', 'high', 'low', 'high', 'high', 'medium', 'high', 'high', 'low', 'high', 'medium', 'high', 'low', 'high', 'high', 'medium', 'high', 'low', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 2, 4, 4, 3, 4, 4, 2, 4, 3, 4, 2, 4, 4, 3, 4, 2, 4, 4]
+guesses_output ['negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 33.0, 'positive': 36.0, 'null': 0.0}
+  {'negative': 33.0, 'positive': 36.0, 'null': 0.0}
+empirical_mean [0.4697127  0.51653021 0.0137571 ]
+Counts: {'sst2': {'negative': 10, 'positive': 10, 'null': 0}}
+Numerical Confidences: [4, 4, 2, 4, 4, 3, 4, 4, 2, 4, 3, 4, 2, 4, 4, 3, 4, 2, 4, 4]
+Weighted Counts: {'negative': 33.0, 'positive': 36.0, 'null': 0.0}
+Alpha Vector: [34.0, 37.0, 1.0]
+Probabilities: [0.53724711 0.44186201 0.02089088]
+Second Order Uncertainty: [0.0034140876035853203, 0.0034220150515812614, 0.0001876162692372738]
+guess negative [0.4697127  0.51653021 0.0137571 ] 0.5372471146176925
+logit list: [tensor([0.4697, 0.5165, 0.0138], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.4697, 0.5165, 0.0138]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
+generated_text: 
+
+The new sentence is: We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.
+
+I replaced "root for" with "sympathize with" and "like" with "dislike" to achieve the same semantic meaning while flipping the sentiment to negative.
+Generated_sentence: The new sentence is: We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.
+
+I replaced "root for" with "sympathize with" and "like" with "dislike" to achieve the same semantic meaning while flipping the sentiment to negative.
+generated_text: 
+
+We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.
+New_sentence: We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.
+att sen new indices <AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16]), 'modified_indices': set()}
+att sen new words ['We', 'sympathize', 'with', 'Clara', 'and', 'Paul', 'even', 'dislike', 'them', 'though', 'perhaps', "it's", 'an', 'emotion', 'closer', 'to', 'contempt'] 17
+att sen new indices2 <AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt."> {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16]), 'modified_indices': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}, 'newly_modified_indices': {0}, 'previous_attacked_text': <AttackedText "we root for ( clara and paul ) , even like them , though perhaps it 's an emotion closer to pity . ">}
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+transformed_text_candidates [<AttackedText "We sympathize with (Clara and Paul), even dislike them, though perhaps it's an emotion closer to contempt.">] 1
+valid_candidates [] 0
+ending queries 1 20
+color_method None
+attacked_text_list [<AttackedText "a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama . ">] True
+self.num_queries 0
+text_input_list ['a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama . ']
+label_index_text a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama .  1
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama .  Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+expected_prediction ['positive']
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for 'a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama . ':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Empirical confidence: 100.0%
+max_class positive ['positive']
+task_dictionary_counts_correct[task] {'positive': 20}
+task_dictionary_counts_incorrect[task] {'negative': 0}
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$a gorgeous , high-spirited musical from india that exquisitely blends music , dance , song , and high drama . $ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest, highest
+confidence_guesses ['highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+empirical_mean [0.00908908 0.98024816 0.01066277]
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+Weighted Counts: {'negative': 0.0, 'positive': 100.0, 'null': 0.0}
+Alpha Vector: [1.0, 101.0, 1.0]
+Probabilities: [0.01625267 0.93527778 0.04846955]
+Second Order Uncertainty: [9.24469064727336e-05, 0.00018308112850482536, 9.24469064727336e-05]
+guess positive [0.00908908 0.98024816 0.01066277] 0.9352777821682982
+logit list: [tensor([0.0091, 0.9802, 0.0107], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0091, 0.9802, 0.0107]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+starting queries 1
+Current_Text {'original_index_map': array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14]), 'modified_indices': set(), 'label_names': ['negative', 'positive']}
+self.goal_function Prediction_And_Confidence_GoalFunction
+self gto 1
+label_index 1
