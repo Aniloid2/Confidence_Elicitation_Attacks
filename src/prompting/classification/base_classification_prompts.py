@@ -106,27 +106,27 @@ class BaseClassificationPrompt:
         for pred, number_of_results in self.task_dictionary_counts[self.task].items():
             self.task_dictionary_confidences[pred] = (number_of_results / len(results))
 
-    def _calculate_result_count_correct(self, results, weight): 
-        for result in results:
-            if result in self.task_dictionary_counts_correct[self.task]:
-                self.task_dictionary_counts_correct[self.task][result]+= weight
+    # def _calculate_result_count_correct(self, results, weight): 
+    #     for result in results:
+    #         if result in self.task_dictionary_counts_correct[self.task]:
+    #             self.task_dictionary_counts_correct[self.task][result]+= weight
 
-    def _calculate_result_count_incorrect(self, results,weight):
-        for result in results:
-            if result in self.task_dictionary_counts_incorrect[self.task]:
-                self.task_dictionary_counts_incorrect[self.task][result]+=weight
+    # def _calculate_result_count_incorrect(self, results,weight):
+    #     for result in results:
+    #         if result in self.task_dictionary_counts_incorrect[self.task]:
+    #             self.task_dictionary_counts_incorrect[self.task][result]+=weight
     
-    def _add_confidence_weight_correct(self, results, confidence_numerical_results):
+    # def _add_confidence_weight_correct(self, results, confidence_numerical_results):
 
-        for result, confidence in zip(results, confidence_numerical_results):
-            if result in self.task_dictionary_counts_correct[self.task]:
-                self.task_dictionary_counts_correct[self.task][result]+=confidence
+    #     for result, confidence in zip(results, confidence_numerical_results):
+    #         if result in self.task_dictionary_counts_correct[self.task]:
+    #             self.task_dictionary_counts_correct[self.task][result]+=confidence
 
-    def _add_confidence_weight_incorrect(self, results, confidence_numerical_results):
+    # def _add_confidence_weight_incorrect(self, results, confidence_numerical_results):
         
-        for result, confidence in zip(results, confidence_numerical_results):
-            if result in self.task_dictionary_counts_incorrect[self.task]:
-                self.task_dictionary_counts_incorrect[self.task][result]+=confidence
+    #     for result, confidence in zip(results, confidence_numerical_results):
+    #         if result in self.task_dictionary_counts_incorrect[self.task]:
+    #             self.task_dictionary_counts_incorrect[self.task][result]+=confidence
 
     def _lower_labels(self,label_list):
         label_list = [label.lower() for label in label_list]
@@ -157,7 +157,8 @@ class BaseClassificationPrompt:
         confidence_empirical = (correct_predictions / len(results)) * 100
         # print('correct_predictions',correct_predictions)
         return correct_predictions, confidence_empirical
-    def _answer_post_processing(self,results, labels):
+    
+    def _answer_post_processing(self,results):
         return results
     
     def _predictor_decision(self):
@@ -199,7 +200,7 @@ class BaseClassificationPrompt:
             empirical_mean = np.mean(dirichlet_distribution, axis=0)
             # empirical_mean_ternary = (empirical_mean[0], empirical_mean[1], empirical_mean[2])
             print('empirical_mean', empirical_mean) 
- 
+            print ('self.ternaryplot',self.ternary_plot) 
             if self.ternary_plot == True:
                 from src.utils.shared.plotting import ternary_plot, ternary_mean_plot
                 if empirical_mean.shape[0] == 3:

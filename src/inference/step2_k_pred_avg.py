@@ -151,17 +151,18 @@ class Step2KPredAvg(BasePredictor):
         
         
         
-        text, label_index = datapoint
+        # text, label_index = datapoint
+        text = datapoint
         self.prompt_class._initialize_sample_counters() 
-        print ('label_index_text',text,label_index)
-        expected_prediction, incorrect_answers = self.prompt_class._identify_correct_incorrect_labels(label_index)
-        self.prompt_class._initialize_correct_incorrect_predictions(label_index)
+        # print ('label_index_text',text,label_index)
+        # expected_prediction, incorrect_answers = self.prompt_class._identify_correct_incorrect_labels(label_index)
+        # self.prompt_class._initialize_correct_incorrect_predictions(label_index)
         
         self.prompt_class._initialize_guess_pattern_prediction(datapoint,self.prompt_class.label_list)
         
         prompt = self.prompt_class._predict_prompt(text )
   
-        print ('expected_prediction',expected_prediction)
+        # print ('expected_prediction',expected_prediction)
         
 
         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
@@ -204,7 +205,7 @@ class Step2KPredAvg(BasePredictor):
         
         # only used in generation if for the task we need to apply some threshold to decide 
         # whether the answer meets a standard or not.
-        results_post_process = self.prompt_class._answer_post_processing(results, label_index) 
+        results_post_process = self.prompt_class._answer_post_processing(results) 
 
         # # Extract guesses, assuming they're separated by commas and ignoring case
         # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
@@ -214,7 +215,7 @@ class Step2KPredAvg(BasePredictor):
         self.prompt_class._extend_with_null(results_post_process)
         # results.extend(['null'] * (self.k_pred - len(results))) 
         
-        correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process, expected_prediction) # bellow for standard class
+        # correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process) # bellow for standard class
         
     
         self.prompt_class._calculate_result_counts(results_post_process)
@@ -222,20 +223,20 @@ class Step2KPredAvg(BasePredictor):
 
         self.prompt_class._calculate_result_confidences(results_post_process) 
         
-        self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
+        # self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
 
-        self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
+        # self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
 
         print(f"Results for '{text}':")
         print(f"Counter: {self.prompt_class.task_dictionary_counts}")
-        print(f"Empirical confidence: {confidence_empirical}%")
+        # print(f"Empirical confidence: {confidence_empirical}%")
 
         # guess_result = max(self.prompt_class.task_dictionary_counts[self.task], key=self.prompt_class.task_dictionary_counts[self.task].get)
         guess_result = self.prompt_class._predictor_decision()
 
-        print('max_class', guess_result, expected_prediction)
-        print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
-        print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
+        print('max_class', guess_result)#, expected_prediction)
+        # print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
+        # print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
  
         guesses_output = results
 
@@ -310,13 +311,13 @@ class Step2KPredAvg(BasePredictor):
 
         
 
-        self.prompt_class._add_confidence_weight_correct(results_post_process, confidence_numerical_results)
+        # self.prompt_class._add_confidence_weight_correct(results_post_process, confidence_numerical_results)
 
         # for result, confidence in zip(guesses_output, confidence_numerical_results):
         #     if result in self.prompt_class.task_dictionary_counts_correct[self.task]:
         #         self.prompt_class.task_dictionary_counts_correct[self.task][result]+=confidence
 
-        self.prompt_class._add_confidence_weight_incorrect(results_post_process, confidence_numerical_results)
+        # self.prompt_class._add_confidence_weight_incorrect(results_post_process, confidence_numerical_results)
 
         # for result, confidence in zip(guesses_output, confidence_numerical_results):
         #     if result in self.prompt_class.task_dictionary_counts_incorrect[self.task]:

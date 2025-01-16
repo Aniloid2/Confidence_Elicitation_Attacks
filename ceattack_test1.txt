@@ -1,0 +1,413 @@
+Selected transformation method 'word_swap_embedding' is of type 'word_level'.
+Selected transformation method 'sst2' is of type 'classification'.
+Arguments Namespace:
+  - Model type: llama3
+  - Model precision: float32
+  - Task: sst2
+  - Task structure: classification
+  - Confidence type: weighted_confidence
+  - Prompting type: step2_k_pred_avg
+  - Search method: greedy_search_use
+  - Transformation method: word_swap_embedding
+  - N embeddings: 10
+  - Prompt shot type: zs
+  - K pred: 20
+  - Max iter i: 5
+  - Query budget: 500
+  - Num examples: 500
+  - Similarity technique: USE
+  - Similarity threshold: 0.5
+  - Num transformations: 2
+  - Index order technique: random
+  - Cache transformers: /mnt/hdd/brian/
+  - Cache dir: /home/brian/.cache/CEAttacks
+  - Experiment name folder: ceattack_test1
+  - Temperature: 0.001
+  - Ternary plot: True
+  - Seed: 42
+  - Transformation type: word_level
+  - Task type: classification
+high_level_folder: ceattack_test1
+test_folder: ceattack_test1/llama3_sst2_log_folder
+tokenizer.pad_token <|eot_id|>
+tokenizer.pad_token_id 128009
+Loading SST2 dataset from 'stanfordnlp/sst2'...
+SST2 dataset loaded successfully <class 'datasets.arrow_dataset.Dataset'> column names ['idx', 'sentence', 'label']
+types <class 'datasets.arrow_dataset.Dataset'> True
+Saving to: ceattack_test1/llama3_sst2_log_folder EN500_MTllama3_TAsst2_PTstep2_k_pred_avg_PSTzs_STUSE_NT2
+Attack(
+  (search_method): GreedySearch_USE(
+    (beam_width):  1
+  )
+  (goal_function):  Prediction_And_Confidence_GoalFunction
+  (transformation):  WordSwapEmbedding(
+    (max_candidates):  10
+    (embedding):  WordEmbedding
+  )
+  (constraints): 
+    (0): WordEmbeddingDistance(
+        (embedding):  WordEmbedding
+        (min_cos_sim):  0.5
+        (cased):  False
+        (include_unknown_words):  True
+        (compare_against_original):  True
+      )
+    (1): PartOfSpeech(
+        (tagger_type):  nltk
+        (tagset):  universal
+        (allow_verb_noun_swap):  True
+        (compare_against_original):  True
+      )
+    (2): RepeatModification
+    (3): StopwordModification
+    (4): InputColumnModification(
+        (matching_column_labels):  ['premise', 'hypothesis']
+        (columns_to_ignore):  {'premise'}
+      )
+  (is_black_box):  True
+) 
+
+attacked_text_list [<AttackedText "it 's a charming and often affecting journey . ">] True
+self.num_queries 0
+final_num_queries 1
+text_input_list ["it 's a charming and often affecting journey . "]
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$("it 's a charming and often affecting journey . ", 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for '("it 's a charming and often affecting journey . ", 1)':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$("it 's a charming and often affecting journey . ", 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+empirical_mean [0.01279359 0.97486934 0.01233707]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+Weighted Counts: {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+Alpha Vector: [1.0, 81.0, 1.0]
+Probabilities: [0.00975015 0.9858009  0.00444895]
+Second Order Uncertainty: [0.0001417027835956563, 0.00027994940173776, 0.0001417027835956563]
+logit list: [tensor([0.0128, 0.9749, 0.0123], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0128, 0.9749, 0.0123]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+transformed_text_candidates 0 [<AttackedText "it 's a charming and often affects journey . ">, <AttackedText "it 's a charming and often afflicting journey . ">, <AttackedText "it 's a charming and often impacts journey . ">, <AttackedText "it 's a charming and often influence journey . ">, <AttackedText "it 's a charming and often influenced journey . ">, <AttackedText "it 's a charming and often influences journey . ">] 6
+valid_candidates [<AttackedText "it 's a charming and often affects journey . ">, <AttackedText "it 's a charming and often afflicting journey . ">, <AttackedText "it 's a charming and often impacts journey . ">, <AttackedText "it 's a charming and often influence journey . ">] 4
+attacked_text_list [<AttackedText "it 's a charming and often affects journey . ">, <AttackedText "it 's a charming and often afflicting journey . ">, <AttackedText "it 's a charming and often impacts journey . ">, <AttackedText "it 's a charming and often influence journey . ">] False
+self.num_queries 1
+final_num_queries 5
+text_input_list ["it 's a charming and often affects journey . ", "it 's a charming and often afflicting journey . ", "it 's a charming and often impacts journey . ", "it 's a charming and often influence journey . "]
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$("it 's a charming and often affects journey . ", 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for '("it 's a charming and often affects journey . ", 1)':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$("it 's a charming and often affects journey . ", 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+The text is: "it's a charming and often affects journey. "
+
+Guesses: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive']
+
+Confidences: [high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high]
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+empirical_mean [0.0120842  0.97557218 0.01234362]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+Weighted Counts: {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+Alpha Vector: [1.0, 81.0, 1.0]
+Probabilities: [1.11406160e-02 9.87933133e-01 9.26251460e-04]
+Second Order Uncertainty: [0.0001417027835956563, 0.00027994940173776, 0.0001417027835956563]
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$("it 's a charming and often afflicting journey . ", 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative, Positive, Negative
+Results for '("it 's a charming and often afflicting journey . ", 1)':
+Counter: {'sst2': {'negative': 10, 'positive': 10, 'null': 0}}
+max_class negative
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$("it 's a charming and often afflicting journey . ", 1)$ the guesses were: ['positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, medium, low, high, low, high, low, high, low, high, low, high, low, high, low, high, low, high, low
+confidence_guesses ['high', 'high', 'medium', 'low', 'high', 'low', 'high', 'low', 'high', 'low', 'high', 'low', 'high', 'low', 'high', 'low', 'high', 'low', 'high', 'low']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 3, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2]
+guesses_output ['positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative', 'positive', 'negative'] ['negative', 'positive']
+weighted_counts+conf {'negative': 22.0, 'positive': 39.0, 'null': 0.0}
+  {'negative': 22.0, 'positive': 39.0, 'null': 0.0}
+empirical_mean [0.36181218 0.62258131 0.01560651]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 10, 'positive': 10, 'null': 0}}
+Numerical Confidences: [4, 4, 3, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2]
+Weighted Counts: {'negative': 22.0, 'positive': 39.0, 'null': 0.0}
+Alpha Vector: [23.0, 40.0, 1.0]
+Probabilities: [0.29569658 0.70358814 0.00071528]
+Second Order Uncertainty: [0.0035419170673076923, 0.003605769230769231, 0.00023662860576923077]
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$("it 's a charming and often impacts journey . ", 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for '("it 's a charming and often impacts journey . ", 1)':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$("it 's a charming and often impacts journey . ", 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+The text is: "it's a charming and often impacts journey. "
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+empirical_mean [0.01196793 0.97616505 0.01186702]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+Weighted Counts: {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+Alpha Vector: [1.0, 81.0, 1.0]
+Probabilities: [0.08495174 0.90690223 0.00814603]
+Second Order Uncertainty: [0.0001417027835956563, 0.00027994940173776, 0.0001417027835956563]
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$("it 's a charming and often influence journey . ", 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Negative
+Results for '("it 's a charming and often influence journey . ", 1)':
+Counter: {'sst2': {'negative': 1, 'positive': 19, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$("it 's a charming and often influence journey . ", 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'negative'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Confidences: high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, highest
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'highest']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'negative'] ['negative', 'positive']
+weighted_counts+conf {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+  {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+empirical_mean [0.07043511 0.91737708 0.01218781]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 1, 'positive': 19, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5]
+Weighted Counts: {'negative': 5.0, 'positive': 76.0, 'null': 0.0}
+Alpha Vector: [6.0, 77.0, 1.0]
+Probabilities: [0.01501512 0.97212449 0.01286039]
+Second Order Uncertainty: [0.00078031212484994, 0.0008986928104575163, 0.00013838868880885688]
+logit list: [tensor([0.0121, 0.9756, 0.0123], device='cuda:0', dtype=torch.float64), tensor([0.3618, 0.6226, 0.0156], device='cuda:0', dtype=torch.float64), tensor([0.0120, 0.9762, 0.0119], device='cuda:0', dtype=torch.float64), tensor([0.0704, 0.9174, 0.0122], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0121, 0.9756, 0.0123],
+        [0.3618, 0.6226, 0.0156],
+        [0.0120, 0.9762, 0.0119],
+        [0.0704, 0.9174, 0.0122]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+results_before_null_filter
+null_label 2
+results_after_sorted [GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): it 's a charming and often afflicting journey . 
+  (ground_truth_output): 1
+  (model_output): 1
+  (score): 0.37741868826016767
+), GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): it 's a charming and often influence journey . 
+  (ground_truth_output): 1
+  (model_output): 1
+  (score): 0.08262291864716098
+), GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): it 's a charming and often affects journey . 
+  (ground_truth_output): 1
+  (model_output): 1
+  (score): 0.024427822665955556
+), GoalFunctionResult( 
+  (goal_function_result_type): Classification
+  (attacked_text): it 's a charming and often impacts journey . 
+  (ground_truth_output): 1
+  (model_output): 1
+  (score): 0.02383494992636348
+)]
+transformed_text_candidates 1 [<AttackedText "it 's a charming and often afflicting journeys . ">, <AttackedText "it 's a charming and often afflicting travel . ">, <AttackedText "it 's a charming and often afflicting traveling . ">, <AttackedText "it 's a charming and often afflicting travelling . ">, <AttackedText "it 's a charming and often afflicting travels . ">, <AttackedText "it 's a charming and often afflicting trip . ">, <AttackedText "it 's a charming and often afflicting trips . ">, <AttackedText "it 's a charming and often afflicting voyage . ">, <AttackedText "it 's a charming and often afflicting voyages . ">] 9
+valid_candidates [] 0
+transformed_text_candidates 2 [<AttackedText "it 's a charming and commonly afflicting journey . ">, <AttackedText "it 's a charming and frequently afflicting journey . ">, <AttackedText "it 's a charming and habitually afflicting journey . ">, <AttackedText "it 's a charming and normally afflicting journey . ">, <AttackedText "it 's a charming and ordinarily afflicting journey . ">, <AttackedText "it 's a charming and routinely afflicting journey . ">, <AttackedText "it 's a charming and traditionally afflicting journey . ">, <AttackedText "it 's a charming and typically afflicting journey . ">, <AttackedText "it 's a charming and usually afflicting journey . ">] 9
+valid_candidates [] 0
+transformed_text_candidates 3 [<AttackedText "it 's a charmer and often afflicting journey . ">, <AttackedText "it 's a charms and often afflicting journey . ">, <AttackedText "it 's a cute and often afflicting journey . ">, <AttackedText "it 's a enchanting and often afflicting journey . ">, <AttackedText "it 's a ravishing and often afflicting journey . ">] 5
+valid_candidates [] 0
+color_method None
+attacked_text_list [<AttackedText "allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] True
+self.num_queries 0
+final_num_queries 1
+text_input_list ['allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ']
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$('allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for '('allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1)':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$('allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+The text is: "allows us to hope that nolan is poised to embark a major career as a commercial yet inventive filmmaker."
+
+Guesses: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive']
+
+Confidences: [high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high, high]
+confidence_guesses ['high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high', 'high']
+confidence_list ['lowest', 'low', 'medium', 'high', 'highest']
+confidence_numerical_results [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+guesses_output ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'] ['negative', 'positive']
+weighted_counts+conf {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+  {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+empirical_mean [0.01181002 0.9768809  0.01130908]
+self.ternaryplot True
+Counts: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+Numerical Confidences: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+Weighted Counts: {'negative': 0.0, 'positive': 80.0, 'null': 0.0}
+Alpha Vector: [1.0, 81.0, 1.0]
+Probabilities: [0.00294863 0.98752764 0.00952374]
+Second Order Uncertainty: [0.0001417027835956563, 0.00027994940173776, 0.0001417027835956563]
+logit list: [tensor([0.0118, 0.9769, 0.0113], device='cuda:0', dtype=torch.float64)]
+logit_tensor: tensor([[0.0118, 0.9769, 0.0113]], device='cuda:0', dtype=torch.float64)
+3 tensor(1) 1 tensor(False)
+3 tensor(1) 1 tensor(False)
+transformed_text_candidates 0 [<AttackedText "allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to esperanza that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expect that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectancy that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectation that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expects that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoped that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hopes that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoping that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to waits that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] 10
+valid_candidates [<AttackedText "allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to esperanza that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expect that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectancy that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectation that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expects that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoped that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hopes that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoping that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to waits that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] 10
+attacked_text_list [<AttackedText "allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to esperanza that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expect that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectancy that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expectation that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to expects that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoped that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hopes that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to hoping that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">, <AttackedText "allows us to waits that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ">] False
+self.num_queries 1
+final_num_queries 11
+text_input_list ['allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to esperanza that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to expect that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to expectancy that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to expectation that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to expects that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to hoped that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to hopes that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to hoping that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 'allows us to waits that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ']
+predict_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>Provide your 20 best guess for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guesses, either positive or negative; not a complete sentence, just the guesses! Separated by a comma, for example [Negative, Positive, Positive, Negative ... x20]>
+
+The text is:$('allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1) Guesses:<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Generated Confidence Text: 
+
+Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive, Positive
+Results for '('allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1)':
+Counter: {'sst2': {'negative': 0, 'positive': 20, 'null': 0}}
+max_class positive
+confidence_prompt: <|begin_of_text|><|start_header_id|>user<|end_header_id|>You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your 20 best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.
+
+For example:
+
+Guesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>
+
+The text is:$('allows us to amal that nolan is poised to embark a major career as a commercial yet inventive filmmaker . ', 1)$ the guesses were: ['positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive', 'positive'], given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.
+
+For example:
+\Confidences: <the confidences, from either lowest, low, medium, high, highest that your guesses are correct, without any extra commentary whatsoever, for example [lowest, low, medium, high, highest ...]; just the confidence! Separated by a coma> Confidences:<|eot_id|><|start_header_id|>assistant<|end_header_id|>

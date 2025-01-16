@@ -490,8 +490,9 @@ class HuggingFaceLLMWrapper(ModelWrapper):
             datapoint = (t,ground_truth_output)
             
             self.inference_step +=1
-            self.predictor.inference_step = self.inference_step 
-            self.predictor.current_sample = self.current_sample
+            self.predictor.prompt_class.inference_step = self.inference_step 
+            self.predictor.prompt_class.current_sample = self.current_sample
+            # have enumerate, pass i to 
             guess, probs, confidence = self.predictor.predict_and_confidence(datapoint)
 
 
@@ -1647,13 +1648,19 @@ class Prediction_And_Confidence_GoalFunction(UntargetedClassification):
             queries_left = self.query_budget - self.num_queries 
             attacked_text_list = attacked_text_list[:queries_left]
         self.num_queries += len(attacked_text_list)
+        print ('final_num_queries',self.num_queries)
+        # prepare the attacked_text_list so that the sample is put into template
+        # 
         model_outputs = self._call_model(attacked_text_list)
+        # counter = 1
         for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
             displayed_output = self._get_displayed_output(raw_output)
             goal_status = self._get_goal_status(
                 raw_output, attacked_text, check_skip=check_skip
             )
             goal_function_score = self._get_score(raw_output, attacked_text)
+            # attacked_text.inference_step+=counter
+            # counter+=1
             results.append(
                 self._goal_function_result_type()(
                     attacked_text,
@@ -2182,23 +2189,34 @@ class SSPAttackSearch(SearchMethod):
         
         self.number_of_queries = 0
 
+    def check_model_status(self,input_text,check_skip=False):
+        model_outputs = self.goal_function._call_model([input_text])
+        current_goal_status = self.goal_function._get_goal_status(
+            model_outputs[0], input_text, check_skip=check_skip
+        )
+        self.goal_function.num_queries +=1
+        return current_goal_status
+
     def perform_search(self, initial_result):
-        self.number_of_queries = 0
+        self.number_of_queries = 0 # raw counter mostly for infucntion debugging purposes
         attacked_text = initial_result.attacked_text
 
         print ('goal_function',self.goal_function)
         
         # Step 1: Initialization
         number_samples = self.num_transformations
-        self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
-        a = self.goal_function.num_queries
-        a +=number_samples + 1
-        print ('self.goal_function.num_queries',a,'self.number_of_queries',self.number_of_queries)
+        # self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
+        # self.goal_function.num_queries +=number_samples + 1
+        # self.goal_function.num_queries += self.num_transformations
+        # print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
+        # print ('self.goal_function.num_queries',a,'self.number_of_queries',self.number_of_queries)
         perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
         
-        results, search_over = self.get_goal_results(perturbed_text)
+        results, search_over = self.get_goal_results(perturbed_text) # automatically keeps track of queries
+        self.number_of_queries+=number_samples + 1
+        # self.goal_function.num_queries += self.num_transformations
+        print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
         
-         
         
         results_success = [result for result in results if result.ground_truth_output!=result.output] 
 
@@ -2214,8 +2232,10 @@ class SSPAttackSearch(SearchMethod):
         if len(results_success) == 0:
             final_result = results[0]
             # final_result.num_queries = self.number_of_queries
-            self.goal_function.num_queries = self.number_of_queries 
-            print ('self.goal_function.num_queries2',self.goal_function.num_queries,'self.number_of_queries',self.number_of_queries)
+            # self.goal_function.num_queries = self.number_of_queries 
+            print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+            # print ('self.goal_function.num_queries2',self.goal_function.num_queries,'self.number_of_queries',self.number_of_queries)
             return final_result # return a random result that wasnt perturbed to show it failed.
 
         perturbed_text = perturbed_text_success[0]
@@ -2252,7 +2272,9 @@ class SSPAttackSearch(SearchMethod):
             results, search_over = self.get_goal_results([perturbed_text])
             # perturbed_result = initial_result.goal_function.call_model([perturbed_text])[0]
             # print ('results',results)
-
+            self.number_of_queries+= 1 # only 1 sample at the time
+            print ('self.goal_function.num_queries preend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
             # add semantic sim filter
 
             # this checks the generated test against the actual final use constraint
@@ -2281,8 +2303,13 @@ class SSPAttackSearch(SearchMethod):
                     continue
 
                 # final_result.num_queries = self.number_of_queries
-                self.goal_function.num_queries = self.number_of_queries
+                # self.goal_function.num_queries = self.number_of_queries
                 print ('final_result.num_queries',final_result.num_queries)
+                print ('final,self.number_of_queries',self.number_of_queries)
+                print ('final,self.goal_function.num_queries ',self.goal_function.num_queries)
+                print ('self.goal_function.num_queries endend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+                
                 # sys.exit()
                 print ('final_result',final_result.attacked_text)
                 print ('final_result.attacked_text.attack_attrs',final_result.attacked_text.attack_attrs)
@@ -2338,11 +2365,15 @@ class SSPAttackSearch(SearchMethod):
                 temp_text = perturbed_text.replace_word_at_index(i, original_word)
 
                 # Step 2: Check if still adversarial and calculate semantic similarity
-                model_outputs = self.goal_function._call_model([temp_text])
-                current_goal_status = self.goal_function._get_goal_status(
-                    model_outputs[0], temp_text, check_skip=check_skip
-                )
-                self.number_of_queries+=1
+                # model_outputs = self.goal_function._call_model([temp_text])
+                # current_goal_status = self.goal_function._get_goal_status(
+                #     model_outputs[0], temp_text, check_skip=check_skip
+                # ) # this does keep track of queries so i have to keep track myself
+                
+                current_goal_status = self.check_model_status(temp_text,check_skip)
+                self.number_of_queries+=1 
+                print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
                 # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
                     candidate_set.append((i, temp_text))
@@ -2367,12 +2398,15 @@ class SSPAttackSearch(SearchMethod):
             print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
             # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
             
-            model_outputs = self.goal_function._call_model([temp_text2])
-            current_goal_status = self.goal_function._get_goal_status(
-                model_outputs[0], temp_text2, check_skip=check_skip
-            )
-            self.number_of_queries+=1
-
+            # model_outputs = self.goal_function._call_model([temp_text2])
+            # current_goal_status = self.goal_function._get_goal_status(
+            #     model_outputs[0], temp_text2, check_skip=check_skip
+            # ) # doest keep track of queries
+            # self.goal_function.num_queries+=1
+            current_goal_status = self.check_model_status(temp_text2,check_skip)
+            self.number_of_queries+=1 
+            print ('self.goal_function.num_queries 3',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
             # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
 
  
@@ -2456,12 +2490,15 @@ class SSPAttackSearch(SearchMethod):
                 temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
 
                 # Check if the substitution still results in an adversarial example
-                model_outputs = self.goal_function._call_model([temp_text2])
-                current_goal_status = self.goal_function._get_goal_status(
-                    model_outputs[0], temp_text2, check_skip=check_skip
-                )
-                self.number_of_queries+=1
-
+                # model_outputs = self.goal_function._call_model([temp_text2])
+                # current_goal_status = self.goal_function._get_goal_status(
+                #     model_outputs[0], temp_text2, check_skip=check_skip
+                # ) # doesnt keep track of queries
+                # self.goal_function.num_queries+=1
+                current_goal_status = self.check_model_status(temp_text2,check_skip)
+                self.number_of_queries+=1 
+                print ('self.goal_function.num_queries 4',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
                 print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
 
                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
@@ -2529,11 +2566,16 @@ class SSPAttackSearch(SearchMethod):
                     # temp_text2.attack_attrs['modified_indices'].remove(i)
                     print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
                     # Check if the substitution still results in an adversarial example
-                    model_outputs = self.goal_function._call_model([temp_text2]) 
-                    current_goal_status = self.goal_function._get_goal_status(
-                        model_outputs[0], temp_text2, check_skip=check_skip
-                    )
+                    # model_outputs = self.goal_function._call_model([temp_text2]) 
+                    # current_goal_status = self.goal_function._get_goal_status(
+                    #     model_outputs[0], temp_text2, check_skip=check_skip
+                    # ) 
+                    # self.goal_function.num_queries+=1
+                    current_goal_status = self.check_model_status(temp_text2,check_skip)
                     self.number_of_queries+=1
+
+                    print ('self.goal_function.num_queries 5',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
                     print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
                     if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
                         perturbed_text = temp_text2
@@ -2695,6 +2737,7 @@ class TextHoaxer(SearchMethod):
         number_samples = self.num_transformations # 2
         self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
         self.goal_function.num_queries = self.number_of_queries
+        # self.goal_function.num_queries += number_samples + 1
         perturbed_text = [self.random_initialization(attacked_text,words_perturb_indices) for i in range(number_samples)]
         print ('perturbed_text',perturbed_text)
         results, search_over = self.get_goal_results(perturbed_text)
@@ -2942,6 +2985,7 @@ class TextHoaxer(SearchMethod):
                         qrs+=1
                         self.number_of_queries+=1
                         self.goal_function.num_queries = self.number_of_queries
+                        # self.goal_function.num_queries+=1
                         # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
                         if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
                             choices.append((i,semantic_sims[0]))
@@ -2978,6 +3022,7 @@ class TextHoaxer(SearchMethod):
                         qrs+=1
                         self.number_of_queries+=1
                         self.goal_function.num_queries = self.number_of_queries
+                        # self.goal_function.num_queries+=1
                         # if current_goal_status != GoalFunctionResultStatus.SUCCEEDED:
                         if results[0].goal_status != GoalFunctionResultStatus.SUCCEEDED:
                             break
@@ -3160,6 +3205,8 @@ class TextHoaxer(SearchMethod):
                     qrs+=1
                     self.number_of_queries+=1
                     self.goal_function.num_queries = self.number_of_queries
+                    # self.goal_function.num_queries+=1
+                    
                     if qrs > budget:
                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
 
@@ -3290,6 +3337,7 @@ class TextHoaxer(SearchMethod):
                         qrs+=1
                         self.number_of_queries+=1
                         self.goal_function.num_queries = self.number_of_queries
+                        
                         print ('qrs budget 3',qrs)
                         if qrs > budget:
                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
@@ -3479,6 +3527,7 @@ class TextHoaxer(SearchMethod):
                             qrs+=1 
                             self.number_of_queries+=1
                             self.goal_function.num_queries = self.number_of_queries
+                            # self.goal_function.num_queries+=1
                             print ('qrs budget 4',qrs)
                             if qrs > budget:
                                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
@@ -3601,6 +3650,7 @@ class TextHoaxer(SearchMethod):
             results, search_over = self.get_goal_results([best_attack_joint])
             self.number_of_queries+=1
             self.goal_function.num_queries = self.number_of_queries
+            # self.goal_function.num_queries+=1
             if search_over: 
                 self.goal_function.model.reset_inference_steps() 
                 return initial_result
@@ -3752,230 +3802,230 @@ class TextHoaxer(SearchMethod):
 
  
 
-    def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
-        # Step 1: Identify words to replace back
-        candidate_set = []
-        word_importance_scores = [] 
-        # print ('original_text',original_text)
-        # print ('perturbed_text',perturbed_text)
-        for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-            if perturbed_word != original_word:
-                # Replace perturbed_word with original_word
-                temp_text = perturbed_text.replace_word_at_index(i, original_word)
+    # def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
+    #     # Step 1: Identify words to replace back
+    #     candidate_set = []
+    #     word_importance_scores = [] 
+    #     # print ('original_text',original_text)
+    #     # print ('perturbed_text',perturbed_text)
+    #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
+    #         if perturbed_word != original_word:
+    #             # Replace perturbed_word with original_word
+    #             temp_text = perturbed_text.replace_word_at_index(i, original_word)
 
-                # Step 2: Check if still adversarial and calculate semantic similarity
-                model_outputs = self.goal_function._call_model([temp_text])
-                current_goal_status = self.goal_function._get_goal_status(
-                    model_outputs[0], temp_text, check_skip=check_skip
-                )
-                self.number_of_queries+=1
-                # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
-                if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                    candidate_set.append((i, temp_text))
-                    sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
+    #             # Step 2: Check if still adversarial and calculate semantic similarity
+    #             model_outputs = self.goal_function._call_model([temp_text])
+    #             current_goal_status = self.goal_function._get_goal_status(
+    #                 model_outputs[0], temp_text, check_skip=check_skip
+    #             )
+    #             self.number_of_queries+=1
+    #             # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
+    #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+    #                 candidate_set.append((i, temp_text))
+    #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
 
-                    if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                        sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+    #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+    #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                    if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                        sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+    #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+    #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                    sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+    #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
                     
-                    word_importance_scores.append((i, sim_score))
+    #                 word_importance_scores.append((i, sim_score))
 
-        # Step 3: Sort word importance scores in descending order and restore original words
-        word_importance_scores.sort(key=lambda x: x[1], reverse=True)
-        print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
-        print ('replace indexs',word_importance_scores)
-        for idx, _ in word_importance_scores:
-            temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
-            temp_text2.attack_attrs['modified_indices'].remove(idx)
-            print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
-            # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
+    #     # Step 3: Sort word importance scores in descending order and restore original words
+    #     word_importance_scores.sort(key=lambda x: x[1], reverse=True)
+    #     print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
+    #     print ('replace indexs',word_importance_scores)
+    #     for idx, _ in word_importance_scores:
+    #         temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
+    #         temp_text2.attack_attrs['modified_indices'].remove(idx)
+    #         print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
+    #         # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
             
-            model_outputs = self.goal_function._call_model([temp_text2])
-            current_goal_status = self.goal_function._get_goal_status(
-                model_outputs[0], temp_text2, check_skip=check_skip
-            )
-            self.number_of_queries+=1
+    #         model_outputs = self.goal_function._call_model([temp_text2])
+    #         current_goal_status = self.goal_function._get_goal_status(
+    #             model_outputs[0], temp_text2, check_skip=check_skip
+    #         )
+    #         self.number_of_queries+=1
 
-            # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
+    #         # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
 
  
-            if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                # If perturbed_text is no longer adversarial, revert the last change
-                perturbed_text = temp_text2
-                # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
-            else:
-                break
-        # print ('original_text',original_text)
-        # print ('perturbed_text',perturbed_text) 
-        return perturbed_text
+    #         if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+    #             # If perturbed_text is no longer adversarial, revert the last change
+    #             perturbed_text = temp_text2
+    #             # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
+    #         else:
+    #             break
+    #     # print ('original_text',original_text)
+    #     # print ('perturbed_text',perturbed_text) 
+    #     return perturbed_text
 
-    def get_vector(self, embedding, word):
-        if isinstance(word, str):
-            if word in embedding._word2index:
-                word_index = embedding._word2index[word]
-            else:
-                return None  # Word not found in the dictionary
-        else:
-            word_index = word
+    # def get_vector(self, embedding, word):
+    #     if isinstance(word, str):
+    #         if word in embedding._word2index:
+    #             word_index = embedding._word2index[word]
+    #         else:
+    #             return None  # Word not found in the dictionary
+    #     else:
+    #         word_index = word
 
-        vector = embedding.embedding_matrix[word_index]
-        return torch.tensor(vector).to(textattack.shared.utils.device)
+    #     vector = embedding.embedding_matrix[word_index]
+    #     return torch.tensor(vector).to(textattack.shared.utils.device)
 
-    def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
-        # Step 1: Calculate Euclidean distances and sampling probabilities
-        distances = []
-        for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-            if perturbed_word != original_word:
-                # Using the get_vector function
-                perturbed_vec = self.get_vector(self.embedding, perturbed_word)
-                if perturbed_vec is None:
-                    continue  # Skip to the next word
-                original_vec = self.get_vector(self.embedding, original_word)
-                if original_vec is None:
-                    continue  # Skip to the next word
-                distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
-                distances.append((i, distance))
+    # def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
+    #     # Step 1: Calculate Euclidean distances and sampling probabilities
+    #     distances = []
+    #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
+    #         if perturbed_word != original_word:
+    #             # Using the get_vector function
+    #             perturbed_vec = self.get_vector(self.embedding, perturbed_word)
+    #             if perturbed_vec is None:
+    #                 continue  # Skip to the next word
+    #             original_vec = self.get_vector(self.embedding, original_word)
+    #             if original_vec is None:
+    #                 continue  # Skip to the next word
+    #             distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
+    #             distances.append((i, distance))
 
-        if not distances:
-            return perturbed_text
+    #     if not distances:
+    #         return perturbed_text
 
-        # Normalize distances to get probabilities
-        distances.sort(key=lambda x: x[1])
-        indices, dist_values = zip(*distances)
-        exp_dist_values = np.exp(dist_values)
-        probabilities = exp_dist_values / np.sum(exp_dist_values)
-        print ('probabilities',probabilities)
+    #     # Normalize distances to get probabilities
+    #     distances.sort(key=lambda x: x[1])
+    #     indices, dist_values = zip(*distances)
+    #     exp_dist_values = np.exp(dist_values)
+    #     probabilities = exp_dist_values / np.sum(exp_dist_values)
+    #     print ('probabilities',probabilities)
 
-        # temp_perturbed_text = copy.deepcopy(perturbed_text)
+    #     # temp_perturbed_text = copy.deepcopy(perturbed_text)
         
-        # Step 2: Iterate with sampling based on the probabilities 
-        while len(indices) > 0:
-            i = np.random.choice(indices, p=probabilities)
-            print ('indices',indices,i)
-            perturbed_word = perturbed_text.words[i]
-            original_word = original_text.words[i]
+    #     # Step 2: Iterate with sampling based on the probabilities 
+    #     while len(indices) > 0:
+    #         i = np.random.choice(indices, p=probabilities)
+    #         print ('indices',indices,i)
+    #         perturbed_word = perturbed_text.words[i]
+    #         original_word = original_text.words[i]
 
-            sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
-            synonyms = [s.words[i] for s in sentence_replaced]
+    #         sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
+    #         synonyms = [s.words[i] for s in sentence_replaced]
 
 
-            # Get top k synonyms
-            k = 10  # Number of synonyms to sample
-            top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
-            top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
+    #         # Get top k synonyms
+    #         k = 10  # Number of synonyms to sample
+    #         top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
+    #         top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
 
-            # Find the best anchor synonym with the highest semantic similarity
-            max_similarity = -float('inf')
-            w_bar = None
-            temp_text_bar = None
-            filtered_synonyms = None
-            print ('top_k_synonyms',top_k_synonyms)
-            # temp_text2 = copy.deepcopy(perturbed_text)
-            for synonym in top_k_synonyms:
-                if perturbed_word == synonym:
-                    continue # skip swapping the same word
-                print ('synonym',i,synonym)
-                # temp_text2 = copy.deepcopy(perturbed_text)
-                temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
+    #         # Find the best anchor synonym with the highest semantic similarity
+    #         max_similarity = -float('inf')
+    #         w_bar = None
+    #         temp_text_bar = None
+    #         filtered_synonyms = None
+    #         print ('top_k_synonyms',top_k_synonyms)
+    #         # temp_text2 = copy.deepcopy(perturbed_text)
+    #         for synonym in top_k_synonyms:
+    #             if perturbed_word == synonym:
+    #                 continue # skip swapping the same word
+    #             print ('synonym',i,synonym)
+    #             # temp_text2 = copy.deepcopy(perturbed_text)
+    #             temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
 
-                # Check if the substitution still results in an adversarial example
-                model_outputs = self.goal_function._call_model([temp_text2])
-                current_goal_status = self.goal_function._get_goal_status(
-                    model_outputs[0], temp_text2, check_skip=check_skip
-                )
-                self.number_of_queries+=1
+    #             # Check if the substitution still results in an adversarial example
+    #             model_outputs = self.goal_function._call_model([temp_text2])
+    #             current_goal_status = self.goal_function._get_goal_status(
+    #                 model_outputs[0], temp_text2, check_skip=check_skip
+    #             )
+    #             self.number_of_queries+=1
 
-                print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
+    #             print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
 
-                if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                    # Compute semantic similarity at the word level
-                    sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
+    #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+    #                 # Compute semantic similarity at the word level
+    #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
 
-                    if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                        sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+    #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+    #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                    if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                        sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+    #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+    #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                    sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
-                    print ('sim scores push towards orgin')
-                    if sim_score > max_similarity:
-                        max_similarity = sim_score
-                        w_bar = synonym
-                        temp_text_bar = temp_text2
+    #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
+    #                 print ('sim scores push towards orgin')
+    #                 if sim_score > max_similarity:
+    #                     max_similarity = sim_score
+    #                     w_bar = synonym
+    #                     temp_text_bar = temp_text2
 
             
-            if w_bar:# is None:
-                  # Skip this index if no suitable anchor synonym is found
+    #         if w_bar:# is None:
+    #               # Skip this index if no suitable anchor synonym is found
             
-                number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
-                print ('num entries',number_entries)
-                all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
-                all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
+    #             number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
+    #             print ('num entries',number_entries)
+    #             all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
+    #             all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
             
-                print ('all_synonyms',all_synonyms)
-                filtered_synonyms = []
-                for synonym in all_synonyms:
-                    if perturbed_word == synonym or w_bar == synonym  :
-                        continue # skip swapping/checking the same word and the anchor word
-                    # Compute semantic similarity with w_bar and original_word
-                    sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
-                    sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
+    #             print ('all_synonyms',all_synonyms)
+    #             filtered_synonyms = []
+    #             for synonym in all_synonyms:
+    #                 if perturbed_word == synonym or w_bar == synonym  :
+    #                     continue # skip swapping/checking the same word and the anchor word
+    #                 # Compute semantic similarity with w_bar and original_word
+    #                 sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
+    #                 sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
 
-                    if not isinstance(sim_w_bar, torch.Tensor):
-                        sim_w_bar = torch.tensor(sim_w_bar)
-                    if not isinstance(sim_synonym, torch.Tensor):
-                        sim_synonym = torch.tensor(sim_synonym)
-                    if not isinstance(sim_org, torch.Tensor):
-                        sim_org = torch.tensor(sim_org)
-                    if not isinstance(sim_synonym_org, torch.Tensor):
-                        sim_synonym_org = torch.tensor(sim_synonym_org)
+    #                 if not isinstance(sim_w_bar, torch.Tensor):
+    #                     sim_w_bar = torch.tensor(sim_w_bar)
+    #                 if not isinstance(sim_synonym, torch.Tensor):
+    #                     sim_synonym = torch.tensor(sim_synonym)
+    #                 if not isinstance(sim_org, torch.Tensor):
+    #                     sim_org = torch.tensor(sim_org)
+    #                 if not isinstance(sim_synonym_org, torch.Tensor):
+    #                     sim_synonym_org = torch.tensor(sim_synonym_org)
 
-                    sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
-                    sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
+    #                 sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
+    #                 sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
 
-                    if sim_score_w_bar > sim_score_org:
-                        filtered_synonyms.append((sim_score_w_bar, synonym))
+    #                 if sim_score_w_bar > sim_score_org:
+    #                     filtered_synonyms.append((sim_score_w_bar, synonym))
 
-            if  filtered_synonyms:
-                # continue  # Skip this index if no suitable synonym is found
+    #         if  filtered_synonyms:
+    #             # continue  # Skip this index if no suitable synonym is found
 
-                # Sort the filtered synonyms by their semantic similarity score in descending order
-                filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
-                print ('filtered_synonyms',filtered_synonyms)
+    #             # Sort the filtered synonyms by their semantic similarity score in descending order
+    #             filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
+    #             print ('filtered_synonyms',filtered_synonyms)
                 
                 
 
-                print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
-                for _, synonym in filtered_synonyms:
-                    temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
-                    # temp_text2.attack_attrs['modified_indices'].remove(i)
-                    print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
-                    # Check if the substitution still results in an adversarial example
-                    model_outputs = self.goal_function._call_model([temp_text2]) 
-                    current_goal_status = self.goal_function._get_goal_status(
-                        model_outputs[0], temp_text2, check_skip=check_skip
-                    )
-                    self.number_of_queries+=1
-                    print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
-                    if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        perturbed_text = temp_text2
-                        break
+    #             print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
+    #             for _, synonym in filtered_synonyms:
+    #                 temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
+    #                 # temp_text2.attack_attrs['modified_indices'].remove(i)
+    #                 print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
+    #                 # Check if the substitution still results in an adversarial example
+    #                 model_outputs = self.goal_function._call_model([temp_text2]) 
+    #                 current_goal_status = self.goal_function._get_goal_status(
+    #                     model_outputs[0], temp_text2, check_skip=check_skip
+    #                 )
+    #                 self.number_of_queries+=1
+    #                 print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
+    #                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+    #                     perturbed_text = temp_text2
+    #                     break
                     
             
-            print ('perturbed_text',perturbed_text)  
-            idx = indices.index(i)
-            indices = indices[:idx] + indices[idx + 1:] 
-            print ('indices2',indices,idx)
+    #         print ('perturbed_text',perturbed_text)  
+    #         idx = indices.index(i)
+    #         indices = indices[:idx] + indices[idx + 1:] 
+    #         print ('indices2',indices,idx)
             
-            probabilities = np.delete(probabilities, idx)
-            probabilities /= np.sum(probabilities)   
-        # sys.exit()
-        return perturbed_text 
+    #         probabilities = np.delete(probabilities, idx)
+    #         probabilities /= np.sum(probabilities)   
+    #     # sys.exit()
+    #     return perturbed_text 
 
     def get_transformations(self, text, index):
         return self.transformation(text, index)
