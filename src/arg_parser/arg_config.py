@@ -17,9 +17,9 @@ def get_args():
                         help='type of confidence levels')
     parser.add_argument('--prompting_type', type=str, default='step2_k_pred_avg', choices=['s1','w1','s1_black_box', '2step', 'empirical_confidence','k_pred_avg','step2_k_pred_avg' ,'other_prompting_types_here','e_guided_paraphrasing'],
                         help='Type of prompting to use')
-    parser.add_argument('--search_method', type=str, default='black_box', choices=['black_box','greedy_search','greedy_search_use','greedy_search_use_hardlabel','sspattack','texthoaxer','greedy_search_withmin_use'],
+    parser.add_argument('--search_method', type=str, default='black_box_search', choices=['black_box_search','greedy_search','greedy_use_search','greedy_use_hardlabel_search','sspattack_search','texthoaxer_search'],
                         help='Type of search technique')
-    parser.add_argument('--transformation_method', type=str, default='word_swap_embedding', choices=['word_swap_embedding','sspattack','texthoaxer','self_word_sub','e_guided_paraphrasing'],
+    parser.add_argument('--transformation_method', type=str, default='ceattack', choices=['ceattack','sspattack','texthoaxer','self_word_sub','e_guided_paraphrasing'],
                         help='Type of transformations to use')
     parser.add_argument('--n_embeddings', type=int, default=10, help='Type of prompting to use')
     parser.add_argument('--prompt_shot_type', type=str, default='fs', choices=['fs','zs', 'other_shot_types_here'],
@@ -56,7 +56,7 @@ def get_args():
     args = parser.parse_args()
     
     method_to_type = {
-        'word_swap_embedding': 'word_level',
+        'ceattack': 'word_level',
         'sspattack': 'word_level',
         'texthoaxer': 'word_level',
         'self_word_sub': 'sentence_level', # This is technically a word level attack, however, since the model can generate anything we have to treat it more like a sentence level attack since my current constraints can't keep track of which word changes unless it's an 1 to 1 mapping.

@@ -52,6 +52,591 @@ class Step2KPredAvg(BasePredictor):
     #     self.label_names = label_names
 
     # def predict_sentiment_and_verbal_confidence_2step_k_pred_avg(self,datapoint):
+    
+    # def add_prompt_and_call_model_batch(self, datapoint):
+
+    #     raw_responses, predictions, confidences = [], [], []
+
+    #     batch = []
+    #     for text in datapoint: 
+    #         self.prompt_class._initialize_sample_counters() 
+    #         # print ('label_index_text',text,label_index)
+    #         # expected_prediction, incorrect_answers = self.prompt_class._identify_correct_incorrect_labels(label_index)
+    #         # self.prompt_class._initialize_correct_incorrect_predictions(label_index)
+            
+    #         self.prompt_class._initialize_guess_pattern_prediction(datapoint,self.prompt_class.label_list)
+            
+    #         prompt = self.prompt_class._predict_prompt(text )
+    #         batch.append(prompt)
+    #         # print ('expected_prediction',expected_prediction)
+            
+    #     tokenizer_encoding_args = {
+    #         'return_tensors':"pt",
+    #         'truncation':True, 
+    #         'max_length':2000,
+    #     }
+    #     # inputs = self.tokenizer(text=prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+    #     # print ('inputs before everything',inputs)
+
+
+    #     generate_args = {
+    #         # "input_ids": inputs['input_ids'],
+    #         # "attention_mask": inputs['attention_mask'], 
+    #         "do_sample": True,  # enable sampling
+    #         "top_k": 40,  # top-k sampling
+    #         "top_p": 0.92,  # nucleus sampling probability
+    #         "temperature": self.temperature,  # sampling temperature
+    #         "max_new_tokens": 200,
+    #         'pad_token_id': self.tokenizer.eos_token_id
+    #     }
+    #     extra_args = {
+    #         "prompt": batch,
+    #     }
+
+    #     # with torch.no_grad():
+    #     #     outputs = self.model.generate(**generate_args)
+
+    #     # prompt_length = len(inputs['input_ids'][0])
+    #     # generated_tokens = outputs[0][prompt_length:]
+    #     # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+    #     # print('prompt', prompt)
+    #     # print("Generated Prediction Text:", generated_text) 
+    #     self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
+    #     self.prompt_class.model.general_generate_args = generate_args
+    #     batch_generated_text = self.prompt_class._call_model(generate_args,extra_args)
+    #         # print ('generated_text before',generated_text)
+    #         # generated_text = self.tokenizer.encode(
+    #         #     generated_text[0],
+    #         #     add_special_tokens=True,
+    #         #     # padding=True,  # Options: True, False, or 'longest'
+    #         #     # truncation=True,  # If needed, to truncate to max length
+    #         #     return_tensors='pt'  # Use 'tf' for TensorFlow, or None for plain Python lists
+    #         # )
+    #         # print ('generated_text2',generated_text)
+    #         # # generated_text = self.tokenizer(generated_text[0],return_tensors="pt").input_ids
+    #         # prompt_length = len(generate_args['input_ids'][0])
+    #         # print ('prompt_length',prompt_length)
+    #         # generated_tokens = generated_text['input_ids'][0][prompt_length:]
+    #         # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+            
+    #         # print("Generated Confidence Text:", generated_text)
+    #         # sys.exit()
+    #         # generated_text = self.prompt_class._remove_original_prompt_from_answer(generated_text)
+    #         # print ('prompt,',prompt)
+    #         # print ('generated_text need remove prompt',generated_text)
+    #         # final_output = generated_text[0][len(prompt):].lstrip()
+    #         # print ('final_output',final_output)
+    #         # final_output = generated_text[0].replace(prompt, "", 1).lstrip()
+    #         # print ('new way outp', final_output)
+    #         # sys.exit()
+    #         # remove input prompt
+
+    #         # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
+    #         # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
+    #     print ('batch_generated_text',batch_generated_text)
+    #     confidence_batch = []
+    #     for generated_text in batch_generated_text:
+    #         results = self.prompt_class._extract_answer_prompt(generated_text)
+
+    #         # print ('self.prompt_class.guess_pattern_prediction',self.prompt_class.guess_pattern_prediction)
+    #         # pattern = re.compile(self.prompt_class.guess_pattern_prediction, re.IGNORECASE)
+    #         # # Find all matches in the text
+    #         # matches = pattern.findall(generated_text)
+    #         # # Convert all matches to lowercase (optional, for consistency)
+    #         # results = [match.lower() for match in matches]
+            
+    #         # only used in generation if for the task we need to apply some threshold to decide 
+    #         # whether the answer meets a standard or not.
+    #         results_post_process = self.prompt_class._answer_post_processing(results) 
+
+    #         # # Extract guesses, assuming they're separated by commas and ignoring case
+    #         # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+    #         # results = [result for result in results if result in label_list]# else 'null' for result in results]
+    #         # # If fewer results than k_pred, fill with 'null'
+
+    #         self.prompt_class._extend_with_null(results_post_process)
+    #         # results.extend(['null'] * (self.k_pred - len(results))) 
+            
+    #         # correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process) # bellow for standard class
+            
+        
+    #         self.prompt_class._calculate_result_counts(results_post_process)
+
+
+    #         self.prompt_class._calculate_result_confidences(results_post_process) 
+            
+    #         # self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
+
+    #         # self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
+
+    #         print(f"Results for '{text}':")
+    #         print(f"Counter: {self.prompt_class.task_dictionary_counts}")
+    #         # print(f"Empirical confidence: {confidence_empirical}%")
+
+    #         # guess_result = max(self.prompt_class.task_dictionary_counts[self.task], key=self.prompt_class.task_dictionary_counts[self.task].get)
+    #         guess_result = self.prompt_class._predictor_decision()
+
+    #         print('max_class', guess_result)#, expected_prediction)
+    #         # print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
+    #         # print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
+    
+    #         guesses_output = results
+
+    #         confidence_prompt = self.prompt_class._confidence_prompt(text, guesses_output)
+    #         confidence_batch.append(confidence_prompt)
+    #         # if self.task == 'sst2':
+    #         #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{self.end_prompt_footer}"""
+    #         #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+            
+    #         # elif self.task == 'ag_news':
+    #         #     # confidence_prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guesses for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: \n\nThe text is:${text} Guesses: {guesses_output} Provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences:  Confidences:{self.end_prompt_footer}"""
+    #         #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+            
+    #         # elif self.task == 'popQA':
+    #         #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${data_point['question']}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{self.end_prompt_footer}"""
+    #         # elif self.task == 'strategyQA':
+    #         #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either true or false; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+    #         #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+    #         #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+    #         #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guess.\n\nStatement: {text}$. The guess were: {guesses_output}, given the guess provide the verbal confidences that your guess us correct. \n\nFor example:\n\Confidence: <the confidence, from either {self.confidence_type_dict} that your guess is correct, for example [{sampled_confidences_str} ...]; just the confidence!> Confidence:{self.end_prompt_footer}"""
+            
+            
+            
+    #     # inputs = self.tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+    #     tokenizer_encoding_args = {
+    #         'return_tensors':"pt",
+    #         'truncation':True, 
+    #         'max_length':2000,
+    #     }
+
+    #     generate_args = {
+    #         # "input_ids": inputs['input_ids'],
+    #         # "attention_mask": inputs['attention_mask'], 
+    #         "do_sample": True,
+    #         "top_k": 40,
+    #         "top_p": 0.92,
+    #         "temperature": self.temperature,
+    #         "max_new_tokens": 300,
+    #         'pad_token_id': self.tokenizer.eos_token_id
+    #     }
+    #     extra_args = {
+    #         "prompt": confidence_batch,
+    #     }
+
+    #     self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
+    #     self.prompt_class.model.general_generate_args = generate_args
+    #     batch_generated_text_conf = self.prompt_class._call_model(generate_args,extra_args)
+    #         # raw_response = f'{generated_text} {generated_text_conf}'
+    #         # prediction = generated_text
+    #         # confidence = generated_text_conf
+    #         # raw_responses.append(raw_response)
+    #         # predictions.append(prediction)
+    #         # confidences.append(confidence)
+
+    #     raw_responses = [f'{generated_text} {generated_text_conf}' for generated_text,generated_text_conf in zip(batch_generated_text,batch_generated_text_conf)]
+
+    #     return {'raw_responses':raw_responses, 'predictions':batch_generated_text,'confidences':batch_generated_text_conf}
+    
+
+    def add_prompt_and_call_model(self, datapoint):
+        text = datapoint
+        self.prompt_class._initialize_sample_counters() 
+        # print ('label_index_text',text,label_index)
+        # expected_prediction, incorrect_answers = self.prompt_class._identify_correct_incorrect_labels(label_index)
+        # self.prompt_class._initialize_correct_incorrect_predictions(label_index)
+        
+        self.prompt_class._initialize_guess_pattern_prediction(datapoint,self.prompt_class.label_list)
+        
+        prompt = self.prompt_class._predict_prompt(text )
+  
+        # print ('expected_prediction',expected_prediction)
+        
+        tokenizer_encoding_args = {
+            'return_tensors':"pt",
+            'truncation':True, 
+            'max_length':2000,
+        }
+        # inputs = self.tokenizer(text=prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+        # print ('inputs before everything',inputs)
+
+
+        generate_args = {
+            # "input_ids": inputs['input_ids'],
+            # "attention_mask": inputs['attention_mask'], 
+            "do_sample": True,  # enable sampling
+            "top_k": 40,  # top-k sampling
+            "top_p": 0.92,  # nucleus sampling probability
+            "temperature": self.temperature,  # sampling temperature
+            "max_new_tokens": 200,
+            'pad_token_id': self.tokenizer.eos_token_id
+        }
+        extra_args = {
+            "prompt": prompt,
+        }
+
+        # with torch.no_grad():
+        #     outputs = self.model.generate(**generate_args)
+
+        # prompt_length = len(inputs['input_ids'][0])
+        # generated_tokens = outputs[0][prompt_length:]
+        # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+        # print('prompt', prompt)
+        # print("Generated Prediction Text:", generated_text) 
+        self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
+        self.prompt_class.model.general_generate_args = generate_args
+        generated_text = self.prompt_class._call_model(generate_args,extra_args)
+        generated_text = generated_text[0]
+        # print ('generated_text before',generated_text)
+        # generated_text = self.tokenizer.encode(
+        #     generated_text[0],
+        #     add_special_tokens=True,
+        #     # padding=True,  # Options: True, False, or 'longest'
+        #     # truncation=True,  # If needed, to truncate to max length
+        #     return_tensors='pt'  # Use 'tf' for TensorFlow, or None for plain Python lists
+        # )
+        # print ('generated_text2',generated_text)
+        # # generated_text = self.tokenizer(generated_text[0],return_tensors="pt").input_ids
+        # prompt_length = len(generate_args['input_ids'][0])
+        # print ('prompt_length',prompt_length)
+        # generated_tokens = generated_text['input_ids'][0][prompt_length:]
+        # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+        
+        # print("Generated Confidence Text:", generated_text)
+        # sys.exit()
+        # generated_text = self.prompt_class._remove_original_prompt_from_answer(generated_text)
+        # print ('prompt,',prompt)
+        # print ('generated_text need remove prompt',generated_text)
+        # final_output = generated_text[0][len(prompt):].lstrip()
+        # print ('final_output',final_output)
+        # final_output = generated_text[0].replace(prompt, "", 1).lstrip()
+        # print ('new way outp', final_output)
+        # sys.exit()
+        # remove input prompt
+
+        # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
+        # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
+        results = self.prompt_class._extract_answer_prompt(generated_text)
+
+        # print ('self.prompt_class.guess_pattern_prediction',self.prompt_class.guess_pattern_prediction)
+        # pattern = re.compile(self.prompt_class.guess_pattern_prediction, re.IGNORECASE)
+        # # Find all matches in the text
+        # matches = pattern.findall(generated_text)
+        # # Convert all matches to lowercase (optional, for consistency)
+        # results = [match.lower() for match in matches]
+        
+        # only used in generation if for the task we need to apply some threshold to decide 
+        # whether the answer meets a standard or not.
+        results_post_process = self.prompt_class._answer_post_processing(results) 
+
+        # # Extract guesses, assuming they're separated by commas and ignoring case
+        # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+        # results = [result for result in results if result in label_list]# else 'null' for result in results]
+        # # If fewer results than k_pred, fill with 'null'
+
+        self.prompt_class._extend_with_null(results_post_process)
+        # results.extend(['null'] * (self.k_pred - len(results))) 
+        
+        # correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process) # bellow for standard class
+        
+    
+        self.prompt_class._calculate_result_counts(results_post_process)
+
+
+        self.prompt_class._calculate_result_confidences(results_post_process) 
+        
+        # self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
+
+        # self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
+
+        print(f"Results for '{text}':")
+        print(f"Counter: {self.prompt_class.task_dictionary_counts}")
+        # print(f"Empirical confidence: {confidence_empirical}%")
+
+        # guess_result = max(self.prompt_class.task_dictionary_counts[self.task], key=self.prompt_class.task_dictionary_counts[self.task].get)
+        guess_result = self.prompt_class._predictor_decision()
+
+        print('max_class', guess_result)#, expected_prediction)
+        # print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
+        # print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
+ 
+        guesses_output = results
+
+        confidence_prompt = self.prompt_class._confidence_prompt(text, guesses_output)
+        
+        # if self.task == 'sst2':
+        #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{self.end_prompt_footer}"""
+        #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text (positive, negative). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        
+        # elif self.task == 'ag_news':
+        #     # confidence_prompt = f"""{self.start_prompt_header}Provide your {self.k_pred} best guesses for the following news article ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: \n\nThe text is:${text} Guesses: {guesses_output} Provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences:  Confidences:{self.end_prompt_footer}"""
+        #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text ({options}). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        
+        # elif self.task == 'popQA':
+        #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {self.k_pred} best guesses for the following text. Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either positive or negative; not a complete sentence, just the guesses!>\n\nThe text is:${data_point['question']}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever; just the confidence! Separated by a coma, for example [{sampled_confidences_str} ...]> Confidences:{self.end_prompt_footer}"""
+        # elif self.task == 'strategyQA':
+        #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $Provide your {k_pred} best guesses for the following text (false, true). Give ONLY the guesses, no other words or explanation.\n\nFor example:\n\nGuesses: <most likely guess, either true or false; not a complete sentence, just the guesses!>\n\nThe text is:${text}$ the guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. Only output your answer nothing else!\n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. Give ONLY the verbal confidences, no other words or explanation.\n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, without any extra commentary whatsoever, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        #     confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guesses. \n\nStatement: {text}$. The guesses were: {guesses_output}, given these guesses provide the verbal confidences that your guesses are correct. \n\nFor example:\n\Confidences: <the confidences, from either {self.confidence_type_dict} that your guesses are correct, for example [{sampled_confidences_str} ...]; just the confidence! Separated by a coma> Confidences:{self.end_prompt_footer}"""
+        #     # confidence_prompt = f"""{self.start_prompt_header}You're a model that needs to give the confidence of answers being correct. The previeous prompt was $You are a factual question answering model, Is the following statement true or false? output {self.k_pred} guess.\n\nStatement: {text}$. The guess were: {guesses_output}, given the guess provide the verbal confidences that your guess us correct. \n\nFor example:\n\Confidence: <the confidence, from either {self.confidence_type_dict} that your guess is correct, for example [{sampled_confidences_str} ...]; just the confidence!> Confidence:{self.end_prompt_footer}"""
+        
+        
+        
+        # inputs = self.tokenizer(confidence_prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+        tokenizer_encoding_args = {
+            'return_tensors':"pt",
+            'truncation':True, 
+            'max_length':2000,
+        }
+
+        generate_args = {
+            # "input_ids": inputs['input_ids'],
+            # "attention_mask": inputs['attention_mask'], 
+            "do_sample": True,
+            "top_k": 40,
+            "top_p": 0.92,
+            "temperature": self.temperature,
+            "max_new_tokens": 300,
+            'pad_token_id': self.tokenizer.eos_token_id
+        }
+        extra_args = {
+            "prompt": confidence_prompt,
+        }
+
+        self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
+        self.prompt_class.model.general_generate_args = generate_args
+        generated_text_conf = self.prompt_class._call_model(generate_args,extra_args)
+        generated_text_conf=generated_text_conf[0]
+        return {'raw_responses':f'{generated_text} {generated_text_conf}', 'predictions':generated_text,'confidences':generated_text_conf}
+    
+    def standarize_output(self,output):
+        generated_text = output['predictions']
+        generated_text_conf = output['confidences']
+
+         
+        
+        results = self.prompt_class._extract_answer_prompt(generated_text)
+
+        # print ('self.prompt_class.guess_pattern_prediction',self.prompt_class.guess_pattern_prediction)
+        # pattern = re.compile(self.prompt_class.guess_pattern_prediction, re.IGNORECASE)
+        # # Find all matches in the text
+        # matches = pattern.findall(generated_text)
+        # # Convert all matches to lowercase (optional, for consistency)
+        # results = [match.lower() for match in matches]
+        
+        # only used in generation if for the task we need to apply some threshold to decide 
+        # whether the answer meets a standard or not.
+        results_post_process = self.prompt_class._answer_post_processing(results) 
+
+        # # Extract guesses, assuming they're separated by commas and ignoring case
+        # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+        # results = [result for result in results if result in label_list]# else 'null' for result in results]
+        # # If fewer results than k_pred, fill with 'null'
+
+        self.prompt_class._extend_with_null(results_post_process)
+        # results.extend(['null'] * (self.k_pred - len(results))) 
+        
+        # correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process) # bellow for standard class
+        
+    
+        self.prompt_class._calculate_result_counts(results_post_process)
+
+
+        self.prompt_class._calculate_result_confidences(results_post_process) 
+        
+        # self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
+
+        # self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
+
+        # print(f"Results for '{text}':")
+        print(f"Counter: {self.prompt_class.task_dictionary_counts}")
+        # print(f"Empirical confidence: {confidence_empirical}%")
+
+        # guess_result = max(self.prompt_class.task_dictionary_counts[self.task], key=self.prompt_class.task_dictionary_counts[self.task].get)
+        guess_result = self.prompt_class._predictor_decision()
+
+        print('max_class', guess_result)#, expected_prediction)
+        # print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
+        # print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
+
+        guesses_output = results
+        # confidence_options = '|'.join(self.confidence_list) 
+        confidence_options = self.prompt_class.guess_pattern_confidence
+        confidence_guesses = re.findall(confidence_options, generated_text_conf, flags=re.IGNORECASE)
+        confidence_guesses = self.prompt_class._lower_labels(confidence_guesses) # [match.lower() for match in confidence_guesses]
+        print('confidence_guesses', confidence_guesses)
+        confidence_list = self.prompt_class.confidence_list
+        print('confidence_list', confidence_list)
+        confidence_results = [result for result in confidence_guesses if result in confidence_list]
+        confidence_results = self.prompt_class._extend_with_null(confidence_results)
+        # confidence_results.extend(['null'] * (self.k_pred - len(confidence_results)))
+
+        confidence_map = self.prompt_class.confidence_map
+
+        confidence_numerical_results = [
+            confidence_map[result] if result != 'null' else min(confidence_map.values()) 
+            for result in confidence_results
+        ] 
+        print('confidence_numerical_results', confidence_numerical_results) 
+        print('guesses_output', guesses_output, self.prompt_class.label_list)
+
+        # weighted_counts = {label: 0.0 for label in self.prompt_class.label_list}
+        # weighted_counts['null'] = 0.0
+        return {'raw_responses': output['raw_responses'], 'predictions':results_post_process,'confidences':confidence_numerical_results}
+    
+
+    def standarize_output_batch(self,output):
+        # generated_text = output['predictions']
+        # generated_text_conf = output['confidences']
+
+        predictions, confidences = [],[]
+
+        for generated_text, generated_text_conf in zip(output['predictions'],output['confidences']):
+            results = self.prompt_class._extract_answer_prompt(generated_text)
+
+            # print ('self.prompt_class.guess_pattern_prediction',self.prompt_class.guess_pattern_prediction)
+            # pattern = re.compile(self.prompt_class.guess_pattern_prediction, re.IGNORECASE)
+            # # Find all matches in the text
+            # matches = pattern.findall(generated_text)
+            # # Convert all matches to lowercase (optional, for consistency)
+            # results = [match.lower() for match in matches]
+            
+            # only used in generation if for the task we need to apply some threshold to decide 
+            # whether the answer meets a standard or not.
+            results_post_process = self.prompt_class._answer_post_processing(results) 
+
+            # # Extract guesses, assuming they're separated by commas and ignoring case
+            # results = [guess.lower() for guess in re.split(r'\s*,\s*', generated_text.strip())]
+            # results = [result for result in results if result in label_list]# else 'null' for result in results]
+            # # If fewer results than k_pred, fill with 'null'
+
+            self.prompt_class._extend_with_null(results_post_process)
+            # results.extend(['null'] * (self.k_pred - len(results))) 
+            
+            # correct_predictions, confidence_empirical =  self.prompt_class._extract_predictions(results_post_process) # bellow for standard class
+            
+        
+            self.prompt_class._calculate_result_counts(results_post_process)
+
+
+            self.prompt_class._calculate_result_confidences(results_post_process) 
+            
+            # self.prompt_class._calculate_result_count_correct(results_post_process, weight = 1)  
+
+            # self.prompt_class._calculate_result_count_incorrect(results_post_process, weight = 1) 
+
+            # print(f"Results for '{text}':")
+            print(f"Counter: {self.prompt_class.task_dictionary_counts}")
+            # print(f"Empirical confidence: {confidence_empirical}%")
+
+            # guess_result = max(self.prompt_class.task_dictionary_counts[self.task], key=self.prompt_class.task_dictionary_counts[self.task].get)
+            guess_result = self.prompt_class._predictor_decision()
+
+            print('max_class', guess_result)#, expected_prediction)
+            # print ('task_dictionary_counts_correct[task]',self.prompt_class.task_dictionary_counts_correct[self.task])
+            # print ('task_dictionary_counts_incorrect[task]', self.prompt_class.task_dictionary_counts_incorrect[self.task])
+    
+            guesses_output = results
+            # confidence_options = '|'.join(self.confidence_list) 
+            confidence_options = self.prompt_class.guess_pattern_confidence
+            confidence_guesses = re.findall(confidence_options, generated_text_conf, flags=re.IGNORECASE)
+            confidence_guesses = self.prompt_class._lower_labels(confidence_guesses) # [match.lower() for match in confidence_guesses]
+            print('confidence_guesses', confidence_guesses)
+            confidence_list = self.prompt_class.confidence_list
+            print('confidence_list', confidence_list)
+            confidence_results = [result for result in confidence_guesses if result in confidence_list]
+            confidence_results = self.prompt_class._extend_with_null(confidence_results)
+            # confidence_results.extend(['null'] * (self.k_pred - len(confidence_results)))
+
+            confidence_map = self.prompt_class.confidence_map
+
+            confidence_numerical_results = [
+                confidence_map[result] if result != 'null' else min(confidence_map.values()) 
+                for result in confidence_results
+            ] 
+            print('confidence_numerical_results', confidence_numerical_results) 
+            print('guesses_output', guesses_output, self.prompt_class.label_list)
+            predictions.append(results_post_process)
+            confidences.append(confidence_numerical_results)
+        # weighted_counts = {label: 0.0 for label in self.prompt_class.label_list}
+        # weighted_counts['null'] = 0.0
+        return {'raw_responses': output['raw_responses'], 'predictions':predictions,'confidences':confidences}
+    
+    def aggregate_output(self, output):
+        results_post_process = output['predictions']
+        confidence_numerical_results = output['confidences']
+        inference_step = output['inference_step']
+        current_sample_id = output['current_sample_id']
+        weighted_counts = {label: 0.0 for label in self.prompt_class.label_list}
+        weighted_counts['null'] = 0.0
+        
+        for pred, confidence in zip(results_post_process, confidence_numerical_results):
+            if confidence:
+                
+                weighted_counts[pred] += confidence
+            else:
+                weighted_counts[pred] += 1
+        
+        print ('weighted_counts+conf',weighted_counts)
+        guess_result_with_confidence = max(weighted_counts, key=weighted_counts.get) 
+
+        def compute_dirichlet_statistics(weighted_counts, label_list,current_sample_id,inference_step):
+            print(' ', weighted_counts)
+
+            # You mentioned 'weighted_counts_binary' in your request, but it seems missing.
+            # Assuming it's another dictionary similar to weighted_counts. For now, we skip this.
+            # print('weighted_counts_binary', weighted_counts_binary)  
+
+            alpha_prior = 1.0
+            alpha = {label: weighted_counts[label] + alpha_prior for label in label_list}
+            alpha['null'] = weighted_counts['null'] + alpha_prior
+
+            alpha_values = list(alpha.values())
+            sample_size = 1000
+            dirichlet_distribution = dirichlet(alpha_values, size=sample_size)
+            # samples_ternary = [(p[0], p[1], p[2]) for p in dirichlet_distribution]  
+            # samples_ternary = [tuple(p[i] for i in range(self.n_classes + 1)) for p in dirichlet_distribution]
+            empirical_mean = np.mean(dirichlet_distribution, axis=0)
+            # empirical_mean_ternary = (empirical_mean[0], empirical_mean[1], empirical_mean[2])
+            print('empirical_mean', empirical_mean) 
+            print ('self.ternaryplot',self.ternary_plot) 
+            print ('current_sample_id just before',inference_step,current_sample_id )
+            if self.ternary_plot == True:
+                from src.utils.shared.plotting import ternary_plot, ternary_mean_plot
+                if empirical_mean.shape[0] == 3:
+                    if self.current_sample:
+                        # self.inference_step +=1
+                        samples_ternary = [tuple(p[i] for i in range(self.n_classes + 1)) for p in dirichlet_distribution]
+                        empirical_means_ternary = (empirical_mean[0], empirical_mean[1], empirical_mean[2])
+                        dirichlet_folder = os.path.join(self.test_folder, 'dirichlet')
+                        
+                        if not os.path.exists(dirichlet_folder):
+                            os.makedirs(dirichlet_folder)
+                        ternary_plot_file = os.path.join(dirichlet_folder, f'dirichlet_cs{current_sample_id}_is{inference_step}_a({alpha_values})_n{str(sample_size)}')
+                        self.logging.info(f'Plotting ternary plot for sample {ternary_plot_file}')
+                        ternary_mean_plot(samples_ternary,alpha_values,empirical_means_ternary,ternary_plot_file)
+                else:
+                    logging.warning('Not plotting ternary plot, as the number of classes is not 3')
+            def dirichlet_variance(alpha):
+                alpha_0 = sum(alpha)
+                variances = [(alpha_i * (alpha_0 - alpha_i)) / (alpha_0 ** 2 * (alpha_0 + 1)) for alpha_i in alpha]
+                return variances
+
+            alpha_vector = list(alpha.values())
+            second_order_uncertainty = dirichlet_variance(alpha_vector)
+            probabilities = dirichlet_distribution[0] 
+            
+            print("Counts:", self.prompt_class.task_dictionary_counts)
+            print("Numerical Confidences:", confidence_numerical_results)
+            print("Weighted Counts:", weighted_counts)
+            print("Alpha Vector:", alpha_vector)
+            print("Probabilities:", probabilities)
+            print("Second Order Uncertainty:", second_order_uncertainty) 
+            return alpha, dirichlet_distribution, empirical_mean, second_order_uncertainty, probabilities 
+
+        alpha, dirichlet_distribution, empirical_mean, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts,weighted_counts.keys(),current_sample_id,inference_step)
+        return guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities
+
+    
     def predict_and_confidence(self, datapoint):
          
         # if task not in ['sst2', 'ag_news', 'popQA']:

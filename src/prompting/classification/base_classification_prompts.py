@@ -240,9 +240,13 @@ class BaseClassificationPrompt:
 
     def _call_model(self,generate_args,extra_args):
         with torch.no_grad():
-            outputs = self.model.generate(**generate_args)
-
+            # outputs = self.model.generate(**generate_args)
+            print ('passing')
+            outputs = self.model(extra_args['prompt'])
+        
         # prompt_length = len(inputs['input_ids'][0])
+        return outputs
+        print ('outputs',outputs)
         prompt_length = len(generate_args['input_ids'][0])
         generated_tokens = outputs[0][prompt_length:]
         generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)

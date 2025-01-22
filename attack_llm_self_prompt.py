@@ -12,8 +12,8 @@ import torch
 
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
 from textattack.search_methods import AlzantotGeneticAlgorithm
-from textattack.transformations import WordSwapEmbedding, WordSwapWordNet,WordSwap
-from textattack.goal_functions import UntargetedClassification
+# from textattack.transformations import WordSwapEmbedding, WordSwapWordNet,WordSwap
+# from textattack.goal_functions import UntargetedClassification
 from textattack.shared import AttackedText
 from textattack.attack import Attack
 
@@ -281,9 +281,164 @@ from src.inference import Step2KPredAvg
 # if args.prompting_type == 'step2_k_pred_avg':
 from src.inference.inference_config import DYNAMIC_INFERENCE
 
+ 
+import re
+
+
+import random
+
+# from textattack.models.wrappers import ModelWrapper
+# class HuggingFaceLLMWrapper(ModelWrapper):
+#     """A wrapper around HuggingFace for LLMs.
+
+#     Args:
+#         model: A HuggingFace pretrained LLM
+#         tokenizer: A HuggingFace pretrained tokenizer
+#     """
+
+#     def __init__(self, **kwargs):
+ 
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
+#         self.generated_max_length = 2
+#         # self.inference_step = 0
+#         # self.current_sample = 1
+#         self.general_generate_args = {
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 0.92,  # nucleus sampling probability
+#             "temperature": self.temperature,  # sampling temperature
+#             "max_new_tokens": 200,
+#             'pad_token_id': self.tokenizer.eos_token_id
+#         }
+
+#         self.general_tokenizer_encoding_args = {
+#             'return_tensors':"pt",
+#             }
+
+
+
+#     # def reset_inference_steps(self):
+#     #     """Resets the inference step counter to 0 and current sample to +1"""
+#     #     self.inference_step = 0
+#     #     self.current_sample +=1
+
+
+#     def __call__(self, text_input_list):#,ground_truth_output):
+        
+#         self.device = next(self.model.parameters()).device
+#         # print ('device',self.device)
+#         print ('text_input_list',text_input_list)
+#         print ('self.device',self.device)
+#         # text_input_list = [text_input_list,text_input_list]
+#         inference_tokenizer_args = self.general_tokenizer_encoding_args
+#         inference_tokenizer_args['text'] = text_input_list
+
+#         inputs = self.tokenizer(**inference_tokenizer_args)
+#         # inputs = self.tokenizer(text_input_list, return_tensors="pt")
+        
+#         input_ids = inputs['input_ids'].to(self.device) 
+#         att_ids = inputs['attention_mask'].to(self.device) 
+#         # print ('input_ids',input_ids)
+
+#         inference_generate_args = {
+#             "input_ids": input_ids,
+#             "attention_mask": att_ids, 
+#             "do_sample": self.general_generate_args['do_sample'],  # enable sampling
+#             "top_k": self.general_generate_args['top_k'],# 40,  # top-k sampling
+#             "top_p": self.general_generate_args['top_p'],# 0.92,  # nucleus sampling probability
+#             "temperature": self.temperature,  # sampling temperature
+#             "max_new_tokens": self.general_generate_args['max_new_tokens'],#200,
+#             'pad_token_id': self.tokenizer.eos_token_id
+#         }
+#         extra_args = {
+#             "prompt": text_input_list,
+#         }
+
+        
+
+#         # outputs = self.model.generate(
+#         #     input_ids, max_new_tokens=512, pad_token_id=self.tokenizer.eos_token_id
+#         # )
+
+#         outputs = self.model.generate(
+#             **inference_generate_args
+#             )
+        
+#         # print ('outputs',outputs)
+#         generated_texts = []
+#         for i, output in enumerate(outputs):
+#             prompt_length = len(input_ids[i])  # Calculate the length for each individual input
+#             generated_tokens = output[prompt_length:]  # Slice using the correct prompt length
+#             generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#             # print("Generated Confidence Text:", generated_text)
+#             generated_texts.append(generated_text)
+
+#         # print ('outputs',outputs)
+#         # prompt_length = len(inference_generate_args['input_ids'][0])
+#         # generated_tokens = outputs[0][prompt_length:]
+#         # generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#         # print("Generated Confidence Text:", generated_text) 
+#         # print ('generated_text',generated_texts)
+#         return generated_texts
+#         print ('outputs',outputs)
+#         # trimmed_outputs = []
+#         # for i in range(len(outputs)):
+#         #     prompt_length = len(input_ids['input_ids'][i])
+#         #     generated_tokens = outputs[i][prompt_length:]
+#         #     trimmed_outputs.append(generated_tokens)
+
+#         responses = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+#         print ('response',responses)
+#         if len(text_input_list) == 1:
+#             return responses[0]
+#         return responses
+
+
+
+
+#         logit_list = []
+#         predictions = []
+
+#         # go back at doing model.generate
+
+ 
+
+
+#         for t in text_input_list:
+#             datapoint = (t,ground_truth_output)
+            
+#             self.inference_step +=1
+#             self.predictor.prompt_class.inference_step = self.inference_step 
+#             self.predictor.prompt_class.current_sample = self.current_sample
+#             # have enumerate, pass i to 
+#             guess, probs, confidence = self.predictor.predict_and_confidence(datapoint)
+            
+
+#             if guess == 'null': # return the logits with original label at 1
+#                 probs = torch.zeros(self.n_classes+1, dtype=torch.float16)
+#                 probs[-1] = 1.0
+             
+#             predictions.append(guess)
+#             logit_list.append(torch.tensor(probs, device=self.device)) 
+
+
+#         print ('logit list:',logit_list)
+#         logit_tensor = torch.stack(logit_list)
+#         print('logit_tensor:', logit_tensor)
+#         return logit_tensor 
+    
+
+
+from src.llm_wrappers.huggingface_llm_wrapper import HuggingFaceLLMWrapper
+
+args.dataset = dataset_class
+model_wrapper = HuggingFaceLLMWrapper(**vars(args))
+args.model = model_wrapper
+
 args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
 
-
+# need to change this so that it's a wrapper
 if 'gpt-4o' in args.model_type: 
     # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
     import requests
@@ -355,9 +510,6 @@ if 'gpt-4o' in args.model_type:
 
 
 
-
-from textattack.models.wrappers import ModelWrapper
-import re
 
  
 # from datasets import load_dataset
@@ -451,69 +603,6 @@ import re
 
 
 
-import random
-class HuggingFaceLLMWrapper(ModelWrapper):
-    """A wrapper around HuggingFace for LLMs.
-
-    Args:
-        model: A HuggingFace pretrained LLM
-        tokenizer: A HuggingFace pretrained tokenizer
-    """
-
-    def __init__(self, **kwargs):
- 
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self.generated_max_length = 2
-        self.inference_step = 0
-        self.current_sample = 1
-
-
-
-    def reset_inference_steps(self):
-        """Resets the inference step counter to 0 and current sample to +1"""
-        self.inference_step = 0
-        self.current_sample +=1
-
-
-    def __call__(self, text_input_list,ground_truth_output):
-        
-        self.device = next(self.model.parameters()).device
-        # print ('device',self.device)
-        print ('text_input_list',text_input_list)
-        logit_list = []
-        predictions = []
- 
-
-
-        for t in text_input_list:
-            datapoint = (t,ground_truth_output)
-            
-            self.inference_step +=1
-            self.predictor.prompt_class.inference_step = self.inference_step 
-            self.predictor.prompt_class.current_sample = self.current_sample
-            # have enumerate, pass i to 
-            guess, probs, confidence = self.predictor.predict_and_confidence(datapoint)
-
-
-            if guess == 'null': # return the logits with original label at 1
-                probs = torch.zeros(self.n_classes+1, dtype=torch.float16)
-                probs[-1] = 1.0
-             
-            predictions.append(guess)
-            logit_list.append(torch.tensor(probs, device=self.device)) 
-
-
-        print ('logit list:',logit_list)
-        logit_tensor = torch.stack(logit_list)
-        print('logit_tensor:', logit_tensor)
-        return logit_tensor 
-    
-
-
-
-args.dataset = dataset_class
-model_wrapper = HuggingFaceLLMWrapper(**vars(args))
 
 
 
@@ -532,348 +621,348 @@ model_wrapper = HuggingFaceLLMWrapper(**vars(args))
 
 
 
-class LLMSelfWordSubstitutionW1(WordSwap):
-    def __init__(self,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+# class LLMSelfWordSubstitutionW1(WordSwap):
+#     def __init__(self,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
 
-    # def __init__(self, tokenizer, model ,task,prompt_shot_type,num_transformations,goal_function):
-    #     self.tokenizer = tokenizer
-    #     self.model = model
-    #     self.task = task
-    #     self.goal_function = goal_function
-    #     self.num_transformations = num_transformations
-    #     self.prompt_shot_type = prompt_shot_type
-    #     self.device = next(self.model.parameters()).device
+#     # def __init__(self, tokenizer, model ,task,prompt_shot_type,num_transformations,goal_function):
+#     #     self.tokenizer = tokenizer
+#     #     self.model = model
+#     #     self.task = task
+#     #     self.goal_function = goal_function
+#     #     self.num_transformations = num_transformations
+#     #     self.prompt_shot_type = prompt_shot_type
+#     #     self.device = next(self.model.parameters()).device
         
-    def _query_model(self, prompt):
-        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
-        generate_args = {
-            "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
-            "do_sample": True,  # enable sampling
-            "top_k": 40,  # top-k sampling
-            "top_p": 0.92,  # nucleus sampling probability
-            "temperature": 0.7,  # sampling temperature
-            "max_new_tokens": 200,
-            'pad_token_id': self.tokenizer.eos_token_id
-        }
+#     def _query_model(self, prompt):
+#         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+#         generate_args = {
+#             "input_ids": inputs['input_ids'],
+#             "attention_mask": inputs['attention_mask'],
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 0.92,  # nucleus sampling probability
+#             "temperature": 0.7,  # sampling temperature
+#             "max_new_tokens": 200,
+#             'pad_token_id': self.tokenizer.eos_token_id
+#         }
 
-        # Generate the output with the model
-        with torch.no_grad():
-            outputs = self.model.generate(**generate_args)
-
-
-        prompt_length = len(inputs['input_ids'][0])
-        generated_tokens = outputs[0][prompt_length:]
-        generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
-
-        # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print ('generated_text:',generated_text) 
-        return generated_text.strip()
-
-    # def _query_model(self, prompt):
-    #     inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
-    #     generate_args = {
-    #         "input_ids": inputs['input_ids'],
-    #         "attention_mask": inputs['attention_mask'],
-    #         "do_sample": True,  # enable sampling
-    #         "top_k": 40,  # top-k sampling
-    #         "top_p": 0.92,  # nucleus sampling probability
-    #         "temperature": 0.7,  # sampling temperature
-    #         "max_new_tokens": 200,
-    #         'pad_token_id': self.tokenizer.eos_token_id
-    #     }
-
-    #     # Generate the output with the model
-    #     with torch.no_grad():
-    #         outputs = self.model.generate(**generate_args)
+#         # Generate the output with the model
+#         with torch.no_grad():
+#             outputs = self.model.generate(**generate_args)
 
 
-    #     prompt_length = len(inputs['input_ids'][0])
-    #     generated_tokens = outputs[0][prompt_length:]
-    #     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#         prompt_length = len(inputs['input_ids'][0])
+#         generated_tokens = outputs[0][prompt_length:]
+#         generated_text = self.tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-    #     # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-    #     print ('generated_text:',generated_text)
-    #     # generated_text = ' this is a random sentence BUSINESS .Business (business) and ;sport; and business and businesss and lbusinessk and kbusiness'
-    #     # Use regex to extract the modified text
-    #     # match_pattern = "(?:Here's a possible new sentence:|Based on the given conditions, here's the new sentence:|Here's my attempt:|Here's a suggestion:|Here's a new sentence that fits your requirements:|Here is the new sentence:|One possible solution:|A possible aswer:|One possible new sentence:|New sentence:|Here is the solution:|A possible solution could be:|A possible solution for the given task could be:|One possible solution:|Here's a possible solution:)(?:[.,;?!])?"
-    #     # match_generated_text = re.search(r"New sentence: (.+)", generated_text)
-    #     # match_generated_text = re.search(rf"{match_pattern} (.+)", generated_text)
-    #     match_generated_text = None
-    #     if self.task == 'sst2' or self.task == 'strategyQA' :
-    #         pattern = r"(?<=:)(.+)"  
-    #         match_generated_text = re.search(pattern, generated_text)
-    #     elif self.task == 'ag_news': # label leaking filtering
-    #         substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport', 'sports']
+#         # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+#         print ('generated_text:',generated_text) 
+#         return generated_text.strip()
+
+#     # def _query_model(self, prompt):
+#     #     inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+#     #     generate_args = {
+#     #         "input_ids": inputs['input_ids'],
+#     #         "attention_mask": inputs['attention_mask'],
+#     #         "do_sample": True,  # enable sampling
+#     #         "top_k": 40,  # top-k sampling
+#     #         "top_p": 0.92,  # nucleus sampling probability
+#     #         "temperature": 0.7,  # sampling temperature
+#     #         "max_new_tokens": 200,
+#     #         'pad_token_id': self.tokenizer.eos_token_id
+#     #     }
+
+#     #     # Generate the output with the model
+#     #     with torch.no_grad():
+#     #         outputs = self.model.generate(**generate_args)
+
+
+#     #     prompt_length = len(inputs['input_ids'][0])
+#     #     generated_tokens = outputs[0][prompt_length:]
+#     #     generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+
+#     #     # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+#     #     print ('generated_text:',generated_text)
+#     #     # generated_text = ' this is a random sentence BUSINESS .Business (business) and ;sport; and business and businesss and lbusinessk and kbusiness'
+#     #     # Use regex to extract the modified text
+#     #     # match_pattern = "(?:Here's a possible new sentence:|Based on the given conditions, here's the new sentence:|Here's my attempt:|Here's a suggestion:|Here's a new sentence that fits your requirements:|Here is the new sentence:|One possible solution:|A possible aswer:|One possible new sentence:|New sentence:|Here is the solution:|A possible solution could be:|A possible solution for the given task could be:|One possible solution:|Here's a possible solution:)(?:[.,;?!])?"
+#     #     # match_generated_text = re.search(r"New sentence: (.+)", generated_text)
+#     #     # match_generated_text = re.search(rf"{match_pattern} (.+)", generated_text)
+#     #     match_generated_text = None
+#     #     if self.task == 'sst2' or self.task == 'strategyQA' :
+#     #         pattern = r"(?<=:)(.+)"  
+#     #         match_generated_text = re.search(pattern, generated_text)
+#     #     elif self.task == 'ag_news': # label leaking filtering
+#     #         substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport', 'sports']
             
 
-    #         pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
+#     #         pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
 
-    #         # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
-    #         def replace(match):
-    #             preceding = generated_text[max(0, match.start()-1)]
-    #             following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
+#     #         # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
+#     #         def replace(match):
+#     #             preceding = generated_text[max(0, match.start()-1)]
+#     #             following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
 
-    #             # Check for spaces to avoid having multiple spaces
-    #             need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
+#     #             # Check for spaces to avoid having multiple spaces
+#     #             need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
 
-    #             if need_space:
-    #                 return ' '
-    #             else:
-    #                 return ''
+#     #             if need_space:
+#     #                 return ' '
+#     #             else:
+#     #                 return ''
 
-    #         clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
+#     #         clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
 
-    #         # Clean up remaining extra spaces left by the removals
-    #         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-    #         generated_text = clean_text 
+#     #         # Clean up remaining extra spaces left by the removals
+#     #         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+#     #         generated_text = clean_text 
 
-    #         pattern = r"(?<=:)(.+)"  
-    #         match_generated_text = re.search(pattern, generated_text)
-    #     print ('generated_text_after_cleanup:',generated_text)
-    #     print ('match_generated_text',match_generated_text)
-    #     if match_generated_text:
-    #         print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
-    #         return match_generated_text.group(1).strip()
-    #     return generated_text.strip()
+#     #         pattern = r"(?<=:)(.+)"  
+#     #         match_generated_text = re.search(pattern, generated_text)
+#     #     print ('generated_text_after_cleanup:',generated_text)
+#     #     print ('match_generated_text',match_generated_text)
+#     #     if match_generated_text:
+#     #         print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
+#     #         return match_generated_text.group(1).strip()
+#     #     return generated_text.strip()
 
-    # def _generate_prompt(self, context_sentence, expected_sentiment):
-    #     if self.task not in ['sst2', 'ag_news']:
-    #         raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+#     # def _generate_prompt(self, context_sentence, expected_sentiment):
+#     #     if self.task not in ['sst2', 'ag_news']:
+#     #         raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-    #     if self.task == 'sst2':
-    #         text_type = 'sentence' 
-    #         expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-    #         expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
-    #         label_types = ['negative', 'positive']
-    #         filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-    #         other_classes = ' or '.join(filtered_label_types)
-    #         attack_type = 'Add at most two semantically neutral words to the sentence..'
-    #         original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-    #         attack_objective = (
-    #             f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-    #             f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-    #             f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}. "
-    #         )
-    #         if self.prompt_shot_type == 'zs':
-    #             attack_guidance = (
-    #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-    #                 f"Only output the new {text_type} without anything else."
-    #                 f"The new sentece is:"
-    #             )
-    #         elif  self.prompt_shot_type == 'fs':
-    #             original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-    #             perturbed_example = ['The feline cat is on the table desk', 'The the boy is is playing soccer', 'She drove her car to work i think', 'The round sun is shining brightly mmmh', 'He cooked a large dinner for his family']
+#     #     if self.task == 'sst2':
+#     #         text_type = 'sentence' 
+#     #         expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#     #         expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#     #         label_types = ['negative', 'positive']
+#     #         filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#     #         other_classes = ' or '.join(filtered_label_types)
+#     #         attack_type = 'Add at most two semantically neutral words to the sentence..'
+#     #         original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#     #         attack_objective = (
+#     #             f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#     #             f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#     #             f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}. "
+#     #         )
+#     #         if self.prompt_shot_type == 'zs':
+#     #             attack_guidance = (
+#     #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#     #                 f"Only output the new {text_type} without anything else."
+#     #                 f"The new sentece is:"
+#     #             )
+#     #         elif  self.prompt_shot_type == 'fs':
+#     #             original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#     #             perturbed_example = ['The feline cat is on the table desk', 'The the boy is is playing soccer', 'She drove her car to work i think', 'The round sun is shining brightly mmmh', 'He cooked a large dinner for his family']
                 
-    #             list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#     #             list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-    #             attack_guidance = (
-    #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-    #                 f"Here are five examples that fit the guidance: {list_examples}"
-    #                 f"Only output the new {text_type} without anything else."
-    #                 f"The new sentece is:"
-    #             )
-    #         # prompt = original_input + attack_objective + attack_guidance
-    #         prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
-    #         # print ('prompt',prompt)
+#     #             attack_guidance = (
+#     #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#     #                 f"Here are five examples that fit the guidance: {list_examples}"
+#     #                 f"Only output the new {text_type} without anything else."
+#     #                 f"The new sentece is:"
+#     #             )
+#     #         # prompt = original_input + attack_objective + attack_guidance
+#     #         prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#     #         # print ('prompt',prompt)
             
-    #     elif self.task == 'ag_news':
-    #         text_type = 'sentence' 
-    #         # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-    #         # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#     #     elif self.task == 'ag_news':
+#     #         text_type = 'sentence' 
+#     #         # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#     #         # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
             
-    #         expected_sentiment_label = self.goal_function.ground_truth_output
+#     #         expected_sentiment_label = self.goal_function.ground_truth_output
             
-    #         print ('expected sentiment',expected_sentiment) 
-    #         label_types= self.dataset.label_names
-    #         expected_sentiment = label_types[expected_sentiment_label]
-    #         print ('label_types',label_types)
-    #         filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-    #         other_classes = ' or '.join(filtered_label_types)
-    #         attack_type = 'Add at most two semantically neutral words to the sentence.'
-    #         original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-    #         attack_objective = (
-    #             f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-    #             f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-    #             f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
-    #             # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
-    #         )
-    #         if self.prompt_shot_type == 'zs':
-    #             attack_guidance = (
-    #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-    #                 f"Only output the new {text_type} without anything else."
-    #                 f"The new sentece is:"
-    #             )
-    #         elif  self.prompt_shot_type == 'fs':
-    #             original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-    #             perturbed_example = ['The cat cat is on the table table', 'The the boy is is playing soccer', 'She drove her car to work i think', 'The round sun is shining brightly mmmh', 'He cooked a large dinner for his family']
+#     #         print ('expected sentiment',expected_sentiment) 
+#     #         label_types= self.dataset.label_names
+#     #         expected_sentiment = label_types[expected_sentiment_label]
+#     #         print ('label_types',label_types)
+#     #         filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#     #         other_classes = ' or '.join(filtered_label_types)
+#     #         attack_type = 'Add at most two semantically neutral words to the sentence.'
+#     #         original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#     #         attack_objective = (
+#     #             f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#     #             f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#     #             f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
+#     #             # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
+#     #         )
+#     #         if self.prompt_shot_type == 'zs':
+#     #             attack_guidance = (
+#     #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#     #                 f"Only output the new {text_type} without anything else."
+#     #                 f"The new sentece is:"
+#     #             )
+#     #         elif  self.prompt_shot_type == 'fs':
+#     #             original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#     #             perturbed_example = ['The cat cat is on the table table', 'The the boy is is playing soccer', 'She drove her car to work i think', 'The round sun is shining brightly mmmh', 'He cooked a large dinner for his family']
                 
-    #             list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#     #             list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-    #             attack_guidance = (
-    #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} \n"
-    #                 f"Here are five examples that fit the guidance: {list_examples} \n"
-    #                 f"Only output the new {text_type} without anything else. Don't provide reasoning "
-    #                 f"The new sentece is: "
-    #             )
-    #         # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+#     #             attack_guidance = (
+#     #                 f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} \n"
+#     #                 f"Here are five examples that fit the guidance: {list_examples} \n"
+#     #                 f"Only output the new {text_type} without anything else. Don't provide reasoning "
+#     #                 f"The new sentece is: "
+#     #             )
+#     #         # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
                                 
-    #         #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
-    #         # system_prompt = ''
-    #         # <<SYS>>{system_prompt}<</SYS>>
-    #         prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
-    #         # prompt =  original_input + attack_objective + attack_guidance 
+#     #         #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
+#     #         # system_prompt = ''
+#     #         # <<SYS>>{system_prompt}<</SYS>>
+#     #         prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#     #         # prompt =  original_input + attack_objective + attack_guidance 
 
-    #         # print ('attack_prompt:', prompt)
+#     #         # print ('attack_prompt:', prompt)
 
-    #         # prompt = (
-    #         #     f"[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium',"
-    #         #     f"'high', 'highest') for the following news article. Give ONLY the guess and verbal confidence, no other "
-    #         #     f"words or explanation. For example:\nGuess: <most likely guess, either world, sports, business or tech/"
-    #         #     f"science; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', "
-    #         #     f"'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the "
-    #         #     f"confidence!>\n\nThe text is: {context_sentence} News type & confidence:[/INST]"
-    #         # )
-    #     print ('prompt',prompt)
-    #     sys.exit()
-    #     return prompt
+#     #         # prompt = (
+#     #         #     f"[INST]Provide your best guess and the verbal confidence that it is correct ('lowest', 'low', 'medium',"
+#     #         #     f"'high', 'highest') for the following news article. Give ONLY the guess and verbal confidence, no other "
+#     #         #     f"words or explanation. For example:\nGuess: <most likely guess, either world, sports, business or tech/"
+#     #         #     f"science; not a complete sentence, just the guess!>\n Confidence: <the confidence, either 'lowest', 'low', "
+#     #         #     f"'medium','high', 'highest' that your guess is correct, without any extra commentary whatsoever; just the "
+#     #         #     f"confidence!>\n\nThe text is: {context_sentence} News type & confidence:[/INST]"
+#     #         # )
+#     #     print ('prompt',prompt)
+#     #     sys.exit()
+#     #     return prompt
 
-    def _generate_prompt(self, context_sentence, label_index):
-        # if self.task not in ['sst2', 'ag_news', 'strategyQA']:
-        #     raise ValueError("Unsupported task. Please choose either 'sst2', 'ag_news', or 'strategyQA'.")
+#     def _generate_prompt(self, context_sentence, label_index):
+#         # if self.task not in ['sst2', 'ag_news', 'strategyQA']:
+#         #     raise ValueError("Unsupported task. Please choose either 'sst2', 'ag_news', or 'strategyQA'.")
 
-        label_list =  self.dataset.label_names 
-        print ('label_index',label_index)
-        expected_prediction, filtered_label_list = self.predictor.prompt_class._identify_correct_incorrect_labels(label_index)
+#         label_list =  self.dataset.label_names 
+#         print ('label_index',label_index)
+#         expected_prediction, filtered_label_list = self.predictor.prompt_class._identify_correct_incorrect_labels(label_index)
             
-        other_classes = ' or '.join(filtered_label_list)
-        attack_type = 'Replace at most two words in the sentence with synonyms.'
-        original_input = f"The original sentence '{context_sentence}' is classified as {expected_prediction}. "
-        attack_objective = (
-            f"Your task is to generate a new sentence which must satisfy the following conditions:\n"
-            f"1) Keeping the semantic meaning of the new sentence unchanged.\n"
-            f"2) The new sentence and the original sentence should be classified as {other_classes}.\n "
-        )
-        if self.prompt_shot_type == 'zs':
-            attack_guidance = (
-                f"You can finish the task by modifying sentence using the following guidance: {attack_type} "
-                f"Only output the new sentence without anything else."
-                f"The new sentence is: [INSERT YOUR SENTENCE TRANSFORMATION HERE]"
-            )
-        elif self.prompt_shot_type == 'fs':
-            original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work', 'The sun is shining brightly', 'He cooked dinner for his family']
-            perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#         other_classes = ' or '.join(filtered_label_list)
+#         attack_type = 'Replace at most two words in the sentence with synonyms.'
+#         original_input = f"The original sentence '{context_sentence}' is classified as {expected_prediction}. "
+#         attack_objective = (
+#             f"Your task is to generate a new sentence which must satisfy the following conditions:\n"
+#             f"1) Keeping the semantic meaning of the new sentence unchanged.\n"
+#             f"2) The new sentence and the original sentence should be classified as {other_classes}.\n "
+#         )
+#         if self.prompt_shot_type == 'zs':
+#             attack_guidance = (
+#                 f"You can finish the task by modifying sentence using the following guidance: {attack_type} "
+#                 f"Only output the new sentence without anything else."
+#                 f"The new sentence is: [INSERT YOUR SENTENCE TRANSFORMATION HERE]"
+#             )
+#         elif self.prompt_shot_type == 'fs':
+#             original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work', 'The sun is shining brightly', 'He cooked dinner for his family']
+#             perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
 
-            list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#             list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
 
-            attack_guidance = (
-                f"You can finish the task by modifying sentence using the following guidance: {attack_type} "
-                f"Here are five examples that fit the guidance: {list_examples}"
-                f"Only output the new sentence without anything else."
-                f"The new sentence is: [INSERT YOUR SENTENCE TRANSFORMATION HERE]"
-            )
-        prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             attack_guidance = (
+#                 f"You can finish the task by modifying sentence using the following guidance: {attack_type} "
+#                 f"Here are five examples that fit the guidance: {list_examples}"
+#                 f"Only output the new sentence without anything else."
+#                 f"The new sentence is: [INSERT YOUR SENTENCE TRANSFORMATION HERE]"
+#             )
+#         prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
         
-        return prompt
+#         return prompt
 
-    def _generate_extractor_prompt(self, context_sentence, label_index):
-        # if self.task not in ['sst2', 'ag_news', 'strategyQA']:
-        #     raise ValueError("Unsupported task. Please choose either 'sst2', 'ag_news', or 'strategyQA'.")
+#     def _generate_extractor_prompt(self, context_sentence, label_index):
+#         # if self.task not in ['sst2', 'ag_news', 'strategyQA']:
+#         #     raise ValueError("Unsupported task. Please choose either 'sst2', 'ag_news', or 'strategyQA'.")
 
         
-        prompt = f'{self.start_prompt_header}' + f'The text in the brackets is what a langugage model has returned from a query [{context_sentence}] can you extract only the generated text and dont return anything else, if multiple answers are given return only 1! The text is:' + f'{self.end_prompt_footer}'
+#         prompt = f'{self.start_prompt_header}' + f'The text in the brackets is what a langugage model has returned from a query [{context_sentence}] can you extract only the generated text and dont return anything else, if multiple answers are given return only 1! The text is:' + f'{self.end_prompt_footer}'
         
-        return prompt
-    # def _get_transformations(self, current_text, indices_to_modify):
-    #     print ('Current_Text',current_text.attack_attrs )
-    #     # original_index_map = current_text.attack_attrs['original_index_map']
-    #     # print ('current_text.attack_attrs',self.ground_truth_output)
-    #     print ('self.goal_function',self.goal_function )
-    #     print ('self gto', self.goal_function.ground_truth_output)
-    #     expected_sentiment =  self.goal_function.ground_truth_output
-    #     context_sentence = current_text.text
-    #     transformations = []
-    #     for i in range(self.num_transformations):
-    #         prompt = self._generate_prompt(context_sentence,expected_sentiment)
-    #         new_sentence = self._query_model(prompt)
+#         return prompt
+#     # def _get_transformations(self, current_text, indices_to_modify):
+#     #     print ('Current_Text',current_text.attack_attrs )
+#     #     # original_index_map = current_text.attack_attrs['original_index_map']
+#     #     # print ('current_text.attack_attrs',self.ground_truth_output)
+#     #     print ('self.goal_function',self.goal_function )
+#     #     print ('self gto', self.goal_function.ground_truth_output)
+#     #     expected_sentiment =  self.goal_function.ground_truth_output
+#     #     context_sentence = current_text.text
+#     #     transformations = []
+#     #     for i in range(self.num_transformations):
+#     #         prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#     #         new_sentence = self._query_model(prompt)
 
-    #         if (new_sentence) and (new_sentence != context_sentence):
-    #             Att_sen_new_sentence = AttackedText(new_sentence)
-    #             # print ('words',Att_sen_new_sentence)
-    #             # current_text.generate_new_attacked_text(Att_sen_new_sentence.words)
-    #             print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-    #             print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
-    #             Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-    #             Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
-    #             # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
-    #             # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
-    #             Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-    #             print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#     #         if (new_sentence) and (new_sentence != context_sentence):
+#     #             Att_sen_new_sentence = AttackedText(new_sentence)
+#     #             # print ('words',Att_sen_new_sentence)
+#     #             # current_text.generate_new_attacked_text(Att_sen_new_sentence.words)
+#     #             print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#     #             print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
+#     #             Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#     #             Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
+#     #             # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
+#     #             # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
+#     #             Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#     #             print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
 
-    #             if len(Att_sen_new_sentence.attack_attrs['original_index_map']) == 0:
-    #                 continue
+#     #             if len(Att_sen_new_sentence.attack_attrs['original_index_map']) == 0:
+#     #                 continue
                 
                 
                 
-    #             transformations.append(Att_sen_new_sentence)
+#     #             transformations.append(Att_sen_new_sentence)
                 
-    #     return transformations 
+#     #     return transformations 
 
-    def _remove_labels(self, text):
-        # Create a regex pattern with ignoring case and match as whole word \b
-        pattern = r'\b(' + '|'.join(map(re.escape, self.dataset.label_names)) + r')\b'
+#     def _remove_labels(self, text):
+#         # Create a regex pattern with ignoring case and match as whole word \b
+#         pattern = r'\b(' + '|'.join(map(re.escape, self.dataset.label_names)) + r')\b'
 
-        # Substitute the matched word with an empty string
-        cleaned_text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+#         # Substitute the matched word with an empty string
+#         cleaned_text = re.sub(pattern, '', text, flags=re.IGNORECASE)
 
-        # Removing extra spaces if any
-        cleaned_text = ' '.join(cleaned_text.split())
+#         # Removing extra spaces if any
+#         cleaned_text = ' '.join(cleaned_text.split())
 
-        return cleaned_text
+#         return cleaned_text
 
-    def _get_transformations(self, current_text, indices_to_modify):
-        print ('Current_Text',current_text.attack_attrs )
-        # original_index_map = current_text.attack_attrs['original_index_map']
-        # print ('current_text.attack_attrs',self.ground_truth_output)
-        print ('self.goal_function',self.goal_function )
-        print ('self gto', self.goal_function.ground_truth_output)
-        expected_sentiment =  self.goal_function.ground_truth_output
-        context_sentence = current_text.text
-        transformations = []
+#     def _get_transformations(self, current_text, indices_to_modify):
+#         print ('Current_Text',current_text.attack_attrs )
+#         # original_index_map = current_text.attack_attrs['original_index_map']
+#         # print ('current_text.attack_attrs',self.ground_truth_output)
+#         print ('self.goal_function',self.goal_function )
+#         print ('self gto', self.goal_function.ground_truth_output)
+#         expected_sentiment =  self.goal_function.ground_truth_output
+#         context_sentence = current_text.text
+#         transformations = []
         
         
-        prompt = self._generate_prompt(context_sentence,expected_sentiment)
-        generated_sentence = self._query_model(prompt)
-        print ('Generated_sentence:',generated_sentence)
-        extract_ans_prompt = self._generate_extractor_prompt(generated_sentence,expected_sentiment)
-        extract_ans_prompt = self._remove_labels(extract_ans_prompt) 
+#         prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#         generated_sentence = self._query_model(prompt)
+#         print ('Generated_sentence:',generated_sentence)
+#         extract_ans_prompt = self._generate_extractor_prompt(generated_sentence,expected_sentiment)
+#         extract_ans_prompt = self._remove_labels(extract_ans_prompt) 
 
-        new_sentence = self._query_model(extract_ans_prompt)
-        print ('New_sentence:', new_sentence)
-        if (new_sentence) and (new_sentence != context_sentence):
-            Att_sen_new_sentence = AttackedText(new_sentence)
-            # print ('words',Att_sen_new_sentence)
-            # current_text.generate_new_attacked_text(Att_sen_new_sentence.words)
-            print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-            print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
-            Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-            Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
-            # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
-            # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
-            Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-            print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#         new_sentence = self._query_model(extract_ans_prompt)
+#         print ('New_sentence:', new_sentence)
+#         if (new_sentence) and (new_sentence != context_sentence):
+#             Att_sen_new_sentence = AttackedText(new_sentence)
+#             # print ('words',Att_sen_new_sentence)
+#             # current_text.generate_new_attacked_text(Att_sen_new_sentence.words)
+#             print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#             print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
+#             Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#             Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
+#             # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
+#             # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
+#             Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#             print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
 
-            # if the model returns a string with no words and only punctuation and nothering else e.g -> we return an empty list
-            if len(Att_sen_new_sentence.attack_attrs['original_index_map']) == 0:
-                return []
+#             # if the model returns a string with no words and only punctuation and nothering else e.g -> we return an empty list
+#             if len(Att_sen_new_sentence.attack_attrs['original_index_map']) == 0:
+#                 return []
             
             
             
-            transformations.append(Att_sen_new_sentence)
+#             transformations.append(Att_sen_new_sentence)
                 
-        return transformations 
+#         return transformations 
 
 
 # print ('current_text',current_text )
@@ -902,558 +991,558 @@ class LLMSelfWordSubstitutionW1(WordSwap):
 
 
 
-class LLMSelfFoolS2(WordSwap):
-    def __init__(self,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+# class LLMSelfFoolS2(WordSwap):
+#     def __init__(self,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
 
  
 
-    def _query_model(self, prompt):
-        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
-        generate_args = {
-            "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
-            "do_sample": True,  # enable sampling
-            "top_k": 40,  # top-k sampling
-            "top_p": 0.92,  # nucleus sampling probability
-            "temperature": 0.7,  # sampling temperature
-            "max_new_tokens": 200,
-            'pad_token_id': self.tokenizer.eos_token_id
-        }
+#     def _query_model(self, prompt):
+#         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+#         generate_args = {
+#             "input_ids": inputs['input_ids'],
+#             "attention_mask": inputs['attention_mask'],
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 0.92,  # nucleus sampling probability
+#             "temperature": 0.7,  # sampling temperature
+#             "max_new_tokens": 200,
+#             'pad_token_id': self.tokenizer.eos_token_id
+#         }
 
-        # Generate the output with the model
-        with torch.no_grad():
-            outputs = self.model.generate(**generate_args)
+#         # Generate the output with the model
+#         with torch.no_grad():
+#             outputs = self.model.generate(**generate_args)
 
 
-        prompt_length = len(inputs['input_ids'][0])
-        generated_tokens = outputs[0][prompt_length:]
-        generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#         prompt_length = len(inputs['input_ids'][0])
+#         generated_tokens = outputs[0][prompt_length:]
+#         generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-        # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print ('generated_text:',generated_text)
+#         # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+#         print ('generated_text:',generated_text)
  
-        match_generated_text = None
-        if self.task == 'sst2':
-            pattern = r"(?<=:)(.+)"  
-            match_generated_text = re.search(pattern, generated_text)
-        elif self.task == 'ag_news': # label leaking filtering
-            substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport']
+#         match_generated_text = None
+#         if self.task == 'sst2':
+#             pattern = r"(?<=:)(.+)"  
+#             match_generated_text = re.search(pattern, generated_text)
+#         elif self.task == 'ag_news': # label leaking filtering
+#             substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport']
             
 
-            pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
+#             pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
 
-            # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
-            def replace(match):
-                preceding = generated_text[max(0, match.start()-1)]
-                following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
+#             # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
+#             def replace(match):
+#                 preceding = generated_text[max(0, match.start()-1)]
+#                 following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
 
-                # Check for spaces to avoid having multiple spaces
-                need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
+#                 # Check for spaces to avoid having multiple spaces
+#                 need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
 
-                if need_space:
-                    return ' '
-                else:
-                    return ''
+#                 if need_space:
+#                     return ' '
+#                 else:
+#                     return ''
 
-            clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
+#             clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
 
-            # Clean up remaining extra spaces left by the removals
-            clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-            generated_text = clean_text 
+#             # Clean up remaining extra spaces left by the removals
+#             clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+#             generated_text = clean_text 
 
-            pattern = r"(?<=:)(.+)"  
-            match_generated_text = re.search(pattern, generated_text)
-        print ('generated_text_after_cleanup:',generated_text)
-        print ('match_generated_text',match_generated_text)
-        if match_generated_text:
-            print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
-            return match_generated_text.group(1).strip()
-        return generated_text.strip()
+#             pattern = r"(?<=:)(.+)"  
+#             match_generated_text = re.search(pattern, generated_text)
+#         print ('generated_text_after_cleanup:',generated_text)
+#         print ('match_generated_text',match_generated_text)
+#         if match_generated_text:
+#             print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
+#             return match_generated_text.group(1).strip()
+#         return generated_text.strip()
 
  
 
-    def _generate_prompt(self, context_sentence, expected_sentiment):
-        if self.task not in ['sst2', 'ag_news']:
-            raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+#     def _generate_prompt(self, context_sentence, expected_sentiment):
+#         if self.task not in ['sst2', 'ag_news']:
+#             raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-        if self.task == 'sst2':
-            text_type = 'sentence' 
-            expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
-            label_types = ['negative', 'positive']
-            filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Paraphrase the sentence.'
-            original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-            attack_objective = (
-                f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-                f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-                f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}. "
-            )
-            if self.prompt_shot_type == 'zs':
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Only output the new {text_type} without anything else."
-                    f"The new sentece is:"
-                )
-            elif  self.prompt_shot_type == 'fs':
-                original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-                perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#         if self.task == 'sst2':
+#             text_type = 'sentence' 
+#             expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#             label_types = ['negative', 'positive']
+#             filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Paraphrase the sentence.'
+#             original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#             attack_objective = (
+#                 f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#                 f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#                 f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}. "
+#             )
+#             if self.prompt_shot_type == 'zs':
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Only output the new {text_type} without anything else."
+#                     f"The new sentece is:"
+#                 )
+#             elif  self.prompt_shot_type == 'fs':
+#                 original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#                 perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
                 
-                list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#                 list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Here are five examples that fit the guidance: {list_examples}"
-                    f"Only output the new {text_type} without anything else."
-                    f"The new sentece is:"
-                )
-            # prompt = original_input + attack_objective + attack_guidance
-            prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
-            # print ('prompt',prompt)
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Here are five examples that fit the guidance: {list_examples}"
+#                     f"Only output the new {text_type} without anything else."
+#                     f"The new sentece is:"
+#                 )
+#             # prompt = original_input + attack_objective + attack_guidance
+#             prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             # print ('prompt',prompt)
             
-        elif self.task == 'ag_news':
-            text_type = 'sentence' 
-            # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#         elif self.task == 'ag_news':
+#             text_type = 'sentence' 
+#             # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
             
-            expected_sentiment_label = self.goal_function.ground_truth_output
+#             expected_sentiment_label = self.goal_function.ground_truth_output
             
-            print ('expected sentiment',expected_sentiment) 
-            label_types= self.dataset.label_names
-            expected_sentiment = label_types[expected_sentiment_label]
-            print ('label_types',label_types)
-            filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Replace at most two words in the sentence with synonyms.'
-            original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-            attack_objective = (
-                f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-                f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-                f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
-                # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
-            )
-            if self.prompt_shot_type == 'zs':
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Only output the new {text_type} without anything else."
-                    f"The new sentece is:"
-                )
-            elif  self.prompt_shot_type == 'fs':
-                original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-                perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#             print ('expected sentiment',expected_sentiment) 
+#             label_types= self.dataset.label_names
+#             expected_sentiment = label_types[expected_sentiment_label]
+#             print ('label_types',label_types)
+#             filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Replace at most two words in the sentence with synonyms.'
+#             original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#             attack_objective = (
+#                 f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#                 f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#                 f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
+#                 # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
+#             )
+#             if self.prompt_shot_type == 'zs':
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Only output the new {text_type} without anything else."
+#                     f"The new sentece is:"
+#                 )
+#             elif  self.prompt_shot_type == 'fs':
+#                 original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#                 perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
                 
-                list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#                 list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Here are five examples that fit the guidance: {list_examples} "
-                    f"Only output the new {text_type} without anything else. Don't provide reasoning "
-                    f"The new sentece is: "
-                )
-            # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Here are five examples that fit the guidance: {list_examples} "
+#                     f"Only output the new {text_type} without anything else. Don't provide reasoning "
+#                     f"The new sentece is: "
+#                 )
+#             # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
                                 
-            #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
-            # system_prompt = ''
-            # <<SYS>>{system_prompt}<</SYS>>
-            prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
+#             # system_prompt = ''
+#             # <<SYS>>{system_prompt}<</SYS>>
+#             prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
   
-        return prompt
+#         return prompt
 
-    def _get_transformations(self, current_text, indices_to_modify):
-        print ('current_text',current_text )
-        # print ('current_text.attack_attrs',self.ground_truth_output)
-        print ('self.goal_function',self.goal_function )
-        print ('self gto', self.goal_function.ground_truth_output)
-        expected_sentiment =  self.goal_function.ground_truth_output
-        context_sentence = current_text.text
-        transformations = []
-        for i in range(self.num_transformations):
-            prompt = self._generate_prompt(context_sentence,expected_sentiment)
-            new_sentence = self._query_model(prompt)
+#     def _get_transformations(self, current_text, indices_to_modify):
+#         print ('current_text',current_text )
+#         # print ('current_text.attack_attrs',self.ground_truth_output)
+#         print ('self.goal_function',self.goal_function )
+#         print ('self gto', self.goal_function.ground_truth_output)
+#         expected_sentiment =  self.goal_function.ground_truth_output
+#         context_sentence = current_text.text
+#         transformations = []
+#         for i in range(self.num_transformations):
+#             prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#             new_sentence = self._query_model(prompt)
 
-            if new_sentence and new_sentence != context_sentence:
-                transformations.append(AttackedText(new_sentence))
-        return transformations 
-
-
+#             if new_sentence and new_sentence != context_sentence:
+#                 transformations.append(AttackedText(new_sentence))
+#         return transformations 
 
 
-class LLMEGuidedParaphrasing(WordSwap):
-    def __init__(self,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+
+
+# class LLMEGuidedParaphrasing(WordSwap):
+#     def __init__(self,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
 
  
 
-    def _query_model(self, prompt):
-        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
-        generate_args = {
-            "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
-            "do_sample": True,  # enable sampling
-            "top_k": 40,  # top-k sampling
-            "top_p": 1,  # nucleus sampling probability
-            "temperature": 1,  # sampling temperature
-            "max_new_tokens": 2000,
-            'pad_token_id': self.tokenizer.eos_token_id
-        }
+#     def _query_model(self, prompt):
+#         inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+#         generate_args = {
+#             "input_ids": inputs['input_ids'],
+#             "attention_mask": inputs['attention_mask'],
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 1,  # nucleus sampling probability
+#             "temperature": 1,  # sampling temperature
+#             "max_new_tokens": 2000,
+#             'pad_token_id': self.tokenizer.eos_token_id
+#         }
 
-        # Generate the output with the model
-        with torch.no_grad():
-            outputs = self.model.generate(**generate_args)
+#         # Generate the output with the model
+#         with torch.no_grad():
+#             outputs = self.model.generate(**generate_args)
 
 
-        prompt_length = len(inputs['input_ids'][0])
-        generated_tokens = outputs[0][prompt_length:]
-        generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
+#         prompt_length = len(inputs['input_ids'][0])
+#         generated_tokens = outputs[0][prompt_length:]
+#         generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-        # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print ('generated_text:',generated_text)
+#         # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+#         print ('generated_text:',generated_text)
  
-        match_generated_text = None
-        if self.task == 'sst2':
-            pattern = r"(?<=:)(.+)"  
-            match_generated_text = re.search(pattern, generated_text)
-        elif self.task == 'ag_news': # label leaking filtering
-            substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport']
+#         match_generated_text = None
+#         if self.task == 'sst2':
+#             pattern = r"(?<=:)(.+)"  
+#             match_generated_text = re.search(pattern, generated_text)
+#         elif self.task == 'ag_news': # label leaking filtering
+#             substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport']
             
 
-            pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
+#             pattern = r'\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b'
 
-            # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
-            def replace(match):
-                preceding = generated_text[max(0, match.start()-1)]
-                following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
+#             # Remove the matched keywords and their surrounding punctuation, ensuring spacing is maintained.
+#             def replace(match):
+#                 preceding = generated_text[max(0, match.start()-1)]
+#                 following = generated_text[min(len(generated_text), match.end()):min(len(generated_text), match.end() + 1)]
 
-                # Check for spaces to avoid having multiple spaces
-                need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
+#                 # Check for spaces to avoid having multiple spaces
+#                 need_space = (preceding not in ' \t\n\r') and (following not in ' \t\n\r')
 
-                if need_space:
-                    return ' '
-                else:
-                    return ''
+#                 if need_space:
+#                     return ' '
+#                 else:
+#                     return ''
 
-            clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
+#             clean_text = re.sub(r'[\[\]{}(),]*\b(?:' + '|'.join(map(re.escape, substrings_to_remove)) + r')\b[\[\]{}(),]*', replace, generated_text,flags=re.IGNORECASE)
 
-            # Clean up remaining extra spaces left by the removals
-            clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-            generated_text = clean_text 
+#             # Clean up remaining extra spaces left by the removals
+#             clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+#             generated_text = clean_text 
 
-            pattern = r"(?<=:)(.+)"  
-            match_generated_text = re.search(pattern, generated_text)
-        print ('generated_text_after_cleanup:',generated_text)
-        print ('match_generated_text',match_generated_text)
-        if match_generated_text:
-            print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
-            return match_generated_text.group(1).strip()
-        return generated_text.strip()
+#             pattern = r"(?<=:)(.+)"  
+#             match_generated_text = re.search(pattern, generated_text)
+#         print ('generated_text_after_cleanup:',generated_text)
+#         print ('match_generated_text',match_generated_text)
+#         if match_generated_text:
+#             print ('match_generated_text.group(1).strip()',match_generated_text.group(1).strip())
+#             return match_generated_text.group(1).strip()
+#         return generated_text.strip()
 
  
 
-    def _generate_prompt(self, context_sentence, expected_sentiment):
-        if self.task not in ['sst2', 'ag_news']:
-            raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+#     def _generate_prompt(self, context_sentence, expected_sentiment):
+#         if self.task not in ['sst2', 'ag_news']:
+#             raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-        if self.task == 'sst2':
-            # text_type = 'sentence' 
-            # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
-            # label_types = ['negative', 'positive']
-            # filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            # other_classes = ' or '.join(filtered_label_types)
-            # attack_type = 'Rewrite the sentance.'
-            # original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment} \n. "
-            # attack_objective = (
-            #     f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-            #     f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-            #     f"2) The new {text_type} should be classified as {other_classes}.\n"
-            #     )
-            # if self.prompt_shot_type == 'zs':
-            #     attack_guidance = (
-            #         f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-            #         f"Only output the new {text_type} without anything else."
-            #         f"The new sentece is:"
-            #     )
-            # elif  self.prompt_shot_type == 'fs':
-            #     # original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-            #     # perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
-            #     original_example = ['This is a great day', 'never again will I play this game', 'She drove a wonderfull car to work']
-            #     perturbed_example = ['The day was wonderful', 'last time that this game will be played is today', 'She guided her good vehicle to work']
+#         if self.task == 'sst2':
+#             # text_type = 'sentence' 
+#             # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#             # label_types = ['negative', 'positive']
+#             # filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             # other_classes = ' or '.join(filtered_label_types)
+#             # attack_type = 'Rewrite the sentance.'
+#             # original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment} \n. "
+#             # attack_objective = (
+#             #     f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#             #     f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#             #     f"2) The new {text_type} should be classified as {other_classes}.\n"
+#             #     )
+#             # if self.prompt_shot_type == 'zs':
+#             #     attack_guidance = (
+#             #         f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#             #         f"Only output the new {text_type} without anything else."
+#             #         f"The new sentece is:"
+#             #     )
+#             # elif  self.prompt_shot_type == 'fs':
+#             #     # original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#             #     # perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#             #     original_example = ['This is a great day', 'never again will I play this game', 'She drove a wonderfull car to work']
+#             #     perturbed_example = ['The day was wonderful', 'last time that this game will be played is today', 'She guided her good vehicle to work']
                 
-            #     list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#             #     list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-            #     attack_guidance = (
-            #         f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-            #         f"Here are five examples that fit the guidance: {list_examples}.\n"
-            #         f"Only output the new {text_type} without anything else.\n"
-            #         f"The new sentece is:"
-            #     )
+#             #     attack_guidance = (
+#             #         f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#             #         f"Here are five examples that fit the guidance: {list_examples}.\n"
+#             #         f"Only output the new {text_type} without anything else.\n"
+#             #         f"The new sentece is:"
+#             #     )
                 
 
-            text_type = 'sentence'
-            expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
-            label_types = ['negative', 'positive']
-            filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Rewrite the sentence.'
+#             text_type = 'sentence'
+#             expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#             label_types = ['negative', 'positive']
+#             filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Rewrite the sentence.'
 
-            original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}.\n"
-            examples = [
-                ("It's a wonderful and uplifting journey.", "It's a decent and somewhat inspiring journey."),
-                ("The movie is a delightful experience.", "The movie is a fairly enjoyable experience.")
-            ]
+#             original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}.\n"
+#             examples = [
+#                 ("It's a wonderful and uplifting journey.", "It's a decent and somewhat inspiring journey."),
+#                 ("The movie is a delightful experience.", "The movie is a fairly enjoyable experience.")
+#             ]
 
-            example_prompts = ""
-            for pos, neg in examples:
-                example_prompts += f"- Original: '{pos}'\n  New: '{neg}'\n  Explanation: The semantic meaning remains the same, but the emotional tone has been subtly shifted to be more neutral.\n\n"
+#             example_prompts = ""
+#             for pos, neg in examples:
+#                 example_prompts += f"- Original: '{pos}'\n  New: '{neg}'\n  Explanation: The semantic meaning remains the same, but the emotional tone has been subtly shifted to be more neutral.\n\n"
 
-            attack_objective = (f"Your task is to generate a new {text_type}")
+#             attack_objective = (f"Your task is to generate a new {text_type}")
             
-            #  (
-            #     f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-            #     # f"1) create a large semantic meaning change of the new {text_type}, however, the meaning the information and message should be the same.\n"
-            #     # f"2) The new {text_type} should be classified as {other_classes}.\n"
-            #     # f"3) Make subtle changes to adjust the sentiment while keeping the overall intent and meaning unaltered.\n" 
-            #     # f"Here are some examples:\n{example_prompts}"
-            #     # f"Think through the following steps to complete your task:\n"
-            #     # f"Step 1: Rephrase or paraphrase the entire original sentance.\n"
-            #     # f"Step 2: Ensure this change has a large semantic change.\n"
-            #     # f"Step 3: Determine words or phrases that convey the positive sentiment in the new paraphrased sentance and list them.\n"
-            #     # f"Step 4: Reword this new pharaprased sentance with counterfitted word substitutions\n"
-            #     # f"Step 5: Ensure the new {text_type} maintains the original meaning.\n"
-            # )
+#             #  (
+#             #     f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#             #     # f"1) create a large semantic meaning change of the new {text_type}, however, the meaning the information and message should be the same.\n"
+#             #     # f"2) The new {text_type} should be classified as {other_classes}.\n"
+#             #     # f"3) Make subtle changes to adjust the sentiment while keeping the overall intent and meaning unaltered.\n" 
+#             #     # f"Here are some examples:\n{example_prompts}"
+#             #     # f"Think through the following steps to complete your task:\n"
+#             #     # f"Step 1: Rephrase or paraphrase the entire original sentance.\n"
+#             #     # f"Step 2: Ensure this change has a large semantic change.\n"
+#             #     # f"Step 3: Determine words or phrases that convey the positive sentiment in the new paraphrased sentance and list them.\n"
+#             #     # f"Step 4: Reword this new pharaprased sentance with counterfitted word substitutions\n"
+#             #     # f"Step 5: Ensure the new {text_type} maintains the original meaning.\n"
+#             # )
 
-            # attack_guidance = (
-            #     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-            #     f"Only output the new {text_type} without anything else.\n"
-            #     f"The new sentence is:"
-            # )
+#             # attack_guidance = (
+#             #     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#             #     f"Only output the new {text_type} without anything else.\n"
+#             #     f"The new sentence is:"
+#             # )
 
-            attack_guidance = (
-                f"You can finish the task by modifying {text_type} by rewriting the sentance, be creative with your response. "
-                f"Only output the new {text_type} without anything else.\n"
-                f"The new sentence is:"
-            )
-            prompt =f'{self.start_prompt_header}' + original_input + attack_objective  + attack_guidance + f'{self.end_prompt_footer}'
+#             attack_guidance = (
+#                 f"You can finish the task by modifying {text_type} by rewriting the sentance, be creative with your response. "
+#                 f"Only output the new {text_type} without anything else.\n"
+#                 f"The new sentence is:"
+#             )
+#             prompt =f'{self.start_prompt_header}' + original_input + attack_objective  + attack_guidance + f'{self.end_prompt_footer}'
              
             
             
-            print ('prompt',prompt)
+#             print ('prompt',prompt)
             
-        elif self.task == 'ag_news':
-            text_type = 'sentence' 
-            # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#         elif self.task == 'ag_news':
+#             text_type = 'sentence' 
+#             # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
             
-            expected_sentiment_label = self.goal_function.ground_truth_output
+#             expected_sentiment_label = self.goal_function.ground_truth_output
             
-            print ('expected sentiment',expected_sentiment) 
-            label_types= self.dataset.label_names
-            expected_sentiment = label_types[expected_sentiment_label]
-            print ('label_types',label_types)
-            filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Replace at most two words in the sentence with synonyms.'
-            original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-            attack_objective = (
-                f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-                f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-                f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
-                # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
-            )
-            if self.prompt_shot_type == 'zs':
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Only output the new {text_type} without anything else."
-                    f"The new sentece is:"
-                )
-            elif  self.prompt_shot_type == 'fs':
-                original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-                perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#             print ('expected sentiment',expected_sentiment) 
+#             label_types= self.dataset.label_names
+#             expected_sentiment = label_types[expected_sentiment_label]
+#             print ('label_types',label_types)
+#             filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Replace at most two words in the sentence with synonyms.'
+#             original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#             attack_objective = (
+#                 f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#                 f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#                 f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
+#                 # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
+#             )
+#             if self.prompt_shot_type == 'zs':
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Only output the new {text_type} without anything else."
+#                     f"The new sentece is:"
+#                 )
+#             elif  self.prompt_shot_type == 'fs':
+#                 original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#                 perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
                 
-                list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#                 list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Here are five examples that fit the guidance: {list_examples} "
-                    f"Only output the new {text_type} without anything else. Don't provide reasoning "
-                    f"The new sentece is: "
-                )
-            # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Here are five examples that fit the guidance: {list_examples} "
+#                     f"Only output the new {text_type} without anything else. Don't provide reasoning "
+#                     f"The new sentece is: "
+#                 )
+#             # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
                                 
-            #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
-            # system_prompt = ''
-            # <<SYS>>{system_prompt}<</SYS>>
-            prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
+#             # system_prompt = ''
+#             # <<SYS>>{system_prompt}<</SYS>>
+#             prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
   
-        return prompt
+#         return prompt
 
-    def _get_transformations(self, current_text, indices_to_modify):
-        print ('current_text',current_text )
-        # print ('current_text.attack_attrs',self.ground_truth_output)
-        print ('self.goal_function',self.goal_function )
-        print ('self gto', self.goal_function.ground_truth_output)
-        expected_sentiment =  self.goal_function.ground_truth_output
-        context_sentence = current_text.text
-        transformations = []
-        for i in range(self.num_transformations):
-            # prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#     def _get_transformations(self, current_text, indices_to_modify):
+#         print ('current_text',current_text )
+#         # print ('current_text.attack_attrs',self.ground_truth_output)
+#         print ('self.goal_function',self.goal_function )
+#         print ('self gto', self.goal_function.ground_truth_output)
+#         expected_sentiment =  self.goal_function.ground_truth_output
+#         context_sentence = current_text.text
+#         transformations = []
+#         for i in range(self.num_transformations):
+#             # prompt = self._generate_prompt(context_sentence,expected_sentiment)
             
-            # new_sentences = [self._query_model(prompt) for i in range(20)]
-            # print ('new_sentences',new_sentences) 
+#             # new_sentences = [self._query_model(prompt) for i in range(20)]
+#             # print ('new_sentences',new_sentences) 
 
-            # if new_sentence and new_sentence != context_sentence:
-            #     Att_sen_new_sentence = AttackedText(new_sentence)
-            #     print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
-            #     Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-            #     Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-            #     print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-            #     transformations.append(Att_sen_new_sentence)
+#             # if new_sentence and new_sentence != context_sentence:
+#             #     Att_sen_new_sentence = AttackedText(new_sentence)
+#             #     print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
+#             #     Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#             #     Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#             #     print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#             #     transformations.append(Att_sen_new_sentence)
 
-            prompt = self._generate_prompt(context_sentence,expected_sentiment)
-            # new_sentences = [self._query_model(prompt) for i in range(20)]
-            # print ('new_sentences_explore',new_sentences)
-            # sys.exit()
-            new_sentence = self._query_model(prompt) 
-            print ('new_sentences_explore',new_sentence) 
+#             prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#             # new_sentences = [self._query_model(prompt) for i in range(20)]
+#             # print ('new_sentences_explore',new_sentences)
+#             # sys.exit()
+#             new_sentence = self._query_model(prompt) 
+#             print ('new_sentences_explore',new_sentence) 
 
-            if new_sentence and new_sentence != context_sentence:
-                Att_sen_new_sentence = AttackedText(new_sentence)
-                print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
-                Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-                Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-                print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-                transformations.append(Att_sen_new_sentence)
+#             if new_sentence and new_sentence != context_sentence:
+#                 Att_sen_new_sentence = AttackedText(new_sentence)
+#                 print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
+#                 Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#                 Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#                 print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#                 transformations.append(Att_sen_new_sentence)
 
-        print ('transformations',transformations)
+#         print ('transformations',transformations)
 
-        return transformations  
+#         return transformations  
     
-    def _generate_prompt_maximise_semantic_sim(self, context_sentence, best_sentence):
-        if self.task not in ['sst2', 'ag_news']:
-            raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
+#     def _generate_prompt_maximise_semantic_sim(self, context_sentence, best_sentence):
+#         if self.task not in ['sst2', 'ag_news']:
+#             raise ValueError("Unsupported task. Please choose either 'sst2' or 'ag_news'.")
 
-        if self.task == 'sst2': 
+#         if self.task == 'sst2': 
 
-            text_type = 'sentence'
-            # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
-            # label_types = ['negative', 'positive']
-            # filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            # other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Rewrite the sentence.'
+#             text_type = 'sentence'
+#             # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#             # label_types = ['negative', 'positive']
+#             # filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             # other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Rewrite the sentence.'
 
-            # original_input = f"The original {text_type} '{best_sentence}' is very different to the original {context_sentence}.\n"
-            original_input = f"The original {text_type} '{best_sentence}'"
-            # attack_objective = (f"Your task is to increase the semantic similarity between '{best_sentence}' and '{context_sentence} \n'")
-            attack_objective = (f"Your task is to rephrase the following sentence: '{context_sentence}' to make it slightly similar to '{best_sentence}', don't make many changes!")
+#             # original_input = f"The original {text_type} '{best_sentence}' is very different to the original {context_sentence}.\n"
+#             original_input = f"The original {text_type} '{best_sentence}'"
+#             # attack_objective = (f"Your task is to increase the semantic similarity between '{best_sentence}' and '{context_sentence} \n'")
+#             attack_objective = (f"Your task is to rephrase the following sentence: '{context_sentence}' to make it slightly similar to '{best_sentence}', don't make many changes!")
              
 
-            attack_guidance = (
-                # f"You can finish the task by modifying {text_type} by rewriting the sentance, be creative with your response. "
-                f"Only output the new {text_type} without anything else.\n"
-                f"The new sentence is:"
-            )
-            prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             attack_guidance = (
+#                 # f"You can finish the task by modifying {text_type} by rewriting the sentance, be creative with your response. "
+#                 f"Only output the new {text_type} without anything else.\n"
+#                 f"The new sentence is:"
+#             )
+#             prompt =f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
              
             
             
-            print ('prompt',prompt)
+#             print ('prompt',prompt)
             
-        elif self.task == 'ag_news':
-            text_type = 'sentence' 
-            # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
-            # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
+#         elif self.task == 'ag_news':
+#             text_type = 'sentence' 
+#             # expected_sentiment = 'positive' if expected_sentiment == 1 else 0
+#             # expected_sentiment_label = 1 if expected_sentiment == 'positive' else 0 
             
-            expected_sentiment_label = self.goal_function.ground_truth_output
+#             expected_sentiment_label = self.goal_function.ground_truth_output
             
-            print ('expected sentiment',expected_sentiment) 
-            label_types= self.dataset.label_names
-            expected_sentiment = label_types[expected_sentiment_label]
-            print ('label_types',label_types)
-            filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
-            other_classes = ' or '.join(filtered_label_types)
-            attack_type = 'Replace at most two words in the sentence with synonyms.'
-            original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
-            attack_objective = (
-                f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
-                f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
-                f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
-                # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
-            )
-            if self.prompt_shot_type == 'zs':
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Only output the new {text_type} without anything else."
-                    f"The new sentece is:"
-                )
-            elif  self.prompt_shot_type == 'fs':
-                original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
-                perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
+#             print ('expected sentiment',expected_sentiment) 
+#             label_types= self.dataset.label_names
+#             expected_sentiment = label_types[expected_sentiment_label]
+#             print ('label_types',label_types)
+#             filtered_label_types = [label for i, label in enumerate(label_types) if i != expected_sentiment_label]
+#             other_classes = ' or '.join(filtered_label_types)
+#             attack_type = 'Replace at most two words in the sentence with synonyms.'
+#             original_input = f"The original {text_type} '{context_sentence}' is classified as {expected_sentiment}. "
+#             attack_objective = (
+#                 f"Your task is to generate a new {text_type} which must satisfy the following conditions:\n"
+#                 f"1) Keeping the semantic meaning of the new {text_type} unchanged.\n"
+#                 f"2) The new {text_type} and the original {text_type} should be classified as {other_classes}.\n"
+#                 # f"3) In your answer, don't generate any of the following tokens: {label_types}\n "
+#             )
+#             if self.prompt_shot_type == 'zs':
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Only output the new {text_type} without anything else."
+#                     f"The new sentece is:"
+#                 )
+#             elif  self.prompt_shot_type == 'fs':
+#                 original_example = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#                 perturbed_example = ['The feline is on the desk', 'The lad is playing football', 'She guided her vehicle to work', 'The sol is shining vividly', 'He prepared supper for his family']
                 
-                list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
+#                 list_examples = ' , '.join([original_example[i] + '->' + perturbed_example[i] for i in range(len(original_example)) ])
                  
-                attack_guidance = (
-                    f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
-                    f"Here are five examples that fit the guidance: {list_examples} "
-                    f"Only output the new {text_type} without anything else. Don't provide reasoning "
-                    f"The new sentece is: "
-                )
-            # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+#                 attack_guidance = (
+#                     f"You can finish the task by modifying {text_type} using the following guidance: {attack_type} "
+#                     f"Here are five examples that fit the guidance: {list_examples} "
+#                     f"Only output the new {text_type} without anything else. Don't provide reasoning "
+#                     f"The new sentece is: "
+#                 )
+#             # system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
                                 
-            #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
-            # system_prompt = ''
-            # <<SYS>>{system_prompt}<</SYS>>
-            prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
+#             #                     If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
+#             # system_prompt = ''
+#             # <<SYS>>{system_prompt}<</SYS>>
+#             prompt = f'{self.start_prompt_header}' + original_input + attack_objective + attack_guidance + f'{self.end_prompt_footer}'
   
-        return prompt
+#         return prompt
 
-    def _maximise_semantic_sim(self, original_attacked_text, best_attacked_text ):
-        print ('current_text',original_attacked_text )
-        # print ('original_attacked_text.attack_attrs',self.ground_truth_output)
-        print ('self.goal_function',self.goal_function )
-        print ('self gto', self.goal_function.ground_truth_output)
-        expected_sentiment =  self.goal_function.ground_truth_output
-        context_sentence = original_attacked_text.text
-        best_sentence = best_attacked_text.text
-        transformations = []
-        for i in range(self.num_transformations):
-            # prompt = self._generate_prompt(context_sentence,expected_sentiment)
+#     def _maximise_semantic_sim(self, original_attacked_text, best_attacked_text ):
+#         print ('current_text',original_attacked_text )
+#         # print ('original_attacked_text.attack_attrs',self.ground_truth_output)
+#         print ('self.goal_function',self.goal_function )
+#         print ('self gto', self.goal_function.ground_truth_output)
+#         expected_sentiment =  self.goal_function.ground_truth_output
+#         context_sentence = original_attacked_text.text
+#         best_sentence = best_attacked_text.text
+#         transformations = []
+#         for i in range(self.num_transformations):
+#             # prompt = self._generate_prompt(context_sentence,expected_sentiment)
             
-            # new_sentences = [self._query_model(prompt) for i in range(20)]
-            # print ('new_sentences',new_sentences) 
+#             # new_sentences = [self._query_model(prompt) for i in range(20)]
+#             # print ('new_sentences',new_sentences) 
 
-            # if new_sentence and new_sentence != context_sentence:
-            #     Att_sen_new_sentence = AttackedText(new_sentence)
-            #     print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
-            #     Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-            #     Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-            #     print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-            #     transformations.append(Att_sen_new_sentence)
+#             # if new_sentence and new_sentence != context_sentence:
+#             #     Att_sen_new_sentence = AttackedText(new_sentence)
+#             #     print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
+#             #     Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#             #     Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#             #     print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#             #     transformations.append(Att_sen_new_sentence)
 
-            prompt = self._generate_prompt_maximise_semantic_sim(context_sentence,best_sentence)
+#             prompt = self._generate_prompt_maximise_semantic_sim(context_sentence,best_sentence)
 
-            print ('prompt increase semantic sim',prompt)
-            # new_sentences = [self._query_model(prompt) for i in range(20)]
-            # print ('new_sentences_explore',new_sentences)
-            # sys.exit()
-            new_sentence = self._query_model(prompt) 
-            print ('new_sentences_explore',new_sentence) 
+#             print ('prompt increase semantic sim',prompt)
+#             # new_sentences = [self._query_model(prompt) for i in range(20)]
+#             # print ('new_sentences_explore',new_sentences)
+#             # sys.exit()
+#             new_sentence = self._query_model(prompt) 
+#             print ('new_sentences_explore',new_sentence) 
 
-            if new_sentence and new_sentence != context_sentence:
-                Att_sen_new_sentence = AttackedText(new_sentence)
-                print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
-                Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-                Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-                print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-                transformations.append(Att_sen_new_sentence)
+#             if new_sentence and new_sentence != context_sentence:
+#                 Att_sen_new_sentence = AttackedText(new_sentence)
+#                 print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs) 
+#                 Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#                 Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#                 print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#                 transformations.append(Att_sen_new_sentence)
 
-        print ('transformations',transformations)
-        return transformations
+#         print ('transformations',transformations)
+#         return transformations
 
 
 
@@ -1552,340 +1641,603 @@ from textattack.goal_functions import ClassificationGoalFunction
 # we have the goal function class accessible in the beamsearch class, set a hyperparameter to true when we start the transformation inf? this can then be accessed 
 # by the huggingface class?
 
-class Prediction_And_Confidence_GoalFunction(UntargetedClassification):
-    def __init__(self, *args, target_max_score=None, **kwargs):
-        self.target_max_score = target_max_score
-        super().__init__(*args, **kwargs)
+# class Prediction_And_Confidence_GoalFunction(UntargetedClassification):
+#     def __init__(self,*args, target_max_score=None ,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
+#         self.target_max_score = target_max_score
+#         self.current_sample_id = 0
+#         super().__init__(*args)
+        
+#     # def __init__(self, *args, target_max_score=None, **kwargs):
+#     #     self.target_max_score = target_max_score
+#     #     super().__init__(*args, **kwargs)
 
-    def _is_goal_complete(self, model_output, _):
-        # """
-        # Check if the confidence of the true label is within the target range.
-        # """
+#     def _is_goal_complete(self, model_output, _):
+#         # """
+#         # Check if the confidence of the true label is within the target range.
+#         # """
         
-        if self.target_max_score:
-            print ('1')
-            return model_output[self.ground_truth_output] < self.target_max_score
-        elif (model_output.numel() == 1) and isinstance(
-            self.ground_truth_output, float
-        ):  
-            print ('2')
-            return abs(self.ground_truth_output - model_output.item()) >= 0.5
-        else:
-            print ('3', model_output.argmax(),self.ground_truth_output, model_output.argmax() != self.ground_truth_output)
-            return model_output.argmax() != self.ground_truth_output
+#         if self.target_max_score:
+#             print ('1')
+#             return model_output[self.ground_truth_output] < self.target_max_score
+#         elif (model_output.numel() == 1) and isinstance(
+#             self.ground_truth_output, float
+#         ):  
+#             print ('2')
+#             return abs(self.ground_truth_output - model_output.item()) >= 0.5
+#         else:
+#             print ('3', model_output.argmax(),self.ground_truth_output, model_output.argmax() != self.ground_truth_output)
+#             return model_output.argmax() != self.ground_truth_output
 
-    def _get_score(self, model_output, _):
-        # If the model outputs a single number and the ground truth output is
-        # a float, we assume that this is a regression task.
-        # print ('true_label_confidence is get score',model_output[self.ground_truth_output],1 - model_output[self.ground_truth_output])
-        if (model_output.numel() == 1) and isinstance(self.ground_truth_output, float):
-            return abs(model_output.item() - self.ground_truth_output)
-        else:
-            # print ('model output get score',model_output,self.ground_truth_output, 1 - model_output[self.ground_truth_output])
+#     def _get_score(self, model_output, _):
+#         # If the model outputs a single number and the ground truth output is
+#         # a float, we assume that this is a regression task.
+#         # print ('true_label_confidence is get score',model_output[self.ground_truth_output],1 - model_output[self.ground_truth_output])
+#         if (model_output.numel() == 1) and isinstance(self.ground_truth_output, float):
+#             return abs(model_output.item() - self.ground_truth_output)
+#         else:
+#             # print ('model output get score',model_output,self.ground_truth_output, 1 - model_output[self.ground_truth_output])
 
-            # issue here, need to change so that it's not 1-, but instead is current prediction score
-            # we are doing now [negative 0.7000, positive 0.2500, null 0.0500], 1-0.25 because ground truth point 1, but we want
-            # confidence 0.7
-            return 1 - model_output[self.ground_truth_output]
+#             # issue here, need to change so that it's not 1-, but instead is current prediction score
+#             # we are doing now [negative 0.7000, positive 0.2500, null 0.0500], 1-0.25 because ground truth point 1, but we want
+#             # confidence 0.7
+#             return 1 - model_output[self.ground_truth_output]
+
+#     def _call_model_uncached(self, attacked_text_list):
+#         """Queries model and returns outputs for a list of AttackedText
+#         objects."""
+#         if not len(attacked_text_list):
+#             return []
         
+
+#         # current_sample = attacked_text_list[0].current_sample (any sample from this will give you current sample)
+#         inputs = [at.tokenizer_input for at in attacked_text_list]
+
+#         # inputs = [inputs[0],inputs[0],inputs[0]]
+#         # print('inputs',inputs)
+
+#         # i = 0
+#         # while i < len(inputs):
+#         #     batch = inputs[i : i + self.batch_size]
+#         #     print ('here1')
+#         #     raw_output = self.predictor.add_prompt_and_call_model(batch) # do one function call because this function might require 1 or multiple calls to the model to determine confidence
+#         #     print ('raw_output',raw_output)
+#         #     standarized_output = self.predictor.standarize_output(raw_output)
+#         #     print ('standarized_output',standarized_output)
+#         #     guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.predictor.aggregate_output(standarized_output)
+#         #     guess_result = self.predictor.prompt_class._predictor_decision()
+            
+
+#         i = 0
+#         # logit_list = []
+#         predictions = []
+#         outputs = []
+#         while i < len(inputs):
+#             logit_list = []
+#             datapoint = inputs[i]
+#             # guess, probs, confidence = self.predictor.predict_and_confidence(datapoint)
+#             print ('here1') 
+            
+#             raw_output = self.predictor.add_prompt_and_call_model(datapoint) # do one function call because this function might require 1 or multiple calls to the model to determine confidence
+#             print ('raw_output',raw_output)
+#             standarized_output = self.predictor.standarize_output(raw_output)
+#             print ('standarized_output',standarized_output) 
+#             # pass i to aggregate and current_sample_id
+#             inference_step = i 
+#             # print ('attacked_text_list[0]',attacked_text_list[0])
+#             # try:
+#             #     current_sample_id = attacked_text_list[0].current_sample_id
+#             #     print ('current_sample_id new',current_sample_id)
+#             # except Exception as e:
+#             #     current_sample_id = 0
+#             #     print ('exception',e)
+#             standarized_output['inference_step'] = inference_step
+#             print ('self.current_sample_id',self.current_sample_id)
+#             standarized_output['current_sample_id'] = self.current_sample_id
+#             guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.predictor.aggregate_output(standarized_output)
+#             guess_result = self.predictor.prompt_class._predictor_decision()
+            
+#             # here
+            
+#             guess = guess_result
+#             probs = empirical_mean
+#             if guess == 'null': # return the logits with original label at 1
+#                 probs = torch.zeros(self.n_classes+1, dtype=torch.float16)
+#                 probs[-1] = 1.0
+
+#             print ('probs',probs)
+#             predictions.append(guess)
+#             logit_list.append(torch.tensor(probs, device=self.device)) 
+#             # logit_list.append(torch.tensor(probs, device=self.device)) 
+            
+#             i += 1
+#             print ('logit_list',logit_list)
+#             logit_tensor = torch.stack(logit_list)
+#             print ('logit_tensor',logit_tensor)
+         
+#         # probs: tensor([[0.1484, 0.8385, 0.0130],
+#                 # [0.3207, 0.6645, 0.0148],
+#                 # [0.1501, 0.8357, 0.0141],
+#                 # [0.1493, 0.8371, 0.0136]], device='cuda:0', dtype=torch.float64)
+
+#             batch_preds = logit_tensor
+#             if isinstance(batch_preds, str):
+#                 batch_preds = [batch_preds]
+
+#             # Get PyTorch tensors off of other devices.
+#             if isinstance(batch_preds, torch.Tensor):
+#                 batch_preds = batch_preds.cpu()
+
+#             if isinstance(batch_preds, list):
+#                 outputs.extend(batch_preds)
+#             elif isinstance(batch_preds, np.ndarray):
+#                 # outputs.append(batch_preds)
+#                 outputs.append(torch.tensor(batch_preds))
+#             else:
+#                 outputs.append(batch_preds)
+#             print ('outputs',outputs)
+#             print ('outputs[0]',outputs[0],len(inputs),len(outputs))
         
-    def _call_model_uncached(self, attacked_text_list):
-        """Queries model and returns outputs for a list of AttackedText
-        objects."""
-        if not len(attacked_text_list):
-            return []
+#         if isinstance(outputs[0], torch.Tensor):
+#             print ('what1')
+#             outputs = torch.cat(outputs, dim=0)
+#         elif isinstance(outputs[0], np.ndarray):
+#             print ('what2')
+#             outputs = np.concatenate(outputs).ravel()
+#         print ('outputs',outputs, len(outputs))
+#         assert len(inputs) == len(
+#             outputs
+#         ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+
+#         return self._process_model_outputs(attacked_text_list, outputs)
+            
+#         print ('logit list:',outputs)
+#         logit_tensor = torch.stack(outputs)
+#         print('logit_tensor:', logit_tensor)
+#         return logit_tensor
+
+#         # this is the raw input that needs to be processes and turned into a prompt
+#         outputs = []
+#         i = 0
+#         while i < len(inputs):
+#             batch = inputs[i : i + self.batch_size]
+#             # batch just sends a text to model (the __call__ from huggingface model wrapper)
+            
+#             batch_preds = self.model(batch,self.ground_truth_output)
+#             # return a raw string
+#             # Some seq-to-seq models will return a single string as a prediction
+#             # for a single-string list. Wrap these in a list.
+#             if isinstance(batch_preds, str):
+#                 batch_preds = [batch_preds]
+
+#             # Get PyTorch tensors off of other devices.
+#             if isinstance(batch_preds, torch.Tensor):
+#                 batch_preds = batch_preds.cpu()
+
+#             if isinstance(batch_preds, list):
+#                 outputs.extend(batch_preds)
+#             elif isinstance(batch_preds, np.ndarray):
+#                 # outputs.append(batch_preds)
+#                 outputs.append(torch.tensor(batch_preds))
+#             else:
+#                 outputs.append(batch_preds)
+#             i += self.batch_size
+
+#         if isinstance(outputs[0], torch.Tensor):
+#             outputs = torch.cat(outputs, dim=0)
+#         elif isinstance(outputs[0], np.ndarray):
+#             outputs = np.concatenate(outputs).ravel()
+
+#         assert len(inputs) == len(
+#             outputs
+#         ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+
+#         return self._process_model_outputs(attacked_text_list, outputs)
+            
         
+#     # def _call_model_uncached(self, attacked_text_list):
+#     #     """Queries model and returns outputs for a list of AttackedText
+#     #     objects."""
+#     #     if not len(attacked_text_list):
+#     #         return []
+        
+
  
-        inputs = [at.tokenizer_input for at in attacked_text_list]
-        outputs = []
-        i = 0
-        while i < len(inputs):
-            batch = inputs[i : i + self.batch_size]
-            batch_preds = self.model(batch,self.ground_truth_output)
+#     #     inputs = [at.tokenizer_input for at in attacked_text_list]
 
-            # Some seq-to-seq models will return a single string as a prediction
-            # for a single-string list. Wrap these in a list.
-            if isinstance(batch_preds, str):
-                batch_preds = [batch_preds]
+#     #     i = 0
+#     #     # logit_list = []
+#     #     predictions = []
+#     #     outputs = []
+#     #     while i < len(inputs):
+#     #         logit_list = []
+#     #         datapoint = inputs[i]
+#     #         # guess, probs, confidence = self.predictor.predict_and_confidence(datapoint)
+#     #         print ('here1')
+#     #         raw_output = self.predictor.add_prompt_and_call_model(datapoint) # do one function call because this function might require 1 or multiple calls to the model to determine confidence
+#     #         print ('raw_output',raw_output)
+#     #         standarized_output = self.predictor.standarize_output(raw_output)
+#     #         print ('standarized_output',standarized_output) 
+#     #         guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.predictor.aggregate_output(standarized_output)
+#     #         guess_result = self.predictor.prompt_class._predictor_decision()
+            
+#     #         # here
+            
+#     #         guess = guess_result
+#     #         probs = empirical_mean
+#     #         if guess == 'null': # return the logits with original label at 1
+#     #             probs = torch.zeros(self.n_classes+1, dtype=torch.float16)
+#     #             probs[-1] = 1.0
 
-            # Get PyTorch tensors off of other devices.
-            if isinstance(batch_preds, torch.Tensor):
-                batch_preds = batch_preds.cpu()
+#     #         print ('probs',probs)
+#     #         predictions.append(guess)
+#     #         logit_list.append(torch.tensor(probs, device=self.device)) 
+#     #         # logit_list.append(torch.tensor(probs, device=self.device)) 
+            
+#     #         i += 1
+#     #         print ('logit_list',logit_list)
+#     #         logit_tensor = torch.stack(logit_list)
+#     #         print ('logit_tensor',logit_tensor)
+         
+#     #     # probs: tensor([[0.1484, 0.8385, 0.0130],
+#     #             # [0.3207, 0.6645, 0.0148],
+#     #             # [0.1501, 0.8357, 0.0141],
+#     #             # [0.1493, 0.8371, 0.0136]], device='cuda:0', dtype=torch.float64)
 
-            if isinstance(batch_preds, list):
-                outputs.extend(batch_preds)
-            elif isinstance(batch_preds, np.ndarray):
-                # outputs.append(batch_preds)
-                outputs.append(torch.tensor(batch_preds))
-            else:
-                outputs.append(batch_preds)
-            i += self.batch_size
+#     #         batch_preds = logit_tensor
+#     #         if isinstance(batch_preds, str):
+#     #             batch_preds = [batch_preds]
 
-        if isinstance(outputs[0], torch.Tensor):
-            outputs = torch.cat(outputs, dim=0)
-        elif isinstance(outputs[0], np.ndarray):
-            outputs = np.concatenate(outputs).ravel()
+#     #         # Get PyTorch tensors off of other devices.
+#     #         if isinstance(batch_preds, torch.Tensor):
+#     #             batch_preds = batch_preds.cpu()
 
-        assert len(inputs) == len(
-            outputs
-        ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
-
-        return self._process_model_outputs(attacked_text_list, outputs)
+#     #         if isinstance(batch_preds, list):
+#     #             outputs.extend(batch_preds)
+#     #         elif isinstance(batch_preds, np.ndarray):
+#     #             # outputs.append(batch_preds)
+#     #             outputs.append(torch.tensor(batch_preds))
+#     #         else:
+#     #             outputs.append(batch_preds)
+#     #         print ('outputs',outputs)
+#     #         print ('outputs[0]',outputs[0],len(inputs),len(outputs))
         
-    def get_results(self, attacked_text_list, check_skip=False): 
-        # this is what get_goal_results in search function calls indirectly so get_goal_results=get_results
-        """For each attacked_text object in attacked_text_list, returns a
-        result consisting of whether or not the goal has been achieved, the
-        output for display purposes, and a score.
+#     #     if isinstance(outputs[0], torch.Tensor):
+#     #         print ('what1')
+#     #         outputs = torch.cat(outputs, dim=0)
+#     #     elif isinstance(outputs[0], np.ndarray):
+#     #         print ('what2')
+#     #         outputs = np.concatenate(outputs).ravel()
+#     #     print ('outputs',outputs, len(outputs))
+#     #     assert len(inputs) == len(
+#     #         outputs
+#     #     ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
 
-        Additionally returns whether the search is over due to the query
-        budget.
-        """
-        print ('attacked_text_list',attacked_text_list,check_skip)
-        print ('self.num_queries',self.num_queries)
-        results = []
-        if self.query_budget < float("inf"):
-            queries_left = self.query_budget - self.num_queries 
-            attacked_text_list = attacked_text_list[:queries_left]
-        self.num_queries += len(attacked_text_list)
-        print ('final_num_queries',self.num_queries)
-        # prepare the attacked_text_list so that the sample is put into template
-        # 
-        model_outputs = self._call_model(attacked_text_list)
-        # counter = 1
-        for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
-            displayed_output = self._get_displayed_output(raw_output)
-            goal_status = self._get_goal_status(
-                raw_output, attacked_text, check_skip=check_skip
-            )
-            goal_function_score = self._get_score(raw_output, attacked_text)
-            # attacked_text.inference_step+=counter
-            # counter+=1
-            results.append(
-                self._goal_function_result_type()(
-                    attacked_text,
-                    raw_output,
-                    displayed_output,
-                    goal_status,
-                    goal_function_score,
-                    self.num_queries,
-                    self.ground_truth_output,
-                )
-            )
-        return results, self.num_queries == self.query_budget
+#     #     return self._process_model_outputs(attacked_text_list, outputs)
+            
+#     #     print ('logit list:',outputs)
+#     #     logit_tensor = torch.stack(outputs)
+#     #     print('logit_tensor:', logit_tensor)
+#     #     return logit_tensor
 
+#     #     # this is the raw input that needs to be processes and turned into a prompt
+#     #     outputs = []
+#     #     i = 0
+#     #     while i < len(inputs):
+#     #         batch = inputs[i : i + self.batch_size]
+#     #         # batch just sends a text to model (the __call__ from huggingface model wrapper)
+            
+#     #         batch_preds = self.model(batch,self.ground_truth_output)
+#     #         # return a raw string
+#     #         # Some seq-to-seq models will return a single string as a prediction
+#     #         # for a single-string list. Wrap these in a list.
+#     #         if isinstance(batch_preds, str):
+#     #             batch_preds = [batch_preds]
 
-class PredictionGoalFunction(UntargetedClassification):
-    def __init__(self, *args, target_max_score=None, **kwargs):
-        self.target_max_score = target_max_score
-        super().__init__(*args, **kwargs)
+#     #         # Get PyTorch tensors off of other devices.
+#     #         if isinstance(batch_preds, torch.Tensor):
+#     #             batch_preds = batch_preds.cpu()
 
-    def _is_goal_complete(self, model_output, _):
-        # """
-        # Check if the confidence of the true label is within the target range.
-        # """
-        # print ('model_output',model_output,self.ground_truth_output, model_output.softmax(dim=-1))
-        # # true_label_confidence = model_output.softmax(dim=-1)[self.ground_truth_output].item()
-        # true_label_confidence = model_output[self.ground_truth_output].item()
-        # print ('true_label_confidence is goal complete',true_label_confidence, self.lower_bound <= true_label_confidence <= self.upper_bound)
+#     #         if isinstance(batch_preds, list):
+#     #             outputs.extend(batch_preds)
+#     #         elif isinstance(batch_preds, np.ndarray):
+#     #             # outputs.append(batch_preds)
+#     #             outputs.append(torch.tensor(batch_preds))
+#     #         else:
+#     #             outputs.append(batch_preds)
+#     #         i += self.batch_size
+
+#     #     if isinstance(outputs[0], torch.Tensor):
+#     #         outputs = torch.cat(outputs, dim=0)
+#     #     elif isinstance(outputs[0], np.ndarray):
+#     #         outputs = np.concatenate(outputs).ravel()
+
+#     #     assert len(inputs) == len(
+#     #         outputs
+#     #     ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+
+#     #     return self._process_model_outputs(attacked_text_list, outputs)
         
-        # return self.lower_bound <= true_label_confidence <= self.upper_bound
-        # model_prediction = model_output[0]
-        # model_probabilities = model_output[1]
-        # print ('model_prediction',model_prediction)
-        # print ('model_probabilities',model_probabilities)
-        print ('self.prediction',self.prediction)
-        # print ('true_label_confidence is goal complete',model_output[self.ground_truth_output])
+#     def get_results(self, attacked_text_list, check_skip=False): 
+#         # this is what get_goal_results in search function calls indirectly so get_goal_results=get_results
+#         """For each attacked_text object in attacked_text_list, returns a
+#         result consisting of whether or not the goal has been achieved, the
+#         output for display purposes, and a score.
 
-        print ('self.ground_truth_output',self.ground_truth_output) 
-        return self.prediction[0] != self.ground_truth_output
-        # if self.target_max_score:
-        #     print ('1')
-        #     return model_output[self.ground_truth_output] < self.target_max_score
-        # elif (model_output.numel() == 1) and isinstance(
-        #     self.ground_truth_output, float
-        # ):  
-        #     print ('2')
-        #     return abs(self.ground_truth_output - model_output.item()) >= 0.5
-        # else:
-        #     print ('3', model_output.argmax(),self.ground_truth_output, model_output.argmax() != self.ground_truth_output)
-        #     return model_output.argmax() != self.ground_truth_output
+#         Additionally returns whether the search is over due to the query
+#         budget.
+#         """
+#         print ('attacked_text_list',attacked_text_list,check_skip)
+#         print ('self.num_queries',self.num_queries)
+#         results = []
+#         if self.query_budget < float("inf"):
+#             queries_left = self.query_budget - self.num_queries 
+#             attacked_text_list = attacked_text_list[:queries_left]
+#         self.num_queries += len(attacked_text_list)
+#         print ('final_num_queries',self.num_queries)
+#         # prepare the attacked_text_list so that the sample is put into template
+#         # 
+#         model_outputs = self._call_model(attacked_text_list)
+#         # model outputs will be raw string, this is where we can perform our cleaning
+#         # and aggregation
 
-    def _get_score(self, model_output, _):
-        # If the model outputs a single number and the ground truth output is
-        # a float, we assume that this is a regression task.
-        # print ('true_label_confidence is get score',model_output[self.ground_truth_output],1 - model_output[self.ground_truth_output])
-        if (model_output.numel() == 1) and isinstance(self.ground_truth_output, float):
-            return abs(model_output.item() - self.ground_truth_output)
-        else:
-            # print ('model output get score',model_output,self.ground_truth_output, 1 - model_output[self.ground_truth_output])
+#         # counter = 1
+#         for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
+#             displayed_output = self._get_displayed_output(raw_output)
+#             goal_status = self._get_goal_status(
+#                 raw_output, attacked_text, check_skip=check_skip
+#             )
+#             print ('get score')
+#             goal_function_score = self._get_score(raw_output, attacked_text)
+#             # attacked_text.inference_step+=counter
+#             # counter+=1
+#             results.append(
+#                 self._goal_function_result_type()(
+#                     attacked_text,
+#                     raw_output,
+#                     displayed_output,
+#                     goal_status,
+#                     goal_function_score,
+#                     self.num_queries,
+#                     self.ground_truth_output,
+#                 )
+#             )
+#         return results, self.num_queries == self.query_budget
 
-            # issue here, need to change so that it's not 1-, but instead is current prediction score
-            # we are doing now [negative 0.7000, positive 0.2500, null 0.0500], 1-0.25 because ground truth point 1, but we want
-            # confidence 0.7
-            return 1 - model_output[self.ground_truth_output]
+#     def init_attack_example(self, attacked_text, ground_truth_output):
+#         """Called before attacking ``attacked_text`` to 'reset' the goal
+#         function and set properties for this example."""
+#         self.initial_attacked_text = attacked_text
+#         self.ground_truth_output = ground_truth_output
+#         self.num_queries = 0
+#         print ('initializing a new example')
+#         self.current_sample_id +=1
+#         result, _ = self.get_result(attacked_text, check_skip=True)
+#         return result, _
+
+
+# class PredictionGoalFunction(UntargetedClassification):
+#     def __init__(self, *args, target_max_score=None, **kwargs):
+#         self.target_max_score = target_max_score
+#         super().__init__(*args, **kwargs)
+
+#     def _is_goal_complete(self, model_output, _):
+#         # """
+#         # Check if the confidence of the true label is within the target range.
+#         # """
+#         # print ('model_output',model_output,self.ground_truth_output, model_output.softmax(dim=-1))
+#         # # true_label_confidence = model_output.softmax(dim=-1)[self.ground_truth_output].item()
+#         # true_label_confidence = model_output[self.ground_truth_output].item()
+#         # print ('true_label_confidence is goal complete',true_label_confidence, self.lower_bound <= true_label_confidence <= self.upper_bound)
+        
+#         # return self.lower_bound <= true_label_confidence <= self.upper_bound
+#         # model_prediction = model_output[0]
+#         # model_probabilities = model_output[1]
+#         # print ('model_prediction',model_prediction)
+#         # print ('model_probabilities',model_probabilities)
+#         print ('self.prediction',self.prediction)
+#         # print ('true_label_confidence is goal complete',model_output[self.ground_truth_output])
+
+#         print ('self.ground_truth_output',self.ground_truth_output) 
+#         return self.prediction[0] != self.ground_truth_output
+#         # if self.target_max_score:
+#         #     print ('1')
+#         #     return model_output[self.ground_truth_output] < self.target_max_score
+#         # elif (model_output.numel() == 1) and isinstance(
+#         #     self.ground_truth_output, float
+#         # ):  
+#         #     print ('2')
+#         #     return abs(self.ground_truth_output - model_output.item()) >= 0.5
+#         # else:
+#         #     print ('3', model_output.argmax(),self.ground_truth_output, model_output.argmax() != self.ground_truth_output)
+#         #     return model_output.argmax() != self.ground_truth_output
+
+#     def _get_score(self, model_output, _):
+#         # If the model outputs a single number and the ground truth output is
+#         # a float, we assume that this is a regression task.
+#         # print ('true_label_confidence is get score',model_output[self.ground_truth_output],1 - model_output[self.ground_truth_output])
+#         if (model_output.numel() == 1) and isinstance(self.ground_truth_output, float):
+#             return abs(model_output.item() - self.ground_truth_output)
+#         else:
+#             # print ('model output get score',model_output,self.ground_truth_output, 1 - model_output[self.ground_truth_output])
+
+#             # issue here, need to change so that it's not 1-, but instead is current prediction score
+#             # we are doing now [negative 0.7000, positive 0.2500, null 0.0500], 1-0.25 because ground truth point 1, but we want
+#             # confidence 0.7
+#             return 1 - model_output[self.ground_truth_output]
         
         
-    def _call_model_uncached(self, attacked_text_list):
-        """Queries model and returns outputs for a list of AttackedText
-        objects."""
-        if not len(attacked_text_list):
-            return []
+#     def _call_model_uncached(self, attacked_text_list):
+#         """Queries model and returns outputs for a list of AttackedText
+#         objects."""
+#         if not len(attacked_text_list):
+#             return []
         
- 
-        inputs = [at.tokenizer_input for at in attacked_text_list]
-        outputs = []
-        i = 0
-        while i < len(inputs):
-            batch = inputs[i : i + self.batch_size]
-            batch_preds = self.model(batch,self.ground_truth_output)
 
-            # Some seq-to-seq models will return a single string as a prediction
-            # for a single-string list. Wrap these in a list.
-            if isinstance(batch_preds, str):
-                batch_preds = [batch_preds]
+#         inputs = [at.tokenizer_input for at in attacked_text_list]
 
-            # Get PyTorch tensors off of other devices.
-            if isinstance(batch_preds, torch.Tensor):
-                batch_preds = batch_preds.cpu()
+        
 
-            if isinstance(batch_preds, list):
-                outputs.extend(batch_preds)
-            elif isinstance(batch_preds, np.ndarray):
-                # outputs.append(batch_preds)
-                outputs.append(torch.tensor(batch_preds))
-            else:
-                outputs.append(batch_preds)
-            i += self.batch_size
+#         outputs = []
+#         i = 0
+#         while i < len(inputs):
+#             batch = inputs[i : i + self.batch_size]
+#             batch_preds = self.model(batch,self.ground_truth_output)
 
-        if isinstance(outputs[0], torch.Tensor):
-            outputs = torch.cat(outputs, dim=0)
-        elif isinstance(outputs[0], np.ndarray):
-            outputs = np.concatenate(outputs).ravel()
+#             # Some seq-to-seq models will return a single string as a prediction
+#             # for a single-string list. Wrap these in a list.
+#             if isinstance(batch_preds, str):
+#                 batch_preds = [batch_preds]
 
-        assert len(inputs) == len(
-            outputs
-        ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+#             # Get PyTorch tensors off of other devices.
+#             if isinstance(batch_preds, torch.Tensor):
+#                 batch_preds = batch_preds.cpu()
 
-        return self._process_model_outputs(attacked_text_list, outputs)
+#             if isinstance(batch_preds, list):
+#                 outputs.extend(batch_preds)
+#             elif isinstance(batch_preds, np.ndarray):
+#                 # outputs.append(batch_preds)
+#                 outputs.append(torch.tensor(batch_preds))
+#             else:
+#                 outputs.append(batch_preds)
+#             i += self.batch_size
+
+#         if isinstance(outputs[0], torch.Tensor):
+#             outputs = torch.cat(outputs, dim=0)
+#         elif isinstance(outputs[0], np.ndarray):
+#             outputs = np.concatenate(outputs).ravel()
+
+#         assert len(inputs) == len(
+#             outputs
+#         ), f"Got {len(outputs)} outputs for {len(inputs)} inputs"
+
+#         return self._process_model_outputs(attacked_text_list, outputs)
     
-    def _process_model_outputs(self, inputs, scores):
-        """Processes and validates a list of model outputs.
+#     def _process_model_outputs(self, inputs, scores):
+#         """Processes and validates a list of model outputs.
 
-        This is a task-dependent operation. For example, classification
-        outputs need to have a softmax applied.
-        """
-        # Automatically cast a list or ndarray of predictions to a tensor. 
-        # try:
-        self.prediction = scores[0][1]
-        scores = scores[0][0]
-        # except Exception as e:
-        #     print ('e',e)
-        # scores = scores[0]
-        print ('scores',scores)
-        if isinstance(scores, list) or isinstance(scores, np.ndarray):
-            scores = torch.tensor(scores)
+#         This is a task-dependent operation. For example, classification
+#         outputs need to have a softmax applied.
+#         """
+#         # Automatically cast a list or ndarray of predictions to a tensor. 
+#         # try:
+#         self.prediction = scores[0][1]
+#         scores = scores[0][0]
+#         # except Exception as e:
+#         #     print ('e',e)
+#         # scores = scores[0]
+#         print ('scores',scores)
+#         if isinstance(scores, list) or isinstance(scores, np.ndarray):
+#             scores = torch.tensor(scores)
 
-        # Ensure the returned value is now a tensor.
-        if not isinstance(scores, torch.Tensor):
-            raise TypeError(
-                "Must have list, np.ndarray, or torch.Tensor of "
-                f"scores. Got type {type(scores)}"
-            )
+#         # Ensure the returned value is now a tensor.
+#         if not isinstance(scores, torch.Tensor):
+#             raise TypeError(
+#                 "Must have list, np.ndarray, or torch.Tensor of "
+#                 f"scores. Got type {type(scores)}"
+#             )
 
-        # Validation check on model score dimensions
-        if scores.ndim == 1:
-            # Unsqueeze prediction, if it's been squeezed by the model.
-            if len(inputs) == 1:
-                scores = scores.unsqueeze(dim=0)
-            else:
-                raise ValueError(
-                    f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
-                )
-        elif scores.ndim != 2:
-            # If model somehow returns too may dimensions, throw an error.
-            raise ValueError(
-                f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
-            )
-        elif scores.shape[0] != len(inputs):
-            # If model returns an incorrect number of scores, throw an error.
-            raise ValueError(
-                f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
-            )
-        elif not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
-            # Values in each row should sum up to 1. The model should return a
-            # set of numbers corresponding to probabilities, which should add
-            # up to 1. Since they are `torch.float` values, allow a small
-            # error in the summation.
-            scores = torch.nn.functional.softmax(scores, dim=1)
-            if not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
-                raise ValueError("Model scores do not add up to 1.")
-        return scores.cpu()
+#         # Validation check on model score dimensions
+#         if scores.ndim == 1:
+#             # Unsqueeze prediction, if it's been squeezed by the model.
+#             if len(inputs) == 1:
+#                 scores = scores.unsqueeze(dim=0)
+#             else:
+#                 raise ValueError(
+#                     f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+#                 )
+#         elif scores.ndim != 2:
+#             # If model somehow returns too may dimensions, throw an error.
+#             raise ValueError(
+#                 f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+#             )
+#         elif scores.shape[0] != len(inputs):
+#             # If model returns an incorrect number of scores, throw an error.
+#             raise ValueError(
+#                 f"Model return score of shape {scores.shape} for {len(inputs)} inputs."
+#             )
+#         elif not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
+#             # Values in each row should sum up to 1. The model should return a
+#             # set of numbers corresponding to probabilities, which should add
+#             # up to 1. Since they are `torch.float` values, allow a small
+#             # error in the summation.
+#             scores = torch.nn.functional.softmax(scores, dim=1)
+#             if not ((scores.sum(dim=1) - 1).abs() < 1e-6).all():
+#                 raise ValueError("Model scores do not add up to 1.")
+#         return scores.cpu()
         
-    def get_results(self, attacked_text_list, check_skip=False): 
-        # this is what get_goal_results in search function calls indirectly so get_goal_results=get_results
-        """For each attacked_text object in attacked_text_list, returns a
-        result consisting of whether or not the goal has been achieved, the
-        output for display purposes, and a score.
+#     def get_results(self, attacked_text_list, check_skip=False): 
+#         # this is what get_goal_results in search function calls indirectly so get_goal_results=get_results
+#         """For each attacked_text object in attacked_text_list, returns a
+#         result consisting of whether or not the goal has been achieved, the
+#         output for display purposes, and a score.
 
-        Additionally returns whether the search is over due to the query
-        budget.
-        """
-        print ('attacked_text_list',attacked_text_list,check_skip)
-        print ('self.num_queries',self.num_queries)
-        results = []
-        if self.query_budget < float("inf"):
-            queries_left = self.query_budget - self.num_queries 
-            attacked_text_list = attacked_text_list[:queries_left]
-        self.num_queries += len(attacked_text_list)
-        model_outputs = self._call_model(attacked_text_list)
-        for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
-            # self.prediction = raw_output[1]
-            # raw_output = raw_output[0]
+#         Additionally returns whether the search is over due to the query
+#         budget.
+#         """
+#         print ('attacked_text_list',attacked_text_list,check_skip)
+#         print ('self.num_queries',self.num_queries)
+#         results = []
+#         if self.query_budget < float("inf"):
+#             queries_left = self.query_budget - self.num_queries 
+#             attacked_text_list = attacked_text_list[:queries_left]
+#         self.num_queries += len(attacked_text_list)
+#         model_outputs = self._call_model(attacked_text_list)
+#         for attacked_text, raw_output in zip(attacked_text_list, model_outputs):
+#             # self.prediction = raw_output[1]
+#             # raw_output = raw_output[0]
 
-            displayed_output = self._get_displayed_output(raw_output)
-            goal_status = self._get_goal_status(
-                raw_output, attacked_text, check_skip=check_skip
-            )
-            goal_function_score = self._get_score(raw_output, attacked_text)
-            results.append(
-                self._goal_function_result_type()(
-                    attacked_text,
-                    raw_output,
-                    displayed_output,
-                    goal_status,
-                    goal_function_score,
-                    self.num_queries,
-                    self.ground_truth_output,
-                )
-            )
-        return results, self.num_queries == self.query_budget
+#             displayed_output = self._get_displayed_output(raw_output)
+#             goal_status = self._get_goal_status(
+#                 raw_output, attacked_text, check_skip=check_skip
+#             )
+#             goal_function_score = self._get_score(raw_output, attacked_text)
+#             results.append(
+#                 self._goal_function_result_type()(
+#                     attacked_text,
+#                     raw_output,
+#                     displayed_output,
+#                     goal_status,
+#                     goal_function_score,
+#                     self.num_queries,
+#                     self.ground_truth_output,
+#                 )
+#             )
+#         return results, self.num_queries == self.query_budget
+
+from src.goal_function_algorithms.predict_and_confidence_goal_function import Prediction_And_Confidence_GoalFunction
+
+# goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,query_budget=args.query_budget)
+goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,**vars(args))
 
 
 
-goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,query_budget=args.query_budget)
 # goal_function = PredictionGoalFunction(model_wrapper,query_budget=args.query_budget)
 # goal_function = UntargetedClassification(model_wrapper)
 
 
 args.goal_function = goal_function
  
-# args.dataset = dataset_class
-if args.transformation_method == 's1' or args.transformation_method == 's1_black_box' or  args.transformation_method == '2step' or args.transformation_method =='empirical' or args.transformation_method =='k_pred_avg'  :
-    transformation = WordSwapWordNet() #WordSwapEmbedding(max_candidates=50)
-elif args.transformation_method =='word_swap_embedding':
-    transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
-elif args.transformation_method =='sspattack':
-    transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
-elif args.transformation_method =='texthoaxer':
-    transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
-elif args.transformation_method == 'self_word_sub':
-    transformation = LLMSelfWordSubstitutionW1(**vars(args))
-elif args.transformation_method == 'e_guided_paraphrasing':
-    transformation = LLMEGuidedParaphrasing(**vars(args))
+from src.transformation_algorithms.transformation_config import DYNAMIC_TRANSFORMATION
+transformation = DYNAMIC_TRANSFORMATION[args.transformation_method](**vars(args))
+args.transformation = transformation
+# # args.dataset = dataset_class
+# if args.transformation_method == 's1' or args.transformation_method == 's1_black_box' or  args.transformation_method == '2step' or args.transformation_method =='empirical' or args.transformation_method =='k_pred_avg'  :
+#     transformation = WordSwapWordNet() #WordSwapEmbedding(max_candidates=50)
+# elif args.transformation_method =='word_swap_embedding':
+#     transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
+# elif args.transformation_method =='sspattack':
+#     transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
+# elif args.transformation_method =='texthoaxer':
+#     transformation = WordSwapEmbedding(max_candidates=args.n_embeddings)
+# elif args.transformation_method == 'self_word_sub':
+#     transformation = LLMSelfWordSubstitutionW1(**vars(args))
+# elif args.transformation_method == 'e_guided_paraphrasing':
+#     transformation = LLMEGuidedParaphrasing(**vars(args))
 
 # print ('transformation',args.transformation)
-args.transformation = transformation
+# args.transformation = transformation
 
 
 
@@ -1896,144 +2248,175 @@ Beam Search
 
 """
 
-import numpy as np
-from textattack.goal_function_results import GoalFunctionResultStatus
+# import numpy as np
+# from textattack.goal_function_results import GoalFunctionResultStatus
 from textattack.search_methods import SearchMethod
 
-class BlackBoxSearch(SearchMethod):
-    """A black-box search that queries the model only to get transformations
-    and evaluates each transformation to determine if it meets the goal.
+# class BlackBoxSearch(SearchMethod):
+#     """A black-box search that queries the model only to get transformations
+#     and evaluates each transformation to determine if it meets the goal.
 
-    Args:
-        num_transformations (int): The number of transformations to generate for each query.
-    """
-    def __init__(self,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        # def __init__(self, num_transformations=20):
-        #     self.num_transformations = num_transformations
+#     Args:
+#         num_transformations (int): The number of transformations to generate for each query.
+#     """
+#     def __init__(self,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
+#         # def __init__(self, num_transformations=20):
+#         #     self.num_transformations = num_transformations
         
 
-    def perform_search(self, initial_result):
-        print ('starting queries',self.goal_function.num_queries)
-        self.number_of_queries = 0
-        for i in range(self.num_transformations): # we ask the model N types of perturbations then
+#     def perform_search(self, initial_result):
+#         print ('starting queries',self.goal_function.num_queries)
+#         self.number_of_queries = 0
+#         for i in range(self.num_transformations): # we ask the model N types of perturbations then
 
 
-            # Get transformations using the custom transformation method 
-            transformed_text_candidates = self.get_transformations(
-            initial_result.attacked_text,
-            original_text=initial_result.attacked_text,
-            indices_to_modify=None,  # Modify the entire text
-            )  
-            self.number_of_queries +=1 # to get trasnformations we have to query 1 time the model
-            # random.shuffle(transformed_text_candidates)
-            # transformed_text_candidates = transformed_text_candidates[:min(self.num_transformations, len(transformed_text_candidates))]
-            print ('transformed_text_candidates',transformed_text_candidates,len(transformed_text_candidates))
-            valid_candidates = []
-            for candidate in transformed_text_candidates:
-                # similarity = self.use_constraint.similarity_function(
-                #     initial_result.attacked_text.text, 
-                #     candidate.text
-                # )
-                # print ('similarity',similarity)
-                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
-                # sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, candidate.text])
+#             # Get transformations using the custom transformation method 
+#             transformed_text_candidates = self.get_transformations(
+#             initial_result.attacked_text,
+#             original_text=initial_result.attacked_text,
+#             indices_to_modify=None,  # Modify the entire text
+#             )  
+#             self.number_of_queries +=1 # to get trasnformations we have to query 1 time the model
+#             # random.shuffle(transformed_text_candidates)
+#             # transformed_text_candidates = transformed_text_candidates[:min(self.num_transformations, len(transformed_text_candidates))]
+#             print ('transformed_text_candidates',transformed_text_candidates,len(transformed_text_candidates))
+#             valid_candidates = []
+#             for candidate in transformed_text_candidates:
+#                 # similarity = self.use_constraint.similarity_function(
+#                 #     initial_result.attacked_text.text, 
+#                 #     candidate.text
+#                 # )
+#                 # print ('similarity',similarity)
+#                 sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+#                 # sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, candidate.text])
 
-                # if not isinstance(sim_final_original, torch.Tensor):
-                #     sim_final_original = torch.tensor(sim_final_original)
+#                 # if not isinstance(sim_final_original, torch.Tensor):
+#                 #     sim_final_original = torch.tensor(sim_final_original)
 
-                # if not isinstance(sim_final_pert, torch.Tensor):
-                #     sim_final_pert = torch.tensor(sim_final_pert)
+#                 # if not isinstance(sim_final_pert, torch.Tensor):
+#                 #     sim_final_pert = torch.tensor(sim_final_pert)
 
-                # sim_score2 = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-                # print ('sim_score transform1',sim_score,round(sim_score, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
+#                 # sim_score2 = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#                 # print ('sim_score transform1',sim_score,round(sim_score, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
                 
-                # print ('sim_score transform2',sim_score2,round(sim_score2, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
-                # sim_score = round(sim_score, 4)
-                if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
-                    valid_candidates.append(candidate)
+#                 # print ('sim_score transform2',sim_score2,round(sim_score2, 4), (1 - (args.similarity_threshold) / math.pi),self.use_constraint.threshold)
+#                 # sim_score = round(sim_score, 4)
+#                 if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
+#                     valid_candidates.append(candidate)
 
-            # Now, valid_candidates only contains those candidates that meet the USE constraint
-            print('valid_candidates', valid_candidates, len(valid_candidates))
-            transformed_text_candidates = valid_candidates
+#             # Now, valid_candidates only contains those candidates that meet the USE constraint
+#             print('valid_candidates', valid_candidates, len(valid_candidates))
+#             transformed_text_candidates = valid_candidates
 
-            if not transformed_text_candidates:
-                continue # try to get another transformation 
+#             if not transformed_text_candidates:
+#                 continue # try to get another transformation 
 
-            # Evaluate each transformation
-            results, search_over = self.get_goal_results(transformed_text_candidates)
-            #get the number of classes, then do #classes+1 in results.predicted pop any that meets this value
-            null_label = len(self.dataset.label_names)
-            print ('results_before_null_filter',results)
-            print ('null_label',null_label)
+#             # Evaluate each transformation
+#             results, search_over = self.get_goal_results(transformed_text_candidates)
+#             #get the number of classes, then do #classes+1 in results.predicted pop any that meets this value
+#             null_label = len(self.dataset.label_names)
+#             print ('results_before_null_filter',results)
+#             print ('null_label',null_label)
             
 
-            results = [i for i in results if i.output != null_label] # filter out all attacks that lead to null
-            print ('results_after_null_filter',results)
-            # Return the first successful perturbation
-            for result in results:
-                if result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                    print ('successful adv sample ', self.goal_function.num_queries, self.number_of_queries )
-                    self.goal_function.num_queries += self.number_of_queries # if adv sample found we query model N times to find a suitable transformation then N times to check it's actually adv
-                    return result
+#             results = [i for i in results if i.output != null_label] # filter out all attacks that lead to null
+#             print ('results_after_null_filter',results)
+#             # Return the first successful perturbation
+#             for result in results:
+#                 if result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                     print ('successful adv sample ', self.goal_function.num_queries, self.number_of_queries )
+#                     self.goal_function.num_queries += self.number_of_queries # if adv sample found we query model N times to find a suitable transformation then N times to check it's actually adv
+#                     return result
 
-        print ('ending queries',self.goal_function.num_queries,self.number_of_queries )
-        self.goal_function.num_queries += self.number_of_queries # no succesful adv samples found, we still query model N times to generate transformations
+#         print ('ending queries',self.goal_function.num_queries,self.number_of_queries )
+#         self.goal_function.num_queries += self.number_of_queries # no succesful adv samples found, we still query model N times to generate transformations
         
-        return initial_result
+#         return initial_result
 
-    # def get_transformations(self, current_text, original_text=None, indices_to_modify=None):
-    #     """Generate N transformations using the transformation method."""
-    #     print ('current_text2',current_text)
-    #     if hasattr(self.transformation, "transform"):
-    #         print ('list transforms',list(self.transformation.transform(current_text, self.num_transformations)))
-    #         sys.exit()
-    #         return list(self.transformation.transform(current_text, self.num_transformations))
-    #     return []
+#     # def get_transformations(self, current_text, original_text=None, indices_to_modify=None):
+#     #     """Generate N transformations using the transformation method."""
+#     #     print ('current_text2',current_text)
+#     #     if hasattr(self.transformation, "transform"):
+#     #         print ('list transforms',list(self.transformation.transform(current_text, self.num_transformations)))
+#     #         sys.exit()
+#     #         return list(self.transformation.transform(current_text, self.num_transformations))
+#     #     return []
 
-    # def get_goal_results(self, transformed_text_candidates):
-    #     print ('transformed_text_candidates',transformed_text_candidates)
-    #     sys.exit()
-    #     """Evaluate the goal on the transformed text candidates."""
-    #     results = [self.goal_function.get_result(text) for text in transformed_text_candidates]
-    #     search_over = any(result.goal_status == GoalFunctionResultStatus.SUCCEEDED for result in results)
-    #     return results, search_over
+#     # def get_goal_results(self, transformed_text_candidates):
+#     #     print ('transformed_text_candidates',transformed_text_candidates)
+#     #     sys.exit()
+#     #     """Evaluate the goal on the transformed text candidates."""
+#     #     results = [self.goal_function.get_result(text) for text in transformed_text_candidates]
+#     #     search_over = any(result.goal_status == GoalFunctionResultStatus.SUCCEEDED for result in results)
+#     #     return results, search_over
 
-    @property
-    def is_black_box(self):
-        return True
+#     @property
+#     def is_black_box(self):
+#         return True
 
-    def extra_repr_keys(self):
-        return ["num_transformations"]
+#     def extra_repr_keys(self):
+#         return ["num_transformations"]
 
-    def __repr__(self):
-        return default_class_repr(self)
+#     def __repr__(self):
+#         return default_class_repr(self)
 
-#sspattack
-from textattack.shared import  WordEmbedding
-import nltk
-from textattack.constraints.semantics.sentence_encoders.sentence_encoder import SentenceEncoder
-from textattack.constraints.semantics.sentence_encoders import SentenceEncoder
-from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+# #sspattack
+# from textattack.shared import  WordEmbedding
+# import nltk
+
+
+
+# from textattack.constraints.semantics.sentence_encoders.sentence_encoder import SentenceEncoder
+# from textattack.constraints.semantics.sentence_encoders import SentenceEncoder
+# from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+
+
+
+
+
+import copy
+
+
 # class SSPAttackSearch(SearchMethod):
-#     def __init__(self, max_iterations=100,**kwargs):
+#     def __init__(self, max_iterations=2,**kwargs):
 #         for key, value in kwargs.items():
 #             setattr(self, key, value)
 #         self.max_iterations = max_iterations
-#         self.embedding = WordEmbedding.counterfitted_GLOVE_embedding()
-#         self.sentence_encoder_use = UniversalSentenceEncoder()
+#         self.embedding = WordEmbedding.counterfitted_GLOVE_embedding() 
+#         self.sentence_encoder_use = UniversalSentenceEncoder(window_size=15)
+        
+#         self.number_of_queries = 0
+
+#     def check_model_status(self,input_text,check_skip=False):
+#         model_outputs = self.goal_function._call_model([input_text])
+#         current_goal_status = self.goal_function._get_goal_status(
+#             model_outputs[0], input_text, check_skip=check_skip
+#         )
+#         self.goal_function.num_queries +=1
+#         return current_goal_status
 
 #     def perform_search(self, initial_result):
+#         self.number_of_queries = 0 # raw counter mostly for infucntion debugging purposes
 #         attacked_text = initial_result.attacked_text
 
 #         print ('goal_function',self.goal_function)
         
 #         # Step 1: Initialization
-#         # perturbed_text = [self.random_initialization(attacked_text)]
-#         perturbed_text = [self.random_initialization(attacked_text) for i in range(20)]
-
-#         results, search_over = self.get_goal_results(perturbed_text)
+#         number_samples = self.num_transformations
+#         # self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
+#         # self.goal_function.num_queries +=number_samples + 1
+#         # self.goal_function.num_queries += self.num_transformations
+#         # print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
+#         # print ('self.goal_function.num_queries',a,'self.number_of_queries',self.number_of_queries)
+#         perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
+        
+#         results, search_over = self.get_goal_results(perturbed_text) # automatically keeps track of queries
+#         self.number_of_queries+=number_samples + 1
+#         # self.goal_function.num_queries += self.num_transformations
+#         print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
+        
         
 #         results_success = [result for result in results if result.ground_truth_output!=result.output] 
 
@@ -2044,8 +2427,16 @@ from textattack.constraints.semantics.sentence_encoders import UniversalSentence
 #                 results_success.append(result)
 #                 perturbed_text_success.append(perturbed_text[i])
 
+
+#         print ('returnign failed?')
 #         if len(results_success) == 0:
-#             return results[0] # return a random result that wasnt perturbed to show it failed.
+#             final_result = results[0]
+#             # final_result.num_queries = self.number_of_queries
+#             # self.goal_function.num_queries = self.number_of_queries 
+#             print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+#             # print ('self.goal_function.num_queries2',self.goal_function.num_queries,'self.number_of_queries',self.number_of_queries)
+#             return final_result # return a random result that wasnt perturbed to show it failed.
 
 #         perturbed_text = perturbed_text_success[0]
 #         results = results_success[0]
@@ -2055,6 +2446,10 @@ from textattack.constraints.semantics.sentence_encoders import UniversalSentence
 
 #         print ('attacked_text',attacked_text)
 #         print ('perturbed_text',perturbed_text)
+
+                 
+
+        
         
 #         # Main iteration loop
 #         for _ in range(self.max_iterations):
@@ -2062,16 +2457,74 @@ from textattack.constraints.semantics.sentence_encoders import UniversalSentence
             
 #             perturbed_text = self.remove_unnecessary_words(perturbed_text, attacked_text)
 #             print ('perturned+text',perturbed_text)
+
+#             # if attacked_text.words == perturbed_text.words:
+#             #     print ('should we skipp?')
+#             #     sys.exit() 
+
 #             # Step 3: Push Substitution Words towards Original Words
 #             perturbed_text = self.push_words_towards_original(perturbed_text, attacked_text)
 #             print ('perturned+text2',perturbed_text) 
+#             # if attacked_text == perturbed_text:
+#             #     print ('should we skipp 2?')
+#             #     sys.exit() 
 #             # Check if attack is successful
 #             results, search_over = self.get_goal_results([perturbed_text])
+#             # perturbed_result = initial_result.goal_function.call_model([perturbed_text])[0]
+#             # print ('results',results)
+#             self.number_of_queries+= 1 # only 1 sample at the time
+#             print ('self.goal_function.num_queries preend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
             
+#             # add semantic sim filter
+
+#             # this checks the generated test against the actual final use constraint
             
-#             if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-#                 return results[0]
-        
+              
+
+#             final_result = results[0]
+
+             
+
+#             if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                 print ('attacked_text.text, final_result.attacked_text.text')
+#                 print ('attk text',attacked_text.text)
+#                 print ('final sre',final_result.attacked_text.text)
+#                 sim_final_original, sim_final_pert = self.use_constraint.encode([attacked_text.text, final_result.attacked_text.text])
+
+#                 if not isinstance(sim_final_original, torch.Tensor):
+#                     sim_final_original = torch.tensor(sim_final_original)
+
+#                 if not isinstance(sim_final_pert, torch.Tensor):
+#                     sim_final_pert = torch.tensor(sim_final_pert)
+
+#                 sim_score = self.sentence_encoder_use.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#                 print ('sim_score',sim_score, (1 - (args.similarity_threshold) / math.pi))
+#                 if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+#                     continue
+
+#                 # final_result.num_queries = self.number_of_queries
+#                 # self.goal_function.num_queries = self.number_of_queries
+#                 print ('final_result.num_queries',final_result.num_queries)
+#                 print ('final,self.number_of_queries',self.number_of_queries)
+#                 print ('final,self.goal_function.num_queries ',self.goal_function.num_queries)
+#                 print ('self.goal_function.num_queries endend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+                
+#                 # sys.exit()
+#                 print ('final_result',final_result.attacked_text)
+#                 print ('final_result.attacked_text.attack_attrs',final_result.attacked_text.attack_attrs)
+#                 print ('final_result.attacked_text.attack_attrs[original_index_map]',final_result.attacked_text.attack_attrs['original_index_map'])
+#                 # print ('final_result',final_result.original_text)
+#                 # print ('final_result',final_result.perturbed_text)
+#                 # print ('final_result.perturbed_result.attack_attrs',final_result.perturbed_result.attack_attrs)
+#                 # if len(final_result.attacked_text.attack_attrs['newly_modified_indices']) == 0:
+#                 #     final_result.attacked_text.attack_attrs['newly_modified_indices'] = {0}
+#                 # if len(final_result.attacked_text.attack_attrs['modified_indices']) == 0:
+#                 #     # final_result.attacked_text.attack_attrs['modified_indices'] = {0}
+#                 #     return initial_result
+
+#                 return final_result
+#         print ('just aviod everything')
 #         return initial_result
 
 #     def random_initialization(self, text):
@@ -2099,74 +2552,245 @@ from textattack.constraints.semantics.sentence_encoders import UniversalSentence
 #         return adv_text
 
  
-#     def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False): # can update to include semantic sim optim
-        
-#         self.sentence_encoder_use()
 
+#     def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
+#         # Step 1: Identify words to replace back
+#         candidate_set = []
+#         word_importance_scores = [] 
+#         # print ('original_text',original_text)
+#         # print ('perturbed_text',perturbed_text)
 #         for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
 #             if perturbed_word != original_word:
-#                 temp_text = perturbed_text.replace_word_at_index(i, original_word) 
-#                 model_outputs = self.goal_function._call_model([temp_text])
-#                 print ('original_text',original_text)
-#                 print ('temp_text',temp_text)
-#                 sim_remove_unnecessary = self.sentence_encoder_use(original_text,temp_text)
-#                 print ('sim_remove_unnecessary',sim_remove_unnecessary)
-#                 sys.exit()
+#                 # Replace perturbed_word with original_word
+#                 temp_text = perturbed_text.replace_word_at_index(i, original_word)
 
-#                 # print ('model_outputs',model_outputs,GoalFunctionResultStatus.SUCCEEDED)
-#                 current_goal_status = self.goal_function._get_goal_status(
-#                     model_outputs[0], temp_text, check_skip=check_skip
-#                 ) 
-#                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-#                     perturbed_text = temp_text
-                     
-#         return perturbed_text
-
-#     def push_words_towards_original(self, perturbed_text, original_text,check_skip=False):
-#         for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-#             if perturbed_word != original_word: 
-
-#                 sentence_replaced = self.get_transformations(original_text,original_text=original_text,indices_to_modify=[i])
-
-#                 synonyms = []
-
-#                 for s in sentence_replaced:
-#                     s_words = s.words
-#                     synonyms.append(s_words[i])
- 
-#                 embedding = WordEmbedding.counterfitted_GLOVE_embedding() 
+#                 # Step 2: Check if still adversarial and calculate semantic similarity
+#                 # model_outputs = self.goal_function._call_model([temp_text])
+#                 # current_goal_status = self.goal_function._get_goal_status(
+#                 #     model_outputs[0], temp_text, check_skip=check_skip
+#                 # ) # this does keep track of queries so i have to keep track myself
                 
-#                 # synonyms.sort(key=lambda x: self.embedding.get_cos_sim(x, original_word), reverse=True) 
+#                 current_goal_status = self.check_model_status(temp_text,check_skip)
+#                 self.number_of_queries+=1 
+#                 print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+#                 # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
+#                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                     candidate_set.append((i, temp_text))
+#                     sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
 
-#                 synonyms_with_scores_and_transforms = []
+#                     if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                         sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-#                 # Step 1: Compute the cosine similarity scores
-#                 for synonym,sentence in zip(synonyms,sentence_replaced):
-#                     # print ('synonym,sentence',synonym,sentence)
-#                     cos_sim = self.embedding.get_cos_sim(synonym, original_word)
-#                     synonyms_with_scores_and_transforms.append((synonym, cos_sim,sentence))
+#                     if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                         sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-#                 # print ('synonyms_with_scores_and_transforms',synonyms_with_scores_and_transforms)
-#                 # sys.exit()
-#                 synonyms_with_scores_and_transforms.sort(key=lambda item: item[1], reverse=True)
+#                     sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                     word_importance_scores.append((i, sim_score))
 
-#                 # get top K synonyms based on eucledian distance
+#         # Step 3: Sort word importance scores in descending order and restore original words
+#         word_importance_scores.sort(key=lambda x: x[1], reverse=True)
+#         print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
+#         print ('replace indexs',word_importance_scores)
+#         for idx, _ in word_importance_scores:
+#             temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
+#             temp_text2.attack_attrs['modified_indices'].remove(idx)
+#             print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
+#             # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
+            
+#             # model_outputs = self.goal_function._call_model([temp_text2])
+#             # current_goal_status = self.goal_function._get_goal_status(
+#             #     model_outputs[0], temp_text2, check_skip=check_skip
+#             # ) # doest keep track of queries
+#             # self.goal_function.num_queries+=1
+#             current_goal_status = self.check_model_status(temp_text2,check_skip)
+#             self.number_of_queries+=1 
+#             print ('self.goal_function.num_queries 3',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+#             # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
 
-#                 for s, (synonym, score, transformation) in enumerate(synonyms_with_scores_and_transforms):
-#                     temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
-#                     temp_text = transformation# sentence_replaced[s_n]
-#                     # print ('temp_text2',temp_text2,synonym)
-#                     # print ('temp_text',temp_text, synonym)
-
-#                     model_outputs = self.goal_function._call_model([temp_text]) 
-#                     current_goal_status = self.goal_function._get_goal_status(
-#                         model_outputs[0], temp_text, check_skip=check_skip
-#                     ) 
-#                     if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-#                         perturbed_text = temp_text
-#                         break 
-                        
+ 
+#             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                 # If perturbed_text is no longer adversarial, revert the last change
+#                 perturbed_text = temp_text2
+#                 # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
+#             else:
+#                 break
+#         # print ('original_text',original_text)
+#         # print ('perturbed_text',perturbed_text) 
 #         return perturbed_text
+
+#     def get_vector(self, embedding, word):
+#         if isinstance(word, str):
+#             if word in embedding._word2index:
+#                 word_index = embedding._word2index[word]
+#             else:
+#                 return None  # Word not found in the dictionary
+#         else:
+#             word_index = word
+
+#         vector = embedding.embedding_matrix[word_index]
+#         return torch.tensor(vector).to(textattack.shared.utils.device)
+
+#     def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
+#         # Step 1: Calculate Euclidean distances and sampling probabilities
+#         distances = []
+#         for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
+#             if perturbed_word != original_word:
+#                 # Using the get_vector function
+#                 perturbed_vec = self.get_vector(self.embedding, perturbed_word)
+#                 if perturbed_vec is None:
+#                     continue  # Skip to the next word
+#                 original_vec = self.get_vector(self.embedding, original_word)
+#                 if original_vec is None:
+#                     continue  # Skip to the next word
+#                 distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
+#                 distances.append((i, distance))
+
+#         if not distances:
+#             return perturbed_text
+
+#         # Normalize distances to get probabilities
+#         distances.sort(key=lambda x: x[1])
+#         indices, dist_values = zip(*distances)
+#         exp_dist_values = np.exp(dist_values)
+#         probabilities = exp_dist_values / np.sum(exp_dist_values)
+#         print ('probabilities',probabilities)
+
+#         # temp_perturbed_text = copy.deepcopy(perturbed_text)
+        
+#         # Step 2: Iterate with sampling based on the probabilities 
+#         while len(indices) > 0:
+#             i = np.random.choice(indices, p=probabilities)
+#             print ('indices',indices,i)
+#             perturbed_word = perturbed_text.words[i]
+#             original_word = original_text.words[i]
+
+#             sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
+#             synonyms = [s.words[i] for s in sentence_replaced]
+
+
+#             # Get top k synonyms
+#             k = 10  # Number of synonyms to sample
+#             top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
+#             top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
+
+#             # Find the best anchor synonym with the highest semantic similarity
+#             max_similarity = -float('inf')
+#             w_bar = None
+#             temp_text_bar = None
+#             filtered_synonyms = None
+#             print ('top_k_synonyms',top_k_synonyms)
+#             # temp_text2 = copy.deepcopy(perturbed_text)
+#             for synonym in top_k_synonyms:
+#                 if perturbed_word == synonym:
+#                     continue # skip swapping the same word
+#                 print ('synonym',i,synonym)
+#                 # temp_text2 = copy.deepcopy(perturbed_text)
+#                 temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
+
+#                 # Check if the substitution still results in an adversarial example
+#                 # model_outputs = self.goal_function._call_model([temp_text2])
+#                 # current_goal_status = self.goal_function._get_goal_status(
+#                 #     model_outputs[0], temp_text2, check_skip=check_skip
+#                 # ) # doesnt keep track of queries
+#                 # self.goal_function.num_queries+=1
+#                 current_goal_status = self.check_model_status(temp_text2,check_skip)
+#                 self.number_of_queries+=1 
+#                 print ('self.goal_function.num_queries 4',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+#                 print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
+
+#                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                     # Compute semantic similarity at the word level
+#                     sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
+
+#                     if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                         sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+
+#                     if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                         sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+
+#                     sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
+#                     print ('sim scores push towards orgin')
+#                     if sim_score > max_similarity:
+#                         max_similarity = sim_score
+#                         w_bar = synonym
+#                         temp_text_bar = temp_text2
+
+            
+#             if w_bar:# is None:
+#                   # Skip this index if no suitable anchor synonym is found
+            
+#                 number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
+#                 print ('num entries',number_entries)
+#                 all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
+#                 all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
+            
+#                 print ('all_synonyms',all_synonyms)
+#                 filtered_synonyms = []
+#                 for synonym in all_synonyms:
+#                     if perturbed_word == synonym or w_bar == synonym  :
+#                         continue # skip swapping/checking the same word and the anchor word
+#                     # Compute semantic similarity with w_bar and original_word
+#                     sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
+#                     sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
+
+#                     if not isinstance(sim_w_bar, torch.Tensor):
+#                         sim_w_bar = torch.tensor(sim_w_bar)
+#                     if not isinstance(sim_synonym, torch.Tensor):
+#                         sim_synonym = torch.tensor(sim_synonym)
+#                     if not isinstance(sim_org, torch.Tensor):
+#                         sim_org = torch.tensor(sim_org)
+#                     if not isinstance(sim_synonym_org, torch.Tensor):
+#                         sim_synonym_org = torch.tensor(sim_synonym_org)
+
+#                     sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
+#                     sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
+
+#                     if sim_score_w_bar > sim_score_org:
+#                         filtered_synonyms.append((sim_score_w_bar, synonym))
+
+#             if  filtered_synonyms:
+#                 # continue  # Skip this index if no suitable synonym is found
+
+#                 # Sort the filtered synonyms by their semantic similarity score in descending order
+#                 filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
+#                 print ('filtered_synonyms',filtered_synonyms)
+                
+                
+
+#                 print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
+#                 for _, synonym in filtered_synonyms:
+#                     temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
+#                     # temp_text2.attack_attrs['modified_indices'].remove(i)
+#                     print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
+#                     # Check if the substitution still results in an adversarial example
+#                     # model_outputs = self.goal_function._call_model([temp_text2]) 
+#                     # current_goal_status = self.goal_function._get_goal_status(
+#                     #     model_outputs[0], temp_text2, check_skip=check_skip
+#                     # ) 
+#                     # self.goal_function.num_queries+=1
+#                     current_goal_status = self.check_model_status(temp_text2,check_skip)
+#                     self.number_of_queries+=1
+
+#                     print ('self.goal_function.num_queries 5',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
+            
+#                     print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
+#                     if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                         perturbed_text = temp_text2
+#                         break
+                    
+            
+#             print ('perturbed_text',perturbed_text)  
+#             idx = indices.index(i)
+#             indices = indices[:idx] + indices[idx + 1:] 
+#             print ('indices2',indices,idx)
+            
+#             probabilities = np.delete(probabilities, idx)
+#             probabilities /= np.sum(probabilities)   
+#         # sys.exit()
+#         return perturbed_text 
 
 #     def get_transformations(self, text, index):
 #         return self.transformation(text, index)
@@ -2178,1864 +2802,1440 @@ from textattack.constraints.semantics.sentence_encoders import UniversalSentence
 #     def is_black_box(self):
 #         return True
 
-import copy
-class SSPAttackSearch(SearchMethod):
-    def __init__(self, max_iterations=2,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self.max_iterations = max_iterations
-        self.embedding = WordEmbedding.counterfitted_GLOVE_embedding() 
-        self.sentence_encoder_use = UniversalSentenceEncoder(window_size=15)
-        
-        self.number_of_queries = 0
-
-    def check_model_status(self,input_text,check_skip=False):
-        model_outputs = self.goal_function._call_model([input_text])
-        current_goal_status = self.goal_function._get_goal_status(
-            model_outputs[0], input_text, check_skip=check_skip
-        )
-        self.goal_function.num_queries +=1
-        return current_goal_status
-
-    def perform_search(self, initial_result):
-        self.number_of_queries = 0 # raw counter mostly for infucntion debugging purposes
-        attacked_text = initial_result.attacked_text
-
-        print ('goal_function',self.goal_function)
-        
-        # Step 1: Initialization
-        number_samples = self.num_transformations
-        # self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
-        # self.goal_function.num_queries +=number_samples + 1
-        # self.goal_function.num_queries += self.num_transformations
-        # print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
-        # print ('self.goal_function.num_queries',a,'self.number_of_queries',self.number_of_queries)
-        perturbed_text = [self.random_initialization(attacked_text) for i in range(number_samples)]
-        
-        results, search_over = self.get_goal_results(perturbed_text) # automatically keeps track of queries
-        self.number_of_queries+=number_samples + 1
-        # self.goal_function.num_queries += self.num_transformations
-        print ('self.goal_function.num_queries 1',self.goal_function.num_queries)
-        
-        
-        results_success = [result for result in results if result.ground_truth_output!=result.output] 
-
-        results_success=[]
-        perturbed_text_success = []
-        for i,result in enumerate(results):
-            if result.ground_truth_output!=result.output:
-                results_success.append(result)
-                perturbed_text_success.append(perturbed_text[i])
-
-
-        print ('returnign failed?')
-        if len(results_success) == 0:
-            final_result = results[0]
-            # final_result.num_queries = self.number_of_queries
-            # self.goal_function.num_queries = self.number_of_queries 
-            print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-            # print ('self.goal_function.num_queries2',self.goal_function.num_queries,'self.number_of_queries',self.number_of_queries)
-            return final_result # return a random result that wasnt perturbed to show it failed.
-
-        perturbed_text = perturbed_text_success[0]
-        results = results_success[0]
- 
-
-        # check that sample is adversarial
-
-        print ('attacked_text',attacked_text)
-        print ('perturbed_text',perturbed_text)
-
-                 
-
-        
-        
-        # Main iteration loop
-        for _ in range(self.max_iterations):
-            # Step 2: Remove Unnecessary Replacement Words
-            
-            perturbed_text = self.remove_unnecessary_words(perturbed_text, attacked_text)
-            print ('perturned+text',perturbed_text)
-
-            # if attacked_text.words == perturbed_text.words:
-            #     print ('should we skipp?')
-            #     sys.exit() 
-
-            # Step 3: Push Substitution Words towards Original Words
-            perturbed_text = self.push_words_towards_original(perturbed_text, attacked_text)
-            print ('perturned+text2',perturbed_text) 
-            # if attacked_text == perturbed_text:
-            #     print ('should we skipp 2?')
-            #     sys.exit() 
-            # Check if attack is successful
-            results, search_over = self.get_goal_results([perturbed_text])
-            # perturbed_result = initial_result.goal_function.call_model([perturbed_text])[0]
-            # print ('results',results)
-            self.number_of_queries+= 1 # only 1 sample at the time
-            print ('self.goal_function.num_queries preend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-            # add semantic sim filter
-
-            # this checks the generated test against the actual final use constraint
-            
-              
-
-            final_result = results[0]
-
-             
-
-            if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                print ('attacked_text.text, final_result.attacked_text.text')
-                print ('attk text',attacked_text.text)
-                print ('final sre',final_result.attacked_text.text)
-                sim_final_original, sim_final_pert = self.use_constraint.encode([attacked_text.text, final_result.attacked_text.text])
-
-                if not isinstance(sim_final_original, torch.Tensor):
-                    sim_final_original = torch.tensor(sim_final_original)
-
-                if not isinstance(sim_final_pert, torch.Tensor):
-                    sim_final_pert = torch.tensor(sim_final_pert)
-
-                sim_score = self.sentence_encoder_use.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-                print ('sim_score',sim_score, (1 - (args.similarity_threshold) / math.pi))
-                if sim_score <  (1 - (args.similarity_threshold) / math.pi):
-                    continue
-
-                # final_result.num_queries = self.number_of_queries
-                # self.goal_function.num_queries = self.number_of_queries
-                print ('final_result.num_queries',final_result.num_queries)
-                print ('final,self.number_of_queries',self.number_of_queries)
-                print ('final,self.goal_function.num_queries ',self.goal_function.num_queries)
-                print ('self.goal_function.num_queries endend',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-                
-                # sys.exit()
-                print ('final_result',final_result.attacked_text)
-                print ('final_result.attacked_text.attack_attrs',final_result.attacked_text.attack_attrs)
-                print ('final_result.attacked_text.attack_attrs[original_index_map]',final_result.attacked_text.attack_attrs['original_index_map'])
-                # print ('final_result',final_result.original_text)
-                # print ('final_result',final_result.perturbed_text)
-                # print ('final_result.perturbed_result.attack_attrs',final_result.perturbed_result.attack_attrs)
-                # if len(final_result.attacked_text.attack_attrs['newly_modified_indices']) == 0:
-                #     final_result.attacked_text.attack_attrs['newly_modified_indices'] = {0}
-                # if len(final_result.attacked_text.attack_attrs['modified_indices']) == 0:
-                #     # final_result.attacked_text.attack_attrs['modified_indices'] = {0}
-                #     return initial_result
-
-                return final_result
-        print ('just aviod everything')
-        return initial_result
-
-    def random_initialization(self, text):
-        words = text.words
-        tmp_text = text
-        size_text = len(text.words)
-        start_i = 0
-        while start_i < size_text:
-            # print ('start tmp text',tmp_text)
-            words = tmp_text.words
-            pos_tags = nltk.pos_tag(words)   
-            # print ('pos_tags',pos_tags)
-            if pos_tags[start_i][1].startswith(('VB', 'NN', 'JJ', 'RB')): 
-                # print ('pos_tags[start_i][1]',pos_tags[start_i][1])
-                replaced_with_synonyms = self.get_transformations(tmp_text, original_text=tmp_text,indices_to_modify=[start_i])
-                # print ('replaced_with_synonyms',replaced_with_synonyms)
-                if replaced_with_synonyms:
-                    tmp_text = random.choice(replaced_with_synonyms)
-                else:
-                    pass
-                
-            start_i+=1
-            
-        adv_text = tmp_text
-        return adv_text
-
- 
-
-    def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
-        # Step 1: Identify words to replace back
-        candidate_set = []
-        word_importance_scores = [] 
-        # print ('original_text',original_text)
-        # print ('perturbed_text',perturbed_text)
-        for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-            if perturbed_word != original_word:
-                # Replace perturbed_word with original_word
-                temp_text = perturbed_text.replace_word_at_index(i, original_word)
-
-                # Step 2: Check if still adversarial and calculate semantic similarity
-                # model_outputs = self.goal_function._call_model([temp_text])
-                # current_goal_status = self.goal_function._get_goal_status(
-                #     model_outputs[0], temp_text, check_skip=check_skip
-                # ) # this does keep track of queries so i have to keep track myself
-                
-                current_goal_status = self.check_model_status(temp_text,check_skip)
-                self.number_of_queries+=1 
-                print ('self.goal_function.num_queries 2',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-                # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
-                if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                    candidate_set.append((i, temp_text))
-                    sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
-
-                    if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                        sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
-
-                    if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                        sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
-
-                    sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                    word_importance_scores.append((i, sim_score))
-
-        # Step 3: Sort word importance scores in descending order and restore original words
-        word_importance_scores.sort(key=lambda x: x[1], reverse=True)
-        print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
-        print ('replace indexs',word_importance_scores)
-        for idx, _ in word_importance_scores:
-            temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
-            temp_text2.attack_attrs['modified_indices'].remove(idx)
-            print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
-            # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
-            
-            # model_outputs = self.goal_function._call_model([temp_text2])
-            # current_goal_status = self.goal_function._get_goal_status(
-            #     model_outputs[0], temp_text2, check_skip=check_skip
-            # ) # doest keep track of queries
-            # self.goal_function.num_queries+=1
-            current_goal_status = self.check_model_status(temp_text2,check_skip)
-            self.number_of_queries+=1 
-            print ('self.goal_function.num_queries 3',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-            # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
-
- 
-            if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                # If perturbed_text is no longer adversarial, revert the last change
-                perturbed_text = temp_text2
-                # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
-            else:
-                break
-        # print ('original_text',original_text)
-        # print ('perturbed_text',perturbed_text) 
-        return perturbed_text
-
-    def get_vector(self, embedding, word):
-        if isinstance(word, str):
-            if word in embedding._word2index:
-                word_index = embedding._word2index[word]
-            else:
-                return None  # Word not found in the dictionary
-        else:
-            word_index = word
-
-        vector = embedding.embedding_matrix[word_index]
-        return torch.tensor(vector).to(textattack.shared.utils.device)
-
-    def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
-        # Step 1: Calculate Euclidean distances and sampling probabilities
-        distances = []
-        for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-            if perturbed_word != original_word:
-                # Using the get_vector function
-                perturbed_vec = self.get_vector(self.embedding, perturbed_word)
-                if perturbed_vec is None:
-                    continue  # Skip to the next word
-                original_vec = self.get_vector(self.embedding, original_word)
-                if original_vec is None:
-                    continue  # Skip to the next word
-                distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
-                distances.append((i, distance))
-
-        if not distances:
-            return perturbed_text
-
-        # Normalize distances to get probabilities
-        distances.sort(key=lambda x: x[1])
-        indices, dist_values = zip(*distances)
-        exp_dist_values = np.exp(dist_values)
-        probabilities = exp_dist_values / np.sum(exp_dist_values)
-        print ('probabilities',probabilities)
-
-        # temp_perturbed_text = copy.deepcopy(perturbed_text)
-        
-        # Step 2: Iterate with sampling based on the probabilities 
-        while len(indices) > 0:
-            i = np.random.choice(indices, p=probabilities)
-            print ('indices',indices,i)
-            perturbed_word = perturbed_text.words[i]
-            original_word = original_text.words[i]
-
-            sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
-            synonyms = [s.words[i] for s in sentence_replaced]
-
-
-            # Get top k synonyms
-            k = 10  # Number of synonyms to sample
-            top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
-            top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
-
-            # Find the best anchor synonym with the highest semantic similarity
-            max_similarity = -float('inf')
-            w_bar = None
-            temp_text_bar = None
-            filtered_synonyms = None
-            print ('top_k_synonyms',top_k_synonyms)
-            # temp_text2 = copy.deepcopy(perturbed_text)
-            for synonym in top_k_synonyms:
-                if perturbed_word == synonym:
-                    continue # skip swapping the same word
-                print ('synonym',i,synonym)
-                # temp_text2 = copy.deepcopy(perturbed_text)
-                temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
-
-                # Check if the substitution still results in an adversarial example
-                # model_outputs = self.goal_function._call_model([temp_text2])
-                # current_goal_status = self.goal_function._get_goal_status(
-                #     model_outputs[0], temp_text2, check_skip=check_skip
-                # ) # doesnt keep track of queries
-                # self.goal_function.num_queries+=1
-                current_goal_status = self.check_model_status(temp_text2,check_skip)
-                self.number_of_queries+=1 
-                print ('self.goal_function.num_queries 4',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-                print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
-
-                if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                    # Compute semantic similarity at the word level
-                    sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
-
-                    if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                        sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
-
-                    if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                        sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
-
-                    sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
-                    print ('sim scores push towards orgin')
-                    if sim_score > max_similarity:
-                        max_similarity = sim_score
-                        w_bar = synonym
-                        temp_text_bar = temp_text2
-
-            
-            if w_bar:# is None:
-                  # Skip this index if no suitable anchor synonym is found
-            
-                number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
-                print ('num entries',number_entries)
-                all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
-                all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
-            
-                print ('all_synonyms',all_synonyms)
-                filtered_synonyms = []
-                for synonym in all_synonyms:
-                    if perturbed_word == synonym or w_bar == synonym  :
-                        continue # skip swapping/checking the same word and the anchor word
-                    # Compute semantic similarity with w_bar and original_word
-                    sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
-                    sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
-
-                    if not isinstance(sim_w_bar, torch.Tensor):
-                        sim_w_bar = torch.tensor(sim_w_bar)
-                    if not isinstance(sim_synonym, torch.Tensor):
-                        sim_synonym = torch.tensor(sim_synonym)
-                    if not isinstance(sim_org, torch.Tensor):
-                        sim_org = torch.tensor(sim_org)
-                    if not isinstance(sim_synonym_org, torch.Tensor):
-                        sim_synonym_org = torch.tensor(sim_synonym_org)
-
-                    sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
-                    sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
-
-                    if sim_score_w_bar > sim_score_org:
-                        filtered_synonyms.append((sim_score_w_bar, synonym))
-
-            if  filtered_synonyms:
-                # continue  # Skip this index if no suitable synonym is found
-
-                # Sort the filtered synonyms by their semantic similarity score in descending order
-                filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
-                print ('filtered_synonyms',filtered_synonyms)
-                
-                
-
-                print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
-                for _, synonym in filtered_synonyms:
-                    temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
-                    # temp_text2.attack_attrs['modified_indices'].remove(i)
-                    print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
-                    # Check if the substitution still results in an adversarial example
-                    # model_outputs = self.goal_function._call_model([temp_text2]) 
-                    # current_goal_status = self.goal_function._get_goal_status(
-                    #     model_outputs[0], temp_text2, check_skip=check_skip
-                    # ) 
-                    # self.goal_function.num_queries+=1
-                    current_goal_status = self.check_model_status(temp_text2,check_skip)
-                    self.number_of_queries+=1
-
-                    print ('self.goal_function.num_queries 5',self.goal_function.num_queries,'self.number_of_queries ',self.number_of_queries )
-            
-                    print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
-                    if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        perturbed_text = temp_text2
-                        break
-                    
-            
-            print ('perturbed_text',perturbed_text)  
-            idx = indices.index(i)
-            indices = indices[:idx] + indices[idx + 1:] 
-            print ('indices2',indices,idx)
-            
-            probabilities = np.delete(probabilities, idx)
-            probabilities /= np.sum(probabilities)   
-        # sys.exit()
-        return perturbed_text 
-
-    def get_transformations(self, text, index):
-        return self.transformation(text, index)
-
-    def get_similarity(self, word1, word2):
-        return self.transformation.get_cosine_similarity(word1, word2)
-    
-    @property
-    def is_black_box(self):
-        return True
-
 
 
 from collections import defaultdict
-class TextHoaxer(SearchMethod):
-    def __init__(self, max_iterations=2,**kwargs): 
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self.max_iterations = max_iterations
-        self.embedding = WordEmbedding.counterfitted_GLOVE_embedding() 
-        self.sentence_encoder_use = UniversalSentenceEncoder(window_size=15)
-        self.download_synonym_file()
+# class TextHoaxer(SearchMethod):
+#     def __init__(self, max_iterations=2,**kwargs): 
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
+#         self.max_iterations = max_iterations
+#         self.embedding = WordEmbedding.counterfitted_GLOVE_embedding() 
+#         self.sentence_encoder_use = UniversalSentenceEncoder(window_size=15)
+#         self.download_synonym_file()
 
         
 
-        self.number_of_queries = 0
+#         self.number_of_queries = 0
 
-    def download_synonym_file(self):
-        import gdown
-        import pickle
-        # Create the full directory path if it doesn't exist
-        full_path = os.path.join(self.cache_dir, 'texthoaxer')
-        os.makedirs(full_path, exist_ok=True)
+#     def download_synonym_file(self):
+#         import gdown
+#         import pickle
+#         # Create the full directory path if it doesn't exist
+#         full_path = os.path.join(self.cache_dir, 'texthoaxer')
+#         os.makedirs(full_path, exist_ok=True)
 
-        # Define the URL or Google Drive ID
-        file_id = '1AIz8Imvv8OmHxVwY5kx10iwKAUzD6ODx'
-        url = f'https://drive.google.com/uc?id={file_id}'
+#         # Define the URL or Google Drive ID
+#         file_id = '1AIz8Imvv8OmHxVwY5kx10iwKAUzD6ODx'
+#         url = f'https://drive.google.com/uc?id={file_id}'
 
-        # Define the file path where the file will be saved
-        output_path = os.path.join(full_path, 'mat.txt')
+#         # Define the file path where the file will be saved
+#         output_path = os.path.join(full_path, 'mat.txt')
 
-        # Check if the file already exists
-        if os.path.exists(output_path):
-            print(f"File already exists at: {output_path}")
-        else:
-            # Download the file
-            print(f"Downloading file to: {output_path}")
-            gdown.download(url, output_path, quiet=False)
-            print("Download complete.")
+#         # Check if the file already exists
+#         if os.path.exists(output_path):
+#             print(f"File already exists at: {output_path}")
+#         else:
+#             # Download the file
+#             print(f"Downloading file to: {output_path}")
+#             gdown.download(url, output_path, quiet=False)
+#             print("Download complete.")
         
-        with open(output_path, "rb") as fp:
-            self.sim_lis = pickle.load(fp)
-    def soft_threshold(self, alpha, beta):
-        if beta > alpha:
-            return beta - alpha
-        elif beta < -alpha:
-            return beta + alpha
-        else:
-            return 0
-    def  get_pos(self,sent, tagset='universal'):
-        '''
-        :param sent: list of word strings
-        tagset: {'universal', 'default'}
-        :return: list of pos tags.
-        Universal (Coarse) Pos tags has  12 categories
-            - NOUN (nouns)
-            - VERB (verbs)
-            - ADJ (adjectives)
-            - ADV (adverbs)
-            - PRON (pronouns)
-            - DET (determiners and articles)
-            - ADP (prepositions and postpositions)
-            - NUM (numerals)
-            - CONJ (conjunctions)
-            - PRT (particles)
-            - . (punctuation marks)
-            - X (a catch-all for other categories such as abbreviations or foreign words)
-        '''
-        if tagset == 'default':
-            word_n_pos_list = nltk.pos_tag(sent)
-        elif tagset == 'universal':
-            word_n_pos_list = nltk.pos_tag(sent, tagset=tagset)
-        print ('tagset',tagset)
-        _, pos_list = zip(*word_n_pos_list)
-        return pos_list
+#         with open(output_path, "rb") as fp:
+#             self.sim_lis = pickle.load(fp)
+#     def soft_threshold(self, alpha, beta):
+#         if beta > alpha:
+#             return beta - alpha
+#         elif beta < -alpha:
+#             return beta + alpha
+#         else:
+#             return 0
+#     def  get_pos(self,sent, tagset='universal'):
+#         '''
+#         :param sent: list of word strings
+#         tagset: {'universal', 'default'}
+#         :return: list of pos tags.
+#         Universal (Coarse) Pos tags has  12 categories
+#             - NOUN (nouns)
+#             - VERB (verbs)
+#             - ADJ (adjectives)
+#             - ADV (adverbs)
+#             - PRON (pronouns)
+#             - DET (determiners and articles)
+#             - ADP (prepositions and postpositions)
+#             - NUM (numerals)
+#             - CONJ (conjunctions)
+#             - PRT (particles)
+#             - . (punctuation marks)
+#             - X (a catch-all for other categories such as abbreviations or foreign words)
+#         '''
+#         if tagset == 'default':
+#             word_n_pos_list = nltk.pos_tag(sent)
+#         elif tagset == 'universal':
+#             word_n_pos_list = nltk.pos_tag(sent, tagset=tagset)
+#         print ('tagset',tagset)
+#         _, pos_list = zip(*word_n_pos_list)
+#         return pos_list
 
-    def perform_search(self, initial_result):
-        self.number_of_queries = 0
-        attacked_text = initial_result.attacked_text
+#     def perform_search(self, initial_result):
+#         self.number_of_queries = 0
+#         attacked_text = initial_result.attacked_text
 
-        print ('goal_function',self.goal_function)
+#         print ('goal_function',self.goal_function)
         
         
 
-        # get_vector(self, self.embedding, word): # word can either be a str or the index eqivalant of embed_content[word_idx_dict[word] ]
+#         # get_vector(self, self.embedding, word): # word can either be a str or the index eqivalant of embed_content[word_idx_dict[word] ]
 
-        text_ls = attacked_text.words
-        true_label = initial_result.ground_truth_output 
-        orig_label = initial_result.output
+#         text_ls = attacked_text.words
+#         true_label = initial_result.ground_truth_output 
+#         orig_label = initial_result.output
 
-        word_idx_dict = self.embedding._word2index
-        embed_content = self.embedding
-        idx2word = self.embedding._index2word
-        word2idx = self.embedding._word2index
-        criteria = self
-        top_k_words = self.max_iter_i
-        cos_sim = self.sim_lis
-        budget =  self.query_budget - 1 # -1 because we have qrs > buget, but if we do a model call exacly on query results will be empty
-        num_synonyms = self.n_embeddings
-        pos_ls = criteria.get_pos(text_ls)
-        len_text = len(text_ls)
-        # if len_text < sim_score_window:
-        #     sim_score_threshold = 0.1
-        # half_sim_score_window = (sim_score_window - 1) // 2
-        num_queries = 1
-        rank = {}
-        words_perturb = []
-        # pos_ls = criteria.get_pos(text_ls)
-        # print ('pos_ls',pos_ls)
-        # pos_pref = ["ADJ", "ADV", "VERB", "NOUN"]
-        # for pos in pos_pref:
-        #     for i in range(len(pos_ls)):
-        #         if pos_ls[i] == pos and len(text_ls[i]) > 2:
-        #             words_perturb.append((i, text_ls[i]))
-        # print ('words_perturb',words_perturb)
-        # pos_ls = criteria.get_pos(text_ls)
-        pos_tags = nltk.pos_tag(text_ls)   
-        print ('pos_tags',pos_tags)
-        for i, (word, pos_tag) in enumerate(pos_tags):
-            if pos_tag.startswith(('VB', 'NN', 'JJ', 'RB')) and len(word) > 2:
-                words_perturb.append((i, word))
+#         word_idx_dict = self.embedding._word2index
+#         embed_content = self.embedding
+#         idx2word = self.embedding._index2word
+#         word2idx = self.embedding._word2index
+#         criteria = self
+#         top_k_words = self.max_iter_i
+#         cos_sim = self.sim_lis
+#         budget =  self.query_budget - 1 # -1 because we have qrs > buget, but if we do a model call exacly on query results will be empty
+#         num_synonyms = self.n_embeddings
+#         pos_ls = criteria.get_pos(text_ls)
+#         len_text = len(text_ls)
+#         # if len_text < sim_score_window:
+#         #     sim_score_threshold = 0.1
+#         # half_sim_score_window = (sim_score_window - 1) // 2
+#         num_queries = 1
+#         rank = {}
+#         words_perturb = []
+#         # pos_ls = criteria.get_pos(text_ls)
+#         # print ('pos_ls',pos_ls)
+#         # pos_pref = ["ADJ", "ADV", "VERB", "NOUN"]
+#         # for pos in pos_pref:
+#         #     for i in range(len(pos_ls)):
+#         #         if pos_ls[i] == pos and len(text_ls[i]) > 2:
+#         #             words_perturb.append((i, text_ls[i]))
+#         # print ('words_perturb',words_perturb)
+#         # pos_ls = criteria.get_pos(text_ls)
+#         pos_tags = nltk.pos_tag(text_ls)   
+#         print ('pos_tags',pos_tags)
+#         for i, (word, pos_tag) in enumerate(pos_tags):
+#             if pos_tag.startswith(('VB', 'NN', 'JJ', 'RB')) and len(word) > 2:
+#                 words_perturb.append((i, word))
 
-        random.shuffle(words_perturb)
-        words_perturb = words_perturb[:top_k_words]
-
-
-
-        print ('words_perturb',words_perturb) 
-        words_perturb_indices = [idx for idx, word in words_perturb]
+#         random.shuffle(words_perturb)
+#         words_perturb = words_perturb[:top_k_words]
 
 
 
-        # Step 1: Initialization
-        number_samples = self.num_transformations # 2
-        self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
-        self.goal_function.num_queries = self.number_of_queries
-        # self.goal_function.num_queries += number_samples + 1
-        perturbed_text = [self.random_initialization(attacked_text,words_perturb_indices) for i in range(number_samples)]
-        print ('perturbed_text',perturbed_text)
-        results, search_over = self.get_goal_results(perturbed_text)
+#         print ('words_perturb',words_perturb) 
+#         words_perturb_indices = [idx for idx, word in words_perturb]
+
+
+
+#         # Step 1: Initialization
+#         number_samples = self.num_transformations # 2
+#         self.number_of_queries+=number_samples + 1 # checking the original sample if it's correct, then num samples perturbations to find adv
+#         self.goal_function.num_queries = self.number_of_queries
+#         # self.goal_function.num_queries += number_samples + 1
+#         perturbed_text = [self.random_initialization(attacked_text,words_perturb_indices) for i in range(number_samples)]
+#         print ('perturbed_text',perturbed_text)
+#         results, search_over = self.get_goal_results(perturbed_text)
         
          
         
-        # results_success = [result for result in results if result.ground_truth_output!=result.output] 
+#         # results_success = [result for result in results if result.ground_truth_output!=result.output] 
 
-        results_success=[]
-        perturbed_text_success = []
-        for i,result in enumerate(results):
-            if result.ground_truth_output!=result.output:
-                results_success.append(result)
-                perturbed_text_success.append(perturbed_text[i])
+#         results_success=[]
+#         perturbed_text_success = []
+#         for i,result in enumerate(results):
+#             if result.ground_truth_output!=result.output:
+#                 results_success.append(result)
+#                 perturbed_text_success.append(perturbed_text[i])
 
 
-        print ('returnign failed?')
-        if len(results_success) == 0:
-            flag = 0
-        else:
-            flag = 1
+#         print ('returnign failed?')
+#         if len(results_success) == 0:
+#             flag = 0
+#         else:
+#             flag = 1
 
-            #     final_result = results[0]
+#             #     final_result = results[0]
                 
-            #     self.goal_function.num_queries = self.number_of_queries
-            #     self.goal_function.model.reset_inference_steps()
-            #     return final_result # return a random result that wasnt perturbed to show it failed.
+#             #     self.goal_function.num_queries = self.number_of_queries
+#             #     self.goal_function.model.reset_inference_steps()
+#             #     return final_result # return a random result that wasnt perturbed to show it failed.
 
-            perturbed_text = perturbed_text_success[0]
-            # results = results_success[0]
+#             perturbed_text = perturbed_text_success[0]
+#             # results = results_success[0]
     
 
-            # check that sample is adversarial
+#             # check that sample is adversarial
 
-            print ('attacked_text',attacked_text)
-            print ('perturbed_text',perturbed_text)
+#             print ('attacked_text',attacked_text)
+#             print ('perturbed_text',perturbed_text)
 
-            random_text = perturbed_text.words
-
-
-
-        words_perturb_idx= []
-        words_perturb_embed = []
-        words_perturb_doc_idx = []
-        for idx, word in words_perturb:
-            if word in word_idx_dict:
-                words_perturb_doc_idx.append(idx)
-                words_perturb_idx.append(word2idx[word])
-                # print ('[float(num) for num in embed_content[ word_idx_dict[word] ]', embed_content[ word_idx_dict[word]] )
-                words_perturb_embed.append([float(num) for num in embed_content[ word_idx_dict[word] ]])
-                # print ('words_perturb_embed',words_perturb_embed) 
-
-        words_perturb_embed_matrix = np.asarray(words_perturb_embed)
+#             random_text = perturbed_text.words
 
 
-        synonym_words,synonym_values=[],[]
-        for idx in words_perturb_idx:
-            res = list(zip(*(cos_sim[idx])))
+
+#         words_perturb_idx= []
+#         words_perturb_embed = []
+#         words_perturb_doc_idx = []
+#         for idx, word in words_perturb:
+#             if word in word_idx_dict:
+#                 words_perturb_doc_idx.append(idx)
+#                 words_perturb_idx.append(word2idx[word])
+#                 # print ('[float(num) for num in embed_content[ word_idx_dict[word] ]', embed_content[ word_idx_dict[word]] )
+#                 words_perturb_embed.append([float(num) for num in embed_content[ word_idx_dict[word] ]])
+#                 # print ('words_perturb_embed',words_perturb_embed) 
+
+#         words_perturb_embed_matrix = np.asarray(words_perturb_embed)
+
+
+#         synonym_words,synonym_values=[],[]
+#         for idx in words_perturb_idx:
+#             res = list(zip(*(cos_sim[idx])))
             
-            # print ('res',res, len(res),len(res[0]),len(res[1]))
-            res[0] = res[0][:self.n_embeddings]
-            res[1] = res[1][:self.n_embeddings]
-            # [:self.n_embeddings]
-            # print ('res',len(res[0]),len(res[1]))
-            # sys.exit()
-            temp=[]
-            for ii in res[1]:
-                temp.append(idx2word[ii])
-            print ('temp syn words',idx2word[idx],temp, len(temp))
-            synonym_words.append(temp)
-            temp=[]
-            for ii in res[0]:
-                temp.append(ii)
-            print ('temp syn values',idx2word[idx],temp, len(temp))
-            synonym_values.append(temp)
+#             # print ('res',res, len(res),len(res[0]),len(res[1]))
+#             res[0] = res[0][:self.n_embeddings]
+#             res[1] = res[1][:self.n_embeddings]
+#             # [:self.n_embeddings]
+#             # print ('res',len(res[0]),len(res[1]))
+#             # sys.exit()
+#             temp=[]
+#             for ii in res[1]:
+#                 temp.append(idx2word[ii])
+#             print ('temp syn words',idx2word[idx],temp, len(temp))
+#             synonym_words.append(temp)
+#             temp=[]
+#             for ii in res[0]:
+#                 temp.append(ii)
+#             print ('temp syn values',idx2word[idx],temp, len(temp))
+#             synonym_values.append(temp)
 
-        synonyms_all = []
-        synonyms_dict = defaultdict(list)
-        for idx, word in words_perturb:
-            if word in word2idx:
-                synonyms = synonym_words.pop(0)
-                if synonyms:
-                    synonyms_all.append((idx, synonyms))
-                    synonyms_dict[word] = synonyms
+#         synonyms_all = []
+#         synonyms_dict = defaultdict(list)
+#         for idx, word in words_perturb:
+#             if word in word2idx:
+#                 synonyms = synonym_words.pop(0)
+#                 if synonyms:
+#                     synonyms_all.append((idx, synonyms))
+#                     synonyms_dict[word] = synonyms
 
-        # print ('synonym_words',synonym_words)
-        print ('synonyms_all',synonyms_all)
-        ###################### erlier code ##########################
-        # qrs = 1 # qrs start at 1 because we already had to use 1 query to detect if sample gets classified correctly
-        # num_changed = 0
-        # flag = 0
-        # th = 0
-        # while qrs < len(text_ls):
-        #     print ('qrs1',qrs)
-        #     random_text = text_ls[:]
-        #     for i in range(len(synonyms_all)):
-        #         idx = synonyms_all[i][0]
-        #         syn = synonyms_all[i][1]
-        #         random_text[idx] = random.choice(syn)
-        #         if i >= th:
-        #             break
-        #     print ('random_text 1',random_text)
-        #     print ('attacked_text 1',attacked_text)
-        #     print ('text_ls 1',text_ls)
-        #     # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
-        #     # model_outputs = self.goal_function._call_model([random_text_joint])
-        #     # current_goal_status = self.goal_function._get_goal_status(
-        #     #     model_outputs[0], random_text_joint, check_skip=False
-        #     # )
-        #     # self.number_of_queries+=1
+#         # print ('synonym_words',synonym_words)
+#         print ('synonyms_all',synonyms_all)
+#         ###################### erlier code ##########################
+#         # qrs = 1 # qrs start at 1 because we already had to use 1 query to detect if sample gets classified correctly
+#         # num_changed = 0
+#         # flag = 0
+#         # th = 0
+#         # while qrs < len(text_ls):
+#         #     print ('qrs1',qrs)
+#         #     random_text = text_ls[:]
+#         #     for i in range(len(synonyms_all)):
+#         #         idx = synonyms_all[i][0]
+#         #         syn = synonyms_all[i][1]
+#         #         random_text[idx] = random.choice(syn)
+#         #         if i >= th:
+#         #             break
+#         #     print ('random_text 1',random_text)
+#         #     print ('attacked_text 1',attacked_text)
+#         #     print ('text_ls 1',text_ls)
+#         #     # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
+#         #     # model_outputs = self.goal_function._call_model([random_text_joint])
+#         #     # current_goal_status = self.goal_function._get_goal_status(
+#         #     #     model_outputs[0], random_text_joint, check_skip=False
+#         #     # )
+#         #     # self.number_of_queries+=1
             
-        #     random_text_joint = attacked_text.generate_new_attacked_text(random_text)
-        #     results_adv_initial, search_over = self.get_goal_results([random_text_joint])
-        #     # pr = get_attack_result([random_text], predictor, orig_label, batch_size)
-        #     if search_over: 
-        #         self.goal_function.model.reset_inference_steps()
-        #         return initial_result
+#         #     random_text_joint = attacked_text.generate_new_attacked_text(random_text)
+#         #     results_adv_initial, search_over = self.get_goal_results([random_text_joint])
+#         #     # pr = get_attack_result([random_text], predictor, orig_label, batch_size)
+#         #     if search_over: 
+#         #         self.goal_function.model.reset_inference_steps()
+#         #         return initial_result
 
-        #     qrs+=1
-        #     self.number_of_queries+=1
-        #     self.goal_function.num_queries = self.number_of_queries
-        #     th +=1
-        #     if th > len_text:
-        #         break
-        #     # if np.sum(pr)>0:
-        #     # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-        #     # print ('results first',results)
-        #     # if len(results) == 0: 
-        #     #     print ('returning initial result 1', initial_result)
-        #     #     return initial_result
+#         #     qrs+=1
+#         #     self.number_of_queries+=1
+#         #     self.goal_function.num_queries = self.number_of_queries
+#         #     th +=1
+#         #     if th > len_text:
+#         #         break
+#         #     # if np.sum(pr)>0:
+#         #     # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#         #     # print ('results first',results)
+#         #     # if len(results) == 0: 
+#         #     #     print ('returning initial result 1', initial_result)
+#         #     #     return initial_result
 
-        #     if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-        #         flag = 1
-        #         break
-        # old_qrs = qrs
-        # print ('old_qrs',old_qrs)
-        ######################################################
-        qrs = number_samples + 1
-        old_qrs = qrs  
-        print ('old_qrs',old_qrs)
+#         #     if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#         #         flag = 1
+#         #         break
+#         # old_qrs = qrs
+#         # print ('old_qrs',old_qrs)
+#         ######################################################
+#         qrs = number_samples + 1
+#         old_qrs = qrs  
+#         print ('old_qrs',old_qrs)
 
-        # while qrs < old_qrs + 2500 and flag == 0:
+#         # while qrs < old_qrs + 2500 and flag == 0:
 
-        # we remove this part because althou if tries all possible queries to find a solution, to make sure we stay in buget we 
-        # focus only on examples that we found an adversarial example quickly then optimize it's semantic similarity.
-        # while qrs < budget and flag == 0:
-        #     print ('qrs2',qrs)
-        #     random_text = text_ls[:]
-        #     for j in range(len(synonyms_all)):
-        #         idx = synonyms_all[j][0]
-        #         syn = synonyms_all[j][1]
-        #         random_text[idx] = random.choice(syn)
-        #         if j >= len_text:
-        #             break
-        #     # pr = get_attack_result([random_text], predictor, orig_label, batch_size) 
-        #     print ('random_text 2',random_text)
-        #     print ('attacked_text 2',attacked_text)
-        #     print ('text_ls 2',text_ls)
-        #     # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
-        #     # model_outputs = self.goal_function._call_model([random_text_joint])
-        #     # current_goal_status = self.goal_function._get_goal_status(
-        #     #     model_outputs[0], random_text_joint, check_skip=False
-        #     # )
-        #     # self.number_of_queries+=1
+#         # we remove this part because althou if tries all possible queries to find a solution, to make sure we stay in buget we 
+#         # focus only on examples that we found an adversarial example quickly then optimize it's semantic similarity.
+#         # while qrs < budget and flag == 0:
+#         #     print ('qrs2',qrs)
+#         #     random_text = text_ls[:]
+#         #     for j in range(len(synonyms_all)):
+#         #         idx = synonyms_all[j][0]
+#         #         syn = synonyms_all[j][1]
+#         #         random_text[idx] = random.choice(syn)
+#         #         if j >= len_text:
+#         #             break
+#         #     # pr = get_attack_result([random_text], predictor, orig_label, batch_size) 
+#         #     print ('random_text 2',random_text)
+#         #     print ('attacked_text 2',attacked_text)
+#         #     print ('text_ls 2',text_ls)
+#         #     # random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
+#         #     # model_outputs = self.goal_function._call_model([random_text_joint])
+#         #     # current_goal_status = self.goal_function._get_goal_status(
+#         #     #     model_outputs[0], random_text_joint, check_skip=False
+#         #     # )
+#         #     # self.number_of_queries+=1
 
-        #     random_text_joint = attacked_text.generate_new_attacked_text(random_text)
-        #     results_adv_initial, search_over = self.get_goal_results([random_text_joint])
-        #     if search_over: 
-        #         self.goal_function.model.reset_inference_steps()
-        #         return initial_result
-        #     qrs+=1
-        #     self.number_of_queries+=1
-        #     self.goal_function.num_queries = self.number_of_queries
-        #     # if np.sum(pr)>0:
-        #     # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-        #     print ('results_adv_initial second',results_adv_initial)
+#         #     random_text_joint = attacked_text.generate_new_attacked_text(random_text)
+#         #     results_adv_initial, search_over = self.get_goal_results([random_text_joint])
+#         #     if search_over: 
+#         #         self.goal_function.model.reset_inference_steps()
+#         #         return initial_result
+#         #     qrs+=1
+#         #     self.number_of_queries+=1
+#         #     self.goal_function.num_queries = self.number_of_queries
+#         #     # if np.sum(pr)>0:
+#         #     # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#         #     print ('results_adv_initial second',results_adv_initial)
 
 
-        #     # print ('returning failed result because flag==0')
-        #     # results, search_over = self.get_goal_results([attacked_text])
-        #     # return results[0]
+#         #     # print ('returning failed result because flag==0')
+#         #     # results, search_over = self.get_goal_results([attacked_text])
+#         #     # return results[0]
 
-        #     # if len(results) == 0: 
-        #     #     print ('returning initial result 2', initial_result)
-        #     #     return initial_result
+#         #     # if len(results) == 0: 
+#         #     #     print ('returning initial result 2', initial_result)
+#         #     #     return initial_result
 
-        #     if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-        #         flag = 1
-        #         break
+#         #     if results_adv_initial[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#         #         flag = 1
+#         #         break
             
             
-        print ('flag',flag) 
-        if flag == 1:
-            changed = 0
-            for i in range(len(text_ls)):
-                if text_ls[i]!=random_text[i]:
-                    changed+=1
+#         print ('flag',flag) 
+#         if flag == 1:
+#             changed = 0
+#             for i in range(len(text_ls)):
+#                 if text_ls[i]!=random_text[i]:
+#                     changed+=1
              
 
-            print ('original_random_text',random_text)
-            while True:
-                choices = []
+#             print ('original_random_text',random_text)
+#             while True:
+#                 choices = []
 
-                for i in range(len(text_ls)):
-                    if random_text[i] != text_ls[i]:
-                        new_text = random_text[:]
-                        new_text[i] = text_ls[i]
-                        # print ('text_ls, [new_text], -1, sim_score_window, sim_predictor',text_ls, [new_text], -1, sim_score_window, sim_predictor)
+#                 for i in range(len(text_ls)):
+#                     if random_text[i] != text_ls[i]:
+#                         new_text = random_text[:]
+#                         new_text[i] = text_ls[i]
+#                         # print ('text_ls, [new_text], -1, sim_score_window, sim_predictor',text_ls, [new_text], -1, sim_score_window, sim_predictor)
                         
                         
 
 
-                        new_text_joint = attacked_text.generate_new_attacked_text(new_text) 
+#                         new_text_joint = attacked_text.generate_new_attacked_text(new_text) 
 
 
-                        print ('attacked_text',attacked_text)
-                        print ('new_text_joint',new_text_joint)
-                        if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            continue
+#                         print ('attacked_text',attacked_text)
+#                         print ('new_text_joint',new_text_joint)
+#                         if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                             continue
                         
 
-                        sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, new_text_joint.text])
+#                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, new_text_joint.text])
 
-                        if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                            sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                             sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                        if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                            sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                         if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                             sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                        semantic_sims = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                         semantic_sims = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
                         
-                        print ('semantic_sims1',semantic_sims)
-                        # semantic_sims = calc_sim(text_ls, [new_text], -1, sim_score_window, sim_predictor)
-                        # model_outputs = self.goal_function._call_model([new_text_joint])
-                        # current_goal_status = self.goal_function._get_goal_status(
-                        #     model_outputs[0], new_text_joint, check_skip=False
-                        # )
-                        # self.number_of_queries+=1
-                        # random_text_joint = attacked_text.generate_new_attacked_text(new_text_joint)
-                        results, search_over = self.get_goal_results([new_text_joint])
-                        if search_over: 
-                            self.goal_function.model.reset_inference_steps()
-                            return initial_result
-                        print ('qrs3',qrs)
-                        qrs+=1
-                        self.number_of_queries+=1
-                        self.goal_function.num_queries = self.number_of_queries
-                        # self.goal_function.num_queries+=1
-                        # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                            choices.append((i,semantic_sims[0]))
+#                         print ('semantic_sims1',semantic_sims)
+#                         # semantic_sims = calc_sim(text_ls, [new_text], -1, sim_score_window, sim_predictor)
+#                         # model_outputs = self.goal_function._call_model([new_text_joint])
+#                         # current_goal_status = self.goal_function._get_goal_status(
+#                         #     model_outputs[0], new_text_joint, check_skip=False
+#                         # )
+#                         # self.number_of_queries+=1
+#                         # random_text_joint = attacked_text.generate_new_attacked_text(new_text_joint)
+#                         results, search_over = self.get_goal_results([new_text_joint])
+#                         if search_over: 
+#                             self.goal_function.model.reset_inference_steps()
+#                             return initial_result
+#                         print ('qrs3',qrs)
+#                         qrs+=1
+#                         self.number_of_queries+=1
+#                         self.goal_function.num_queries = self.number_of_queries
+#                         # self.goal_function.num_queries+=1
+#                         # if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                         if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                             choices.append((i,semantic_sims[0]))
  
-                        # qrs+=1
-                        # pr = get_attack_result([new_text], predictor, orig_label, batch_size)
-                        # if np.sum(pr) > 0:
-                        #     choices.append((i,semantic_sims[0]))
+#                         # qrs+=1
+#                         # pr = get_attack_result([new_text], predictor, orig_label, batch_size)
+#                         # if np.sum(pr) > 0:
+#                         #     choices.append((i,semantic_sims[0]))
 
-                print ('choices', choices) 
-                if len(choices) > 0:
-                    choices.sort(key = lambda x: x[1])
-                    choices.reverse()
-                    for i in range(len(choices)):
-                        new_text = random_text[:]
-                        new_text[choices[i][0]] = text_ls[choices[i][0]]
+#                 print ('choices', choices) 
+#                 if len(choices) > 0:
+#                     choices.sort(key = lambda x: x[1])
+#                     choices.reverse()
+#                     for i in range(len(choices)):
+#                         new_text = random_text[:]
+#                         new_text[choices[i][0]] = text_ls[choices[i][0]]
 
-                        # new_text_joint = attacked_text.generate_new_attacked_text(new_text) 
-                        # model_outputs = self.goal_function._call_model([new_text_joint])
-                        # current_goal_status = self.goal_function._get_goal_status(
-                        #     model_outputs[0], new_text_joint, check_skip=False
-                        # )
-                        # self.number_of_queries+=1
+#                         # new_text_joint = attacked_text.generate_new_attacked_text(new_text) 
+#                         # model_outputs = self.goal_function._call_model([new_text_joint])
+#                         # current_goal_status = self.goal_function._get_goal_status(
+#                         #     model_outputs[0], new_text_joint, check_skip=False
+#                         # )
+#                         # self.number_of_queries+=1
 
-                        new_text_joint = attacked_text.generate_new_attacked_text(new_text)
-                        if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            continue
+#                         new_text_joint = attacked_text.generate_new_attacked_text(new_text)
+#                         if attacked_text.text == new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                             continue
 
-                        results, search_over = self.get_goal_results([new_text_joint])
-                        if search_over: 
-                            self.goal_function.model.reset_inference_steps()
-                            return initial_result
+#                         results, search_over = self.get_goal_results([new_text_joint])
+#                         if search_over: 
+#                             self.goal_function.model.reset_inference_steps()
+#                             return initial_result
 
-                        qrs+=1
-                        self.number_of_queries+=1
-                        self.goal_function.num_queries = self.number_of_queries
-                        # self.goal_function.num_queries+=1
-                        # if current_goal_status != GoalFunctionResultStatus.SUCCEEDED:
-                        if results[0].goal_status != GoalFunctionResultStatus.SUCCEEDED:
-                            break
-                        random_text[choices[i][0]] = text_ls[choices[i][0]]
+#                         qrs+=1
+#                         self.number_of_queries+=1
+#                         self.goal_function.num_queries = self.number_of_queries
+#                         # self.goal_function.num_queries+=1
+#                         # if current_goal_status != GoalFunctionResultStatus.SUCCEEDED:
+#                         if results[0].goal_status != GoalFunctionResultStatus.SUCCEEDED:
+#                             break
+#                         random_text[choices[i][0]] = text_ls[choices[i][0]]
 
-                        # pr = get_attack_result([new_text], predictor, orig_label, batch_size)
-                        # qrs+=1
-                        # if pr[0] == 0:
-                        #     break
-                        # random_text[choices[i][0]] = text_ls[choices[i][0]]
+#                         # pr = get_attack_result([new_text], predictor, orig_label, batch_size)
+#                         # qrs+=1
+#                         # if pr[0] == 0:
+#                         #     break
+#                         # random_text[choices[i][0]] = text_ls[choices[i][0]]
 
-                if len(choices) == 0:
-                    break
+#                 if len(choices) == 0:
+#                     break
             
-            print ('after choices random_text',random_text) 
-            changed_indices = [] 
-            num_changed = 0
-            for i in range(len(text_ls)):
-                if text_ls[i]!=random_text[i]:
-                    changed_indices.append(i)
-                    num_changed+=1
-            print(str(num_changed)+" "+str(qrs))
+#             print ('after choices random_text',random_text) 
+#             changed_indices = [] 
+#             num_changed = 0
+#             for i in range(len(text_ls)):
+#                 if text_ls[i]!=random_text[i]:
+#                     changed_indices.append(i)
+#                     num_changed+=1
+#             print(str(num_changed)+" "+str(qrs))
 
-            new_random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
-            print ('attacked_text',attacked_text)
-            print ('new_random_text_joint',new_random_text_joint)
+#             new_random_text_joint = attacked_text.generate_new_attacked_text(random_text) 
+#             print ('attacked_text',attacked_text)
+#             print ('new_random_text_joint',new_random_text_joint)
             
-            sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, new_random_text_joint.text])
+#             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, new_random_text_joint.text])
 
-            if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                 sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-            if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#             if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                 sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-            random_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-            random_sim = random_sim.item()
-            print ('random_sim1',random_sim)
+#             random_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#             random_sim = random_sim.item()
+#             print ('random_sim1',random_sim)
 
 
-            # random_sim = calc_sim(text_ls, [random_text], -1, sim_score_window, sim_predictor)[0]
+#             # random_sim = calc_sim(text_ls, [random_text], -1, sim_score_window, sim_predictor)[0]
 
-            print ('qrs budget 1',qrs)
-            if qrs > budget:
-                # return fail 
-                random_text_qrs_joint = attacked_text.generate_new_attacked_text(random_text) 
+#             print ('qrs budget 1',qrs)
+#             if qrs > budget:
+#                 # return fail 
+#                 random_text_qrs_joint = attacked_text.generate_new_attacked_text(random_text) 
 
-                sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, random_text_qrs_joint.text])
+#                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, random_text_qrs_joint.text])
 
-                if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                    sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                    sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                failed_sem_sim = failed_sem_sim.item()
-                print ('failed_sem_sim0',failed_sem_sim)
+#                 failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                 failed_sem_sim = failed_sem_sim.item()
+#                 print ('failed_sem_sim0',failed_sem_sim)
 
-                if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
-                    print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
-                    # results_inner, search_over = self.get_goal_results([attacked_text])
-                    # return results_inner[0]
-                    self.goal_function.model.reset_inference_steps()
-                    return initial_result
-                else:
-                    print ('out of queries, random_text_qrs_joint',random_text_qrs_joint)
-                    results_inner, search_over = self.get_goal_results([random_text_qrs_joint])
-                    self.goal_function.model.reset_inference_steps()
-                    return results_inner[0]
+#                 if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
+#                     print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
+#                     # results_inner, search_over = self.get_goal_results([attacked_text])
+#                     # return results_inner[0]
+#                     self.goal_function.model.reset_inference_steps()
+#                     return initial_result
+#                 else:
+#                     print ('out of queries, random_text_qrs_joint',random_text_qrs_joint)
+#                     results_inner, search_over = self.get_goal_results([random_text_qrs_joint])
+#                     self.goal_function.model.reset_inference_steps()
+#                     return results_inner[0]
                 
                 
 
                  
-                # return ' '.join(random_text), len(changed_indices), len(changed_indices), \
-                #     orig_label, torch.argmax(predictor([random_text])), qrs, random_sim, random_sim
+#                 # return ' '.join(random_text), len(changed_indices), len(changed_indices), \
+#                 #     orig_label, torch.argmax(predictor([random_text])), qrs, random_sim, random_sim
 
-            if num_changed == 1:
-                random_text_num_changed_joint = attacked_text.generate_new_attacked_text(random_text)  
-                sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, random_text_num_changed_joint.text])
+#             if num_changed == 1:
+#                 random_text_num_changed_joint = attacked_text.generate_new_attacked_text(random_text)  
+#                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, random_text_num_changed_joint.text])
 
-                if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                    sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                    sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                failed_sem_sim = failed_sem_sim.item()
-                print ('failed_sem_sim1',failed_sem_sim)
+#                 failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                 failed_sem_sim = failed_sem_sim.item()
+#                 print ('failed_sem_sim1',failed_sem_sim)
 
-                if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
-                    print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
-                    # results_inner, search_over = self.get_goal_results([attacked_text])
-                    # return results_inner[0]
-                    self.goal_function.model.reset_inference_steps()
-                    return initial_result
-                else:
-                    print ('out of queries, random_text_num_changed_joint',random_text_num_changed_joint)
-                    results_inner, search_over = self.get_goal_results([random_text_num_changed_joint])
-                    self.goal_function.model.reset_inference_steps()
-                    return results_inner[0]
+#                 if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
+#                     print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
+#                     # results_inner, search_over = self.get_goal_results([attacked_text])
+#                     # return results_inner[0]
+#                     self.goal_function.model.reset_inference_steps()
+#                     return initial_result
+#                 else:
+#                     print ('out of queries, random_text_num_changed_joint',random_text_num_changed_joint)
+#                     results_inner, search_over = self.get_goal_results([random_text_num_changed_joint])
+#                     self.goal_function.model.reset_inference_steps()
+#                     return results_inner[0]
                     
-                # return failed
-                # return ' '.join(random_text), 1, 1, \
-                #     orig_label, torch.argmax(predictor([random_text])), qrs, random_sim, random_sim
+#                 # return failed
+#                 # return ' '.join(random_text), 1, 1, \
+#                 #     orig_label, torch.argmax(predictor([random_text])), qrs, random_sim, random_sim
 
             
 
-            best_attack = random_text
-            # best_sim = calc_sim(text_ls, [best_attack], -1, sim_score_window, sim_predictor)
-            best_sim = random_sim
+#             best_attack = random_text
+#             # best_sim = calc_sim(text_ls, [best_attack], -1, sim_score_window, sim_predictor)
+#             best_sim = random_sim
 
-            already_explored = set()
+#             already_explored = set()
 
 
-            gamma = 0.3*np.ones([words_perturb_embed_matrix.shape[0], 1])
-            l1 = 0.1
-            l2_lambda = 0.1
-            for t in range(100):
+#             gamma = 0.3*np.ones([words_perturb_embed_matrix.shape[0], 1])
+#             l1 = 0.1
+#             l2_lambda = 0.1
+#             for t in range(100):
 
-                theta_old_text = best_attack
-                sim_old= best_sim 
-                old_adv_embed = []
-                for idx in words_perturb_doc_idx:
-                    # old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[theta_old_text[idx]]].strip().split()[1:]])
-                    old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[theta_old_text[idx]]]])
-                old_adv_embed_matrix = np.asarray(old_adv_embed)
+#                 theta_old_text = best_attack
+#                 sim_old= best_sim 
+#                 old_adv_embed = []
+#                 for idx in words_perturb_doc_idx:
+#                     # old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[theta_old_text[idx]]].strip().split()[1:]])
+#                     old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[theta_old_text[idx]]]])
+#                 old_adv_embed_matrix = np.asarray(old_adv_embed)
 
-                theta_old = old_adv_embed_matrix-words_perturb_embed_matrix
+#                 theta_old = old_adv_embed_matrix-words_perturb_embed_matrix
                
-                u_vec = np.random.normal(loc=0.0, scale=1,size=theta_old.shape)
-                theta_old_neighbor = theta_old+0.5*u_vec
-                # print ('theta_old_neighbor',theta_old_neighbor)
-                # Check if theta_old_neighbor is a 2D array
-                if theta_old_neighbor.ndim != 2:
-                    print('theta_old_neighbor not a 2D array. Skipping this iteration.')
-                    continue
-                theta_perturb_dist = np.sum((theta_old_neighbor)**2, axis=1)
-                nonzero_ele = np.nonzero(np.linalg.norm(theta_old,axis = -1))[0].tolist()
-                perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
+#                 u_vec = np.random.normal(loc=0.0, scale=1,size=theta_old.shape)
+#                 theta_old_neighbor = theta_old+0.5*u_vec
+#                 # print ('theta_old_neighbor',theta_old_neighbor)
+#                 # Check if theta_old_neighbor is a 2D array
+#                 if theta_old_neighbor.ndim != 2:
+#                     print('theta_old_neighbor not a 2D array. Skipping this iteration.')
+#                     continue
+#                 theta_perturb_dist = np.sum((theta_old_neighbor)**2, axis=1)
+#                 nonzero_ele = np.nonzero(np.linalg.norm(theta_old,axis = -1))[0].tolist()
+#                 perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
 
-                theta_old_neighbor_text = text_ls[:]
-                for perturb_idx in range(len(nonzero_ele)):
-                    perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
-                    word_dict_idx = words_perturb_idx[perturb_word_idx]
+#                 theta_old_neighbor_text = text_ls[:]
+#                 for perturb_idx in range(len(nonzero_ele)):
+#                     perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
+#                     word_dict_idx = words_perturb_idx[perturb_word_idx]
                     
-                    perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_old_neighbor[perturb_word_idx]
-                    syn_feat_set = []
-                    for syn in synonyms_all[perturb_word_idx][1]:
-                        # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
-                        syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
-                        syn_feat_set.append(syn_feat)
+#                     perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_old_neighbor[perturb_word_idx]
+#                     syn_feat_set = []
+#                     for syn in synonyms_all[perturb_word_idx][1]:
+#                         # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
+#                         syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
+#                         syn_feat_set.append(syn_feat)
 
-                    perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
-                    perturb_syn_order = np.argsort(perturb_syn_dist)
-                    replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
+#                     perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
+#                     perturb_syn_order = np.argsort(perturb_syn_dist)
+#                     replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
                     
-                    theta_old_neighbor_text[synonyms_all[perturb_word_idx][0]] = replacement
+#                     theta_old_neighbor_text[synonyms_all[perturb_word_idx][0]] = replacement
 
-                    theta_old_neighbor_text_joint = attacked_text.generate_new_attacked_text(theta_old_neighbor_text)
-                    print ('attacked_text',attacked_text)
-                    print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
-                    if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                        continue 
-                    # elif theta_old_neighbor_text_joint in already_explored:
-                    #     continue
-                    # else:
-                    #     already_explored.add(theta_old_neighbor_text_joint)
-                    # model_outputs = self.goal_function._call_model([theta_old_neighbor_text_joint])
-                    # current_goal_status = self.goal_function._get_goal_status(
-                    #     model_outputs[0], theta_old_neighbor_text_joint, check_skip=False
-                    # )
-                    # self.number_of_queries+=1
-                    results, search_over = self.get_goal_results([theta_old_neighbor_text_joint])
-                    if search_over: 
-                        self.goal_function.model.reset_inference_steps()
-                        return initial_result
-                    print ('qrs budget 2',qrs)
-                    qrs+=1
-                    self.number_of_queries+=1
-                    self.goal_function.num_queries = self.number_of_queries
-                    # self.goal_function.num_queries+=1
+#                     theta_old_neighbor_text_joint = attacked_text.generate_new_attacked_text(theta_old_neighbor_text)
+#                     print ('attacked_text',attacked_text)
+#                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
+#                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                         continue 
+#                     # elif theta_old_neighbor_text_joint in already_explored:
+#                     #     continue
+#                     # else:
+#                     #     already_explored.add(theta_old_neighbor_text_joint)
+#                     # model_outputs = self.goal_function._call_model([theta_old_neighbor_text_joint])
+#                     # current_goal_status = self.goal_function._get_goal_status(
+#                     #     model_outputs[0], theta_old_neighbor_text_joint, check_skip=False
+#                     # )
+#                     # self.number_of_queries+=1
+#                     results, search_over = self.get_goal_results([theta_old_neighbor_text_joint])
+#                     if search_over: 
+#                         self.goal_function.model.reset_inference_steps()
+#                         return initial_result
+#                     print ('qrs budget 2',qrs)
+#                     qrs+=1
+#                     self.number_of_queries+=1
+#                     self.goal_function.num_queries = self.number_of_queries
+#                     # self.goal_function.num_queries+=1
                     
-                    if qrs > budget:
-                        sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
+#                     if qrs > budget:
+#                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
 
-                        if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                            sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                             sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                        if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                            sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                         if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                             sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                        failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                        failed_sem_sim = failed_sem_sim.item()
-                        print ('failed_sem_sim2',failed_sem_sim)
+#                         failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                         failed_sem_sim = failed_sem_sim.item()
+#                         print ('failed_sem_sim2',failed_sem_sim)
 
-                        if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi): 
-                            print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
-                            # results_inner, search_over = self.get_goal_results([attacked_text])
-                            # return results_inner[0]
-                            self.goal_function.model.reset_inference_steps()
-                            return initial_result
-                        else:
-                            print ('out of queries, theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
-                            # results_inner, search_over = self.get_goal_results([theta_old_neighbor_text_joint])
-                            # return results_inner[0]
-                            self.goal_function.model.reset_inference_steps()
-                            return results[0]
+#                         if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi): 
+#                             print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
+#                             # results_inner, search_over = self.get_goal_results([attacked_text])
+#                             # return results_inner[0]
+#                             self.goal_function.model.reset_inference_steps()
+#                             return initial_result
+#                         else:
+#                             print ('out of queries, theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
+#                             # results_inner, search_over = self.get_goal_results([theta_old_neighbor_text_joint])
+#                             # return results_inner[0]
+#                             self.goal_function.model.reset_inference_steps()
+#                             return results[0]
                         
                         
-                        # return results[0]   
-                        # return ' '.join(best_attack), max_changes, len(changed_indices), \
-                        #     orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
-                    if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        break
+#                         # return results[0]   
+#                         # return ' '.join(best_attack), max_changes, len(changed_indices), \
+#                         #     orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#                     if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                         break
 
 
 
-                    # pr = get_attack_result([theta_old_neighbor_text], predictor, orig_label, batch_size)
-                    # qrs+=1
+#                     # pr = get_attack_result([theta_old_neighbor_text], predictor, orig_label, batch_size)
+#                     # qrs+=1
 
-                    # if qrs > budget:
-                    #     sim = best_sim[0]
-                    #     max_changes = 0
-                    #     for i in range(len(text_ls)):
-                    #         if text_ls[i]!=best_attack[i]:
-                    #             max_changes+=1
+#                     # if qrs > budget:
+#                     #     sim = best_sim[0]
+#                     #     max_changes = 0
+#                     #     for i in range(len(text_ls)):
+#                     #         if text_ls[i]!=best_attack[i]:
+#                     #             max_changes+=1
 
-                    #     return ' '.join(best_attack), max_changes, len(changed_indices), \
-                    #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#                     #     return ' '.join(best_attack), max_changes, len(changed_indices), \
+#                     #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
 
-                    # if np.sum(pr)>0:
-                    #     break
+#                     # if np.sum(pr)>0:
+#                     #     break
 
-                # if np.sum(pr)>0:
+#                 # if np.sum(pr)>0:
 
-                if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                 if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
 
                      
-                    theta_old_neighbor_text_joint = attacked_text.generate_new_attacked_text(theta_old_neighbor_text) 
+#                     theta_old_neighbor_text_joint = attacked_text.generate_new_attacked_text(theta_old_neighbor_text) 
                     
 
-                    print ('attacked_text',attacked_text)
-                    print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
-                    if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                        continue 
-                    # elif theta_old_neighbor_text_joint in already_explored: # if we already tried this perturbation try again
-                    #     continue
-                    # else:
-                    #     already_explored.add(theta_old_neighbor_text_joint)
-                    sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
+#                     print ('attacked_text',attacked_text)
+#                     print ('theta_old_neighbor_text_joint',theta_old_neighbor_text_joint)
+#                     if attacked_text.text == theta_old_neighbor_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                         continue 
+#                     # elif theta_old_neighbor_text_joint in already_explored: # if we already tried this perturbation try again
+#                     #     continue
+#                     # else:
+#                     #     already_explored.add(theta_old_neighbor_text_joint)
+#                     sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_old_neighbor_text_joint.text])
 
-                    if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                        sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                     if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                         sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                    if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                        sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                     if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                         sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                    sim_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                    sim_new = sim_new.item()
-                    print ('sim_new',sim_new)
+#                     sim_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                     sim_new = sim_new.item()
+#                     print ('sim_new',sim_new)
 
-                    # sim_new = calc_sim(text_ls, [theta_old_neighbor_text], -1, sim_score_window, sim_predictor)
-                    derivative = (sim_old-sim_new)/0.5
+#                     # sim_new = calc_sim(text_ls, [theta_old_neighbor_text], -1, sim_score_window, sim_predictor)
+#                     derivative = (sim_old-sim_new)/0.5
 
-                    g_hat = derivative*u_vec
+#                     g_hat = derivative*u_vec
 
-                    theta_new = theta_old-0.3*(g_hat+2*l2_lambda*theta_old)
+#                     theta_new = theta_old-0.3*(g_hat+2*l2_lambda*theta_old)
 
-                    if sim_new > sim_old:
-                        best_attack = theta_old_neighbor_text
-                        best_sim = sim_new
+#                     if sim_new > sim_old:
+#                         best_attack = theta_old_neighbor_text
+#                         best_sim = sim_new
 
-                    theta_perturb_dist = np.sum((theta_new)**2, axis=1)
-                    nonzero_ele = np.nonzero(np.linalg.norm(theta_new,axis = -1))[0].tolist()
-                    perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
+#                     theta_perturb_dist = np.sum((theta_new)**2, axis=1)
+#                     nonzero_ele = np.nonzero(np.linalg.norm(theta_new,axis = -1))[0].tolist()
+#                     perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
 
-                    theta_new_text = text_ls[:]
-                    for perturb_idx in range(len(nonzero_ele)):
-                        perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
-                        word_dict_idx = words_perturb_idx[perturb_word_idx]
+#                     theta_new_text = text_ls[:]
+#                     for perturb_idx in range(len(nonzero_ele)):
+#                         perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
+#                         word_dict_idx = words_perturb_idx[perturb_word_idx]
                         
-                        perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_new[perturb_word_idx]
-                        syn_feat_set = []
-                        for syn in synonyms_all[perturb_word_idx][1]:
-                            # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
-                            syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
-                            syn_feat_set.append(syn_feat)
+#                         perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_new[perturb_word_idx]
+#                         syn_feat_set = []
+#                         for syn in synonyms_all[perturb_word_idx][1]:
+#                             # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
+#                             syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
+#                             syn_feat_set.append(syn_feat)
 
-                        perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
-                        perturb_syn_order = np.argsort(perturb_syn_dist)
-                        replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
+#                         perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
+#                         perturb_syn_order = np.argsort(perturb_syn_dist)
+#                         replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
                         
-                        theta_new_text[synonyms_all[perturb_word_idx][0]] = replacement
+#                         theta_new_text[synonyms_all[perturb_word_idx][0]] = replacement
 
 
-                        theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text)
-                        print ('attacked_text',attacked_text)
-                        print ('theta_new_text_joint',theta_new_text_joint)
-                        if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            continue  
-                        # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
-                        #     continue
-                        # else:
-                        #     already_explored.add(theta_new_text_joint)
-                        results, search_over = self.get_goal_results([theta_new_text_joint])
-                        if search_over: 
-                            self.goal_function.model.reset_inference_steps()
-                            return initial_result
+#                         theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text)
+#                         print ('attacked_text',attacked_text)
+#                         print ('theta_new_text_joint',theta_new_text_joint)
+#                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                             continue  
+#                         # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+#                         #     continue
+#                         # else:
+#                         #     already_explored.add(theta_new_text_joint)
+#                         results, search_over = self.get_goal_results([theta_new_text_joint])
+#                         if search_over: 
+#                             self.goal_function.model.reset_inference_steps()
+#                             return initial_result
 
-                        qrs+=1
-                        self.number_of_queries+=1
-                        self.goal_function.num_queries = self.number_of_queries
+#                         qrs+=1
+#                         self.number_of_queries+=1
+#                         self.goal_function.num_queries = self.number_of_queries
                         
-                        print ('qrs budget 3',qrs)
-                        if qrs > budget:
-                            sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
+#                         print ('qrs budget 3',qrs)
+#                         if qrs > budget:
+#                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
-                            if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                                sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                                 sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                            if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                                sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                             if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                                 sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                            failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                            failed_sem_sim = failed_sem_sim.item()
-                            print ('failed_sem_sim3',failed_sem_sim)
+#                             failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                             failed_sem_sim = failed_sem_sim.item()
+#                             print ('failed_sem_sim3',failed_sem_sim)
 
-                            if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
-                                print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
-                                # results_inner, search_over = self.get_goal_results([attacked_text])
-                                # return results_inner[0]
-                                self.goal_function.model.reset_inference_steps()
-                                return initial_result
-                            else:
-                                # print ('out of queries, theta_new_text_joint',theta_new_text_joint)
-                                # results_inner, search_over = self.get_goal_results([theta_new_text_joint])
-                                # return results_inner[0]
-                                self.goal_function.model.reset_inference_steps()
-                                return results[0]
-                            # return results[0]
-                        if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                            break
+#                             if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
+#                                 print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
+#                                 # results_inner, search_over = self.get_goal_results([attacked_text])
+#                                 # return results_inner[0]
+#                                 self.goal_function.model.reset_inference_steps()
+#                                 return initial_result
+#                             else:
+#                                 # print ('out of queries, theta_new_text_joint',theta_new_text_joint)
+#                                 # results_inner, search_over = self.get_goal_results([theta_new_text_joint])
+#                                 # return results_inner[0]
+#                                 self.goal_function.model.reset_inference_steps()
+#                                 return results[0]
+#                             # return results[0]
+#                         if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                             break
 
 
-                        # pr = get_attack_result([theta_new_text], predictor, orig_label, batch_size)
-                        # qrs+=1
+#                         # pr = get_attack_result([theta_new_text], predictor, orig_label, batch_size)
+#                         # qrs+=1
 
-                        # if qrs > budget:
-                        #     sim = best_sim[0]
-                        #     max_changes = 0
-                        #     for i in range(len(text_ls)):
-                        #         if text_ls[i]!=best_attack[i]:
-                        #             max_changes+=1
+#                         # if qrs > budget:
+#                         #     sim = best_sim[0]
+#                         #     max_changes = 0
+#                         #     for i in range(len(text_ls)):
+#                         #         if text_ls[i]!=best_attack[i]:
+#                         #             max_changes+=1
 
-                        #     return ' '.join(best_attack), max_changes, len(changed_indices), \
-                        #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#                         #     return ' '.join(best_attack), max_changes, len(changed_indices), \
+#                         #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
 
-                        # if np.sum(pr)>0:
-                        #     break
-                    # if np.sum(pr)>0:
-                    if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text) 
-                        print ('attacked_text',attacked_text)
-                        print ('theta_new_text_joint',theta_new_text_joint)
-                        if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            continue
-                        # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
-                        #     continue
-                        # else:
-                        #     already_explored.add(theta_new_text_joint)
-                        sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
+#                         # if np.sum(pr)>0:
+#                         #     break
+#                     # if np.sum(pr)>0:
+#                     if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                         theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text) 
+#                         print ('attacked_text',attacked_text)
+#                         print ('theta_new_text_joint',theta_new_text_joint)
+#                         if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                             continue
+#                         # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+#                         #     continue
+#                         # else:
+#                         #     already_explored.add(theta_new_text_joint)
+#                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
-                        if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                            sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                             sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                        if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                            sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                         if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                             sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                        sim_theta_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                        sim_theta_new = sim_theta_new.item()
-                        print ('sim_theta_new',sim_theta_new)
-                        # sim_theta_new = calc_sim(text_ls, [theta_new_text], -1, sim_score_window, sim_predictor)
-                        if sim_theta_new > best_sim:
-                            best_attack = theta_new_text
-                            best_sim = sim_theta_new
+#                         sim_theta_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                         sim_theta_new = sim_theta_new.item()
+#                         print ('sim_theta_new',sim_theta_new)
+#                         # sim_theta_new = calc_sim(text_ls, [theta_new_text], -1, sim_score_window, sim_predictor)
+#                         if sim_theta_new > best_sim:
+#                             best_attack = theta_new_text
+#                             best_sim = sim_theta_new
 
                     
-                    # if np.sum(pr)>0:
-                    if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                        gamma_old_text = theta_new_text
+#                     # if np.sum(pr)>0:
+#                     if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                         gamma_old_text = theta_new_text
 
-                        gamma_old_text_joint = attacked_text.generate_new_attacked_text(gamma_old_text) 
-                        print ('attacked_text',attacked_text)
-                        print ('gamma_old_text_joint',gamma_old_text_joint)
-                        if attacked_text.text == gamma_old_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                            continue
-                        # elif gamma_old_text_joint in already_explored: # if we already tried this perturbation try again
-                        #     continue
-                        # else:
-                        #     already_explored.add(gamma_old_text_joint)
-                        sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, gamma_old_text_joint.text])
+#                         gamma_old_text_joint = attacked_text.generate_new_attacked_text(gamma_old_text) 
+#                         print ('attacked_text',attacked_text)
+#                         print ('gamma_old_text_joint',gamma_old_text_joint)
+#                         if attacked_text.text == gamma_old_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                             continue
+#                         # elif gamma_old_text_joint in already_explored: # if we already tried this perturbation try again
+#                         #     continue
+#                         # else:
+#                         #     already_explored.add(gamma_old_text_joint)
+#                         sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, gamma_old_text_joint.text])
 
-                        if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                            sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                         if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                             sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                        if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                            sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                         if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                             sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                        gamma_sim_full = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                        gamma_sim_full = gamma_sim_full.item()
-                        print ('gamma_sim_full',gamma_sim_full)
-
-
-
-                        # gamma_sim_full = calc_sim(text_ls, [gamma_old_text], -1, sim_score_window, sim_predictor)
-                        gamma_old_adv_embed = []
-                        for idx in words_perturb_doc_idx:
-                            # gamma_old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[gamma_old_text[idx]]].strip().split()[1:]])
-                            gamma_old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[gamma_old_text[idx]]]])
-                        gamma_old_adv_embed_matrix = np.asarray(gamma_old_adv_embed)
-
-                        gamma_old_pert= gamma_old_adv_embed_matrix-words_perturb_embed_matrix
-                        gamma_old_pert_divided =gamma_old_pert/gamma
-                        perturb_gradient = []
-                        for i in range(gamma.shape[0]):
-                            idx = words_perturb_doc_idx[i]
-                            replaceback_text = gamma_old_text[:]
-                            replaceback_text[idx] = text_ls[idx]
-
-                            replaceback_text_joint = attacked_text.generate_new_attacked_text(replaceback_text) 
-                            print ('attacked_text',attacked_text)
-                            print ('replaceback_text_joint',replaceback_text_joint)
-                            if attacked_text.text == replaceback_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                continue
-                            # elif replaceback_text_joint in already_explored: # if we already tried this perturbation try again
-                            #     continue
-                            # else:
-                            #     already_explored.add(replaceback_text_joint)
-                            sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, replaceback_text_joint.text])
-
-                            if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                                sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
-
-                            if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                                sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
-
-                            replaceback_sims = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                            replaceback_sims = replaceback_sims.item()
-                            print ('replaceback_sims',replaceback_sims)
-
-                            # replaceback_sims = calc_sim(text_ls, [replaceback_text], -1, sim_score_window, sim_predictor)
-                            gradient_2 = self.soft_threshold(l1,gamma[i][0])
-                            gradient_1 = -((gamma_sim_full-replaceback_sims)/(gamma[i]+1e-4))[0]
-                            gradient = gradient_1+gradient_2
-                            gamma[i]=gamma[i]-0.05*gradient
+#                         gamma_sim_full = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                         gamma_sim_full = gamma_sim_full.item()
+#                         print ('gamma_sim_full',gamma_sim_full)
 
 
-                        theta_new = gamma_old_pert_divided * gamma
-                        theta_perturb_dist = np.sum((theta_new)**2, axis=1)
-                        nonzero_ele = np.nonzero(np.linalg.norm(theta_new,axis = -1))[0].tolist()
-                        perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
-                        theta_new_text = text_ls[:]
-                        for perturb_idx in range(len(nonzero_ele)):
-                            perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
-                            word_dict_idx = words_perturb_idx[perturb_word_idx]
+
+#                         # gamma_sim_full = calc_sim(text_ls, [gamma_old_text], -1, sim_score_window, sim_predictor)
+#                         gamma_old_adv_embed = []
+#                         for idx in words_perturb_doc_idx:
+#                             # gamma_old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[gamma_old_text[idx]]].strip().split()[1:]])
+#                             gamma_old_adv_embed.append([float(num) for num in embed_content[word_idx_dict[gamma_old_text[idx]]]])
+#                         gamma_old_adv_embed_matrix = np.asarray(gamma_old_adv_embed)
+
+#                         gamma_old_pert= gamma_old_adv_embed_matrix-words_perturb_embed_matrix
+#                         gamma_old_pert_divided =gamma_old_pert/gamma
+#                         perturb_gradient = []
+#                         for i in range(gamma.shape[0]):
+#                             idx = words_perturb_doc_idx[i]
+#                             replaceback_text = gamma_old_text[:]
+#                             replaceback_text[idx] = text_ls[idx]
+
+#                             replaceback_text_joint = attacked_text.generate_new_attacked_text(replaceback_text) 
+#                             print ('attacked_text',attacked_text)
+#                             print ('replaceback_text_joint',replaceback_text_joint)
+#                             if attacked_text.text == replaceback_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                                 continue
+#                             # elif replaceback_text_joint in already_explored: # if we already tried this perturbation try again
+#                             #     continue
+#                             # else:
+#                             #     already_explored.add(replaceback_text_joint)
+#                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, replaceback_text_joint.text])
+
+#                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                                 sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+
+#                             if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                                 sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+
+#                             replaceback_sims = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                             replaceback_sims = replaceback_sims.item()
+#                             print ('replaceback_sims',replaceback_sims)
+
+#                             # replaceback_sims = calc_sim(text_ls, [replaceback_text], -1, sim_score_window, sim_predictor)
+#                             gradient_2 = self.soft_threshold(l1,gamma[i][0])
+#                             gradient_1 = -((gamma_sim_full-replaceback_sims)/(gamma[i]+1e-4))[0]
+#                             gradient = gradient_1+gradient_2
+#                             gamma[i]=gamma[i]-0.05*gradient
+
+
+#                         theta_new = gamma_old_pert_divided * gamma
+#                         theta_perturb_dist = np.sum((theta_new)**2, axis=1)
+#                         nonzero_ele = np.nonzero(np.linalg.norm(theta_new,axis = -1))[0].tolist()
+#                         perturb_strength_order = np.argsort(-theta_perturb_dist[nonzero_ele])
+#                         theta_new_text = text_ls[:]
+#                         for perturb_idx in range(len(nonzero_ele)):
+#                             perturb_word_idx = nonzero_ele[perturb_strength_order[perturb_idx]]
+#                             word_dict_idx = words_perturb_idx[perturb_word_idx]
                             
-                            perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_new[perturb_word_idx]
-                            syn_feat_set = []
-                            for syn in synonyms_all[perturb_word_idx][1]:
-                                # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
-                                syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
-                                syn_feat_set.append(syn_feat)
+#                             perturb_target = words_perturb_embed_matrix[perturb_word_idx]+theta_new[perturb_word_idx]
+#                             syn_feat_set = []
+#                             for syn in synonyms_all[perturb_word_idx][1]:
+#                                 # syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]].strip().split()[1:]]
+#                                 syn_feat = [float(num) for num in embed_content[word_idx_dict[syn]]]
+#                                 syn_feat_set.append(syn_feat)
 
-                            perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
-                            perturb_syn_order = np.argsort(perturb_syn_dist)
-                            replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
+#                             perturb_syn_dist = np.sum((syn_feat_set-perturb_target)**2, axis=1)
+#                             perturb_syn_order = np.argsort(perturb_syn_dist)
+#                             replacement = synonyms_all[perturb_word_idx][1][perturb_syn_order[0]]
                             
-                            theta_new_text[synonyms_all[perturb_word_idx][0]] = replacement
+#                             theta_new_text[synonyms_all[perturb_word_idx][0]] = replacement
 
 
-                            theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text)
-                            print ('attacked_text',attacked_text)
-                            print ('theta_new_text_joint',theta_new_text_joint)
-                            if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                continue 
-                            # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
-                            #     continue
-                            # else:
-                            #     already_explored.add(theta_new_text_joint)
-                            # model_outputs = self.goal_function._call_model([theta_new_text_joint])
-                            # current_goal_status = self.goal_function._get_goal_status(
-                            #     model_outputs[0], theta_new_text_joint, check_skip=False
-                            # )
-                            # self.number_of_queries+=1
-                            results, search_over = self.get_goal_results([theta_new_text_joint])
-                            if search_over:
-                                self.goal_function.model.reset_inference_steps() 
-                                return initial_result
+#                             theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text)
+#                             print ('attacked_text',attacked_text)
+#                             print ('theta_new_text_joint',theta_new_text_joint)
+#                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                                 continue 
+#                             # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+#                             #     continue
+#                             # else:
+#                             #     already_explored.add(theta_new_text_joint)
+#                             # model_outputs = self.goal_function._call_model([theta_new_text_joint])
+#                             # current_goal_status = self.goal_function._get_goal_status(
+#                             #     model_outputs[0], theta_new_text_joint, check_skip=False
+#                             # )
+#                             # self.number_of_queries+=1
+#                             results, search_over = self.get_goal_results([theta_new_text_joint])
+#                             if search_over:
+#                                 self.goal_function.model.reset_inference_steps() 
+#                                 return initial_result
 
-                            qrs+=1 
-                            self.number_of_queries+=1
-                            self.goal_function.num_queries = self.number_of_queries
-                            # self.goal_function.num_queries+=1
-                            print ('qrs budget 4',qrs)
-                            if qrs > budget:
-                                sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
+#                             qrs+=1 
+#                             self.number_of_queries+=1
+#                             self.goal_function.num_queries = self.number_of_queries
+#                             # self.goal_function.num_queries+=1
+#                             print ('qrs budget 4',qrs)
+#                             if qrs > budget:
+#                                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
-                                if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                                    sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                                if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                                    sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                                failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                                failed_sem_sim = failed_sem_sim.item()
-                                print ('failed_sem_sim4',failed_sem_sim)
+#                                 failed_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                                 failed_sem_sim = failed_sem_sim.item()
+#                                 print ('failed_sem_sim4',failed_sem_sim)
 
-                                if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
-                                    print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
-                                    # results_inner, search_over = self.get_goal_results([attacked_text])
-                                    # return results_inner[0]
-                                    self.goal_function.model.reset_inference_steps()
-                                    return initial_result
-                                else:
-                                    print ('out of queries, theta_new_text_joint',theta_new_text_joint)
-                                    # results_inner, search_over = self.get_goal_results([theta_new_text_joint])
-                                    # return results_inner[0]
-                                    self.goal_function.model.reset_inference_steps()
-                                    return results[0]
-                                # sim = best_sim[0]
-                                # max_changes = 0
-                                # for i in range(len(text_ls)):
-                                #     if text_ls[i]!=best_attack[i]:
-                                #         max_changes+=1
+#                                 if failed_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
+#                                     print ('returning failed result because best_sem_sim too low qrs too much', failed_sem_sim)
+#                                     # results_inner, search_over = self.get_goal_results([attacked_text])
+#                                     # return results_inner[0]
+#                                     self.goal_function.model.reset_inference_steps()
+#                                     return initial_result
+#                                 else:
+#                                     print ('out of queries, theta_new_text_joint',theta_new_text_joint)
+#                                     # results_inner, search_over = self.get_goal_results([theta_new_text_joint])
+#                                     # return results_inner[0]
+#                                     self.goal_function.model.reset_inference_steps()
+#                                     return results[0]
+#                                 # sim = best_sim[0]
+#                                 # max_changes = 0
+#                                 # for i in range(len(text_ls)):
+#                                 #     if text_ls[i]!=best_attack[i]:
+#                                 #         max_changes+=1
 
-                                # return results[0]
-                                # return ' '.join(best_attack), max_changes, len(changed_indices), \
-                                #     orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
-                            # if current_goal_status != GoalFunctionResultStatus.SUCCEEDED:
-                            #     break
-                            if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                                break
+#                                 # return results[0]
+#                                 # return ' '.join(best_attack), max_changes, len(changed_indices), \
+#                                 #     orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#                             # if current_goal_status != GoalFunctionResultStatus.SUCCEEDED:
+#                             #     break
+#                             if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                                 break
 
-                            # pr = get_attack_result([theta_new_text], predictor, orig_label, batch_size)
+#                             # pr = get_attack_result([theta_new_text], predictor, orig_label, batch_size)
                             
                             
-                            # qrs+=1
+#                             # qrs+=1
 
-                            # if qrs > budget:
-                            #     sim = best_sim[0]
-                            #     max_changes = 0
-                            #     for i in range(len(text_ls)):
-                            #         if text_ls[i]!=best_attack[i]:
-                            #             max_changes+=1
+#                             # if qrs > budget:
+#                             #     sim = best_sim[0]
+#                             #     max_changes = 0
+#                             #     for i in range(len(text_ls)):
+#                             #         if text_ls[i]!=best_attack[i]:
+#                             #             max_changes+=1
 
-                            #     return ' '.join(best_attack), max_changes, len(changed_indices), \
-                            #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#                             #     return ' '.join(best_attack), max_changes, len(changed_indices), \
+#                             #         orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
 
-                            # if np.sum(pr)>0:
-                            #     break
+#                             # if np.sum(pr)>0:
+#                             #     break
 
                     
-                        # if np.sum(pr)>0:
-                        if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                            theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text) 
-                            print ('attacked_text',attacked_text)
-                            print ('theta_new_text_joint 2',theta_new_text_joint)
-                            if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
-                                continue
-                            # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
-                            #     continue
-                            # else:
-                            #     already_explored.add(theta_new_text_joint)
-                            sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
+#                         # if np.sum(pr)>0:
+#                         if results[0].goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                             theta_new_text_joint = attacked_text.generate_new_attacked_text(theta_new_text) 
+#                             print ('attacked_text',attacked_text)
+#                             print ('theta_new_text_joint 2',theta_new_text_joint)
+#                             if attacked_text.text == theta_new_text_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                                 continue
+#                             # elif theta_new_text_joint in already_explored: # if we already tried this perturbation try again
+#                             #     continue
+#                             # else:
+#                             #     already_explored.add(theta_new_text_joint)
+#                             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, theta_new_text_joint.text])
 
-                            if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                                sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#                             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                                 sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-                            if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                                sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#                             if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                                 sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-                            sim_theta_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-                            sim_theta_new = sim_theta_new.item()
-                            print ('sim_theta_new',sim_theta_new)
-                            # sim_theta_new = calc_sim(text_ls, [theta_new_text], -1, sim_score_window, sim_predictor)
-                            if sim_theta_new > best_sim:
-                                best_attack = theta_new_text
-                                best_sim = sim_theta_new
+#                             sim_theta_new = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#                             sim_theta_new = sim_theta_new.item()
+#                             print ('sim_theta_new',sim_theta_new)
+#                             # sim_theta_new = calc_sim(text_ls, [theta_new_text], -1, sim_score_window, sim_predictor)
+#                             if sim_theta_new > best_sim:
+#                                 best_attack = theta_new_text
+#                                 best_sim = sim_theta_new
 
 
-            best_attack_joint = attacked_text.generate_new_attacked_text(best_attack)
+#             best_attack_joint = attacked_text.generate_new_attacked_text(best_attack)
             
 
 
-            print ('attacked_text',attacked_text)
-            print ('best_attack_joint',best_attack_joint)
-            if attacked_text.text == best_attack_joint.text: # is word sub leads to perturbation being same as original sample skip
-                self.goal_function.model.reset_inference_steps() 
-                return initial_result # in this case i return the initial result, shouldent really ever happen since we always check if the perturbed sample is the same as original one at each step and ignore perturbation if it is.
+#             print ('attacked_text',attacked_text)
+#             print ('best_attack_joint',best_attack_joint)
+#             if attacked_text.text == best_attack_joint.text: # is word sub leads to perturbation being same as original sample skip
+#                 self.goal_function.model.reset_inference_steps() 
+#                 return initial_result # in this case i return the initial result, shouldent really ever happen since we always check if the perturbed sample is the same as original one at each step and ignore perturbation if it is.
             
-            sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, best_attack_joint.text])
+#             sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([attacked_text.text, best_attack_joint.text])
 
-            if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-                sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#             if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#                 sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-            if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-                sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#             if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#                 sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-            best_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
-            best_sem_sim = best_sem_sim.item()
-            print ('best_sem_sim',best_sem_sim)
+#             best_sem_sim = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#             best_sem_sim = best_sem_sim.item()
+#             print ('best_sem_sim',best_sem_sim)
 
-            if best_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
-                print ('returning failed result because best_sem_sim too low', best_sem_sim)
-                # results, search_over = self.get_goal_results([attacked_text])
-                # return results[0]
-                self.goal_function.model.reset_inference_steps()
-                return initial_result
+#             if best_sem_sim <  (1 - (args.similarity_threshold) / math.pi):
+#                 print ('returning failed result because best_sem_sim too low', best_sem_sim)
+#                 # results, search_over = self.get_goal_results([attacked_text])
+#                 # return results[0]
+#                 self.goal_function.model.reset_inference_steps()
+#                 return initial_result
 
 
 
-            print ('best sim meets threshod,best_attack_joint',best_attack_joint)
-            results, search_over = self.get_goal_results([best_attack_joint])
-            self.number_of_queries+=1
-            self.goal_function.num_queries = self.number_of_queries
-            # self.goal_function.num_queries+=1
-            if search_over: 
-                self.goal_function.model.reset_inference_steps() 
-                return initial_result
-            print ('results best attack',results)
-            self.goal_function.model.reset_inference_steps()
-            return results[0]
+#             print ('best sim meets threshod,best_attack_joint',best_attack_joint)
+#             results, search_over = self.get_goal_results([best_attack_joint])
+#             self.number_of_queries+=1
+#             self.goal_function.num_queries = self.number_of_queries
+#             # self.goal_function.num_queries+=1
+#             if search_over: 
+#                 self.goal_function.model.reset_inference_steps() 
+#                 return initial_result
+#             print ('results best attack',results)
+#             self.goal_function.model.reset_inference_steps()
+#             return results[0]
 
-            # sim = best_sim[0]
-            # print ('last sim',sim)
-            # max_changes = 0
-            # for i in range(len(text_ls)):
-            #     if text_ls[i]!=best_attack[i]:
-            #         max_changes+=1
-            # print ('best_attack',best_attack)
+#             # sim = best_sim[0]
+#             # print ('last sim',sim)
+#             # max_changes = 0
+#             # for i in range(len(text_ls)):
+#             #     if text_ls[i]!=best_attack[i]:
+#             #         max_changes+=1
+#             # print ('best_attack',best_attack)
             
-            # print ('return everything ',' '.join(best_attack), max_changes, len(changed_indices),  orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim)
+#             # print ('return everything ',' '.join(best_attack), max_changes, len(changed_indices),  orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim)
             
-            # sys.exit()
-            # return ' '.join(best_attack), max_changes, len(changed_indices), \
-            #       orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
+#             # sys.exit()
+#             # return ' '.join(best_attack), max_changes, len(changed_indices), \
+#             #       orig_label, torch.argmax(predictor([best_attack])), qrs, sim, random_sim
 
             
 
-        else:
-            print ('returning failed result because flag==0')
-            # results, search_over = self.get_goal_results([attacked_text])
-            # return results[0]
-            self.goal_function.model.reset_inference_steps()
-            return initial_result
-            # print("Not Found")
-            # return '', 0,0, orig_label, orig_label, 0, 0, 0
+#         else:
+#             print ('returning failed result because flag==0')
+#             # results, search_over = self.get_goal_results([attacked_text])
+#             # return results[0]
+#             self.goal_function.model.reset_inference_steps()
+#             return initial_result
+#             # print("Not Found")
+#             # return '', 0,0, orig_label, orig_label, 0, 0, 0
         
         
-        sys.exit()
-        # Att_sen_new_sentence = AttackedText(new_sentence) 
-        # print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
-        # print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
-        # Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
-        # Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
-        # # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
-        # # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
-        # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
-        # print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#         sys.exit()
+#         # Att_sen_new_sentence = AttackedText(new_sentence) 
+#         # print ('att sen new indices',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
+#         # print ('att sen new words',Att_sen_new_sentence.words, len(Att_sen_new_sentence.words) ) 
+#         # Att_sen_new_sentence.attack_attrs['newly_modified_indices'] = {0}
+#         # Att_sen_new_sentence.attack_attrs["previous_attacked_text"] = current_text
+#         # # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(range(len(Att_sen_new_sentence.words)))
+#         # # Att_sen_new_sentence.attack_attrs['original_index_map'] = original_index_map
+#         # Att_sen_new_sentence.attack_attrs['modified_indices'] = set(Att_sen_new_sentence.attack_attrs['original_index_map'])
+#         # print ('att sen new indices2',Att_sen_new_sentence,Att_sen_new_sentence.attack_attrs)
 
-        # attacked_text.generate_new_attacked_text(new_words)
+#         # attacked_text.generate_new_attacked_text(new_words)
 
 
 
 
         
-        # Main iteration loop
-        for _ in range(self.max_iterations):
-            # Step 2: Remove Unnecessary Replacement Words
+#         # Main iteration loop
+#         for _ in range(self.max_iterations):
+#             # Step 2: Remove Unnecessary Replacement Words
             
-            perturbed_text = self.remove_unnecessary_words(perturbed_text, attacked_text)
-            print ('perturned+text',perturbed_text)
+#             perturbed_text = self.remove_unnecessary_words(perturbed_text, attacked_text)
+#             print ('perturned+text',perturbed_text)
 
-            # if attacked_text.words == perturbed_text.words:
-            #     print ('should we skipp?')
-            #     sys.exit() 
+#             # if attacked_text.words == perturbed_text.words:
+#             #     print ('should we skipp?')
+#             #     sys.exit() 
 
-            # Step 3: Push Substitution Words towards Original Words
-            perturbed_text = self.push_words_towards_original(perturbed_text, attacked_text)
-            print ('perturned+text2',perturbed_text) 
-            # if attacked_text == perturbed_text:
-            #     print ('should we skipp 2?')
-            #     sys.exit() 
-            # Check if attack is successful
-            results, search_over = self.get_goal_results([perturbed_text])
-            # perturbed_result = initial_result.goal_function.call_model([perturbed_text])[0]
-            # print ('results',results)
+#             # Step 3: Push Substitution Words towards Original Words
+#             perturbed_text = self.push_words_towards_original(perturbed_text, attacked_text)
+#             print ('perturned+text2',perturbed_text) 
+#             # if attacked_text == perturbed_text:
+#             #     print ('should we skipp 2?')
+#             #     sys.exit() 
+#             # Check if attack is successful
+#             results, search_over = self.get_goal_results([perturbed_text])
+#             # perturbed_result = initial_result.goal_function.call_model([perturbed_text])[0]
+#             # print ('results',results)
 
-            # add semantic sim filter
+#             # add semantic sim filter
 
-            # this checks the generated test against the actual final use constraint
+#             # this checks the generated test against the actual final use constraint
             
               
 
-            final_result = results[0]
+#             final_result = results[0]
 
              
 
-            if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                print ('attacked_text.text, final_result.attacked_text.text')
-                print ('attk text',attacked_text.text)
-                print ('final sre',final_result.attacked_text.text)
-                sim_final_original, sim_final_pert = self.use_constraint.encode([attacked_text.text, final_result.attacked_text.text])
+#             if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                 print ('attacked_text.text, final_result.attacked_text.text')
+#                 print ('attk text',attacked_text.text)
+#                 print ('final sre',final_result.attacked_text.text)
+#                 sim_final_original, sim_final_pert = self.use_constraint.encode([attacked_text.text, final_result.attacked_text.text])
 
-                if not isinstance(sim_final_original, torch.Tensor):
-                    sim_final_original = torch.tensor(sim_final_original)
+#                 if not isinstance(sim_final_original, torch.Tensor):
+#                     sim_final_original = torch.tensor(sim_final_original)
 
-                if not isinstance(sim_final_pert, torch.Tensor):
-                    sim_final_pert = torch.tensor(sim_final_pert)
+#                 if not isinstance(sim_final_pert, torch.Tensor):
+#                     sim_final_pert = torch.tensor(sim_final_pert)
 
-                sim_score = self.sentence_encoder_use.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-                print ('sim_score',sim_score, (1 - (args.similarity_threshold) / math.pi))
-                if sim_score <  (1 - (args.similarity_threshold) / math.pi):
-                    continue
+#                 sim_score = self.sentence_encoder_use.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#                 print ('sim_score',sim_score, (1 - (args.similarity_threshold) / math.pi))
+#                 if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+#                     continue
 
-                # final_result.num_queries = self.number_of_queries
-                self.goal_function.num_queries = self.number_of_queries
-                print ('final_result.num_queries',final_result.num_queries)
-                # sys.exit()
-                print ('final_result',final_result.attacked_text)
-                print ('final_result.attacked_text.attack_attrs',final_result.attacked_text.attack_attrs)
-                print ('final_result.attacked_text.attack_attrs[original_index_map]',final_result.attacked_text.attack_attrs['original_index_map'])
-                # print ('final_result',final_result.original_text)
-                # print ('final_result',final_result.perturbed_text)
-                # print ('final_result.perturbed_result.attack_attrs',final_result.perturbed_result.attack_attrs)
-                # if len(final_result.attacked_text.attack_attrs['newly_modified_indices']) == 0:
-                #     final_result.attacked_text.attack_attrs['newly_modified_indices'] = {0}
-                # if len(final_result.attacked_text.attack_attrs['modified_indices']) == 0:
-                #     # final_result.attacked_text.attack_attrs['modified_indices'] = {0}
-                #     return initial_result
+#                 # final_result.num_queries = self.number_of_queries
+#                 self.goal_function.num_queries = self.number_of_queries
+#                 print ('final_result.num_queries',final_result.num_queries)
+#                 # sys.exit()
+#                 print ('final_result',final_result.attacked_text)
+#                 print ('final_result.attacked_text.attack_attrs',final_result.attacked_text.attack_attrs)
+#                 print ('final_result.attacked_text.attack_attrs[original_index_map]',final_result.attacked_text.attack_attrs['original_index_map'])
+#                 # print ('final_result',final_result.original_text)
+#                 # print ('final_result',final_result.perturbed_text)
+#                 # print ('final_result.perturbed_result.attack_attrs',final_result.perturbed_result.attack_attrs)
+#                 # if len(final_result.attacked_text.attack_attrs['newly_modified_indices']) == 0:
+#                 #     final_result.attacked_text.attack_attrs['newly_modified_indices'] = {0}
+#                 # if len(final_result.attacked_text.attack_attrs['modified_indices']) == 0:
+#                 #     # final_result.attacked_text.attack_attrs['modified_indices'] = {0}
+#                 #     return initial_result
 
-                return final_result
-        print ('just aviod everything')
-        return initial_result
+#                 return final_result
+#         print ('just aviod everything')
+#         return initial_result
 
-    def random_initialization(self, text, words_perturb):
-        words = text.words
-        tmp_text = text
-        size_text = len(text.words)
-        start_i = 0
-        while start_i < size_text:
-            # print ('start tmp text',tmp_text)
-            if start_i not in words_perturb:
-                start_i+=1
-                continue
-            print ('words_perturb',words_perturb)
-            print ('start_i',start_i)
-            words = tmp_text.words
-            pos_tags = nltk.pos_tag(words)   
-            print ('pos_tags nltk',pos_tags)
-            if pos_tags[start_i][1].startswith(('VB', 'NN', 'JJ', 'RB')): 
-                # print ('pos_tags[start_i][1]',pos_tags[start_i][1])
-                replaced_with_synonyms = self.get_transformations(tmp_text, original_text=tmp_text,indices_to_modify=[start_i])
-                print ('replaced_with_synonyms should be 10?',replaced_with_synonyms,len(replaced_with_synonyms))
+#     def random_initialization(self, text, words_perturb):
+#         words = text.words
+#         tmp_text = text
+#         size_text = len(text.words)
+#         start_i = 0
+#         while start_i < size_text:
+#             # print ('start tmp text',tmp_text)
+#             if start_i not in words_perturb:
+#                 start_i+=1
+#                 continue
+#             print ('words_perturb',words_perturb)
+#             print ('start_i',start_i)
+#             words = tmp_text.words
+#             pos_tags = nltk.pos_tag(words)   
+#             print ('pos_tags nltk',pos_tags)
+#             if pos_tags[start_i][1].startswith(('VB', 'NN', 'JJ', 'RB')): 
+#                 # print ('pos_tags[start_i][1]',pos_tags[start_i][1])
+#                 replaced_with_synonyms = self.get_transformations(tmp_text, original_text=tmp_text,indices_to_modify=[start_i])
+#                 print ('replaced_with_synonyms should be 10?',replaced_with_synonyms,len(replaced_with_synonyms))
                 
-                if replaced_with_synonyms:
-                    tmp_text = random.choice(replaced_with_synonyms)
-                else:
-                    pass
+#                 if replaced_with_synonyms:
+#                     tmp_text = random.choice(replaced_with_synonyms)
+#                 else:
+#                     pass
                 
-            start_i+=1
+#             start_i+=1
             
-        adv_text = tmp_text
-        return adv_text
+#         adv_text = tmp_text
+#         return adv_text
 
  
 
-    # def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
-    #     # Step 1: Identify words to replace back
-    #     candidate_set = []
-    #     word_importance_scores = [] 
-    #     # print ('original_text',original_text)
-    #     # print ('perturbed_text',perturbed_text)
-    #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-    #         if perturbed_word != original_word:
-    #             # Replace perturbed_word with original_word
-    #             temp_text = perturbed_text.replace_word_at_index(i, original_word)
+#     # def remove_unnecessary_words(self, perturbed_text, original_text, check_skip=False):
+#     #     # Step 1: Identify words to replace back
+#     #     candidate_set = []
+#     #     word_importance_scores = [] 
+#     #     # print ('original_text',original_text)
+#     #     # print ('perturbed_text',perturbed_text)
+#     #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
+#     #         if perturbed_word != original_word:
+#     #             # Replace perturbed_word with original_word
+#     #             temp_text = perturbed_text.replace_word_at_index(i, original_word)
 
-    #             # Step 2: Check if still adversarial and calculate semantic similarity
-    #             model_outputs = self.goal_function._call_model([temp_text])
-    #             current_goal_status = self.goal_function._get_goal_status(
-    #                 model_outputs[0], temp_text, check_skip=check_skip
-    #             )
-    #             self.number_of_queries+=1
-    #             # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
-    #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-    #                 candidate_set.append((i, temp_text))
-    #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
+#     #             # Step 2: Check if still adversarial and calculate semantic similarity
+#     #             model_outputs = self.goal_function._call_model([temp_text])
+#     #             current_goal_status = self.goal_function._get_goal_status(
+#     #                 model_outputs[0], temp_text, check_skip=check_skip
+#     #             )
+#     #             self.number_of_queries+=1
+#     #             # print ('temp_text',temp_text,i,current_goal_status,GoalFunctionResultStatus.SUCCEEDED)
+#     #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#     #                 candidate_set.append((i, temp_text))
+#     #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_text.text, temp_text.text])
 
-    #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-    #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#     #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#     #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-    #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-    #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#     #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#     #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-    #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
+#     #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0))
                     
-    #                 word_importance_scores.append((i, sim_score))
+#     #                 word_importance_scores.append((i, sim_score))
 
-    #     # Step 3: Sort word importance scores in descending order and restore original words
-    #     word_importance_scores.sort(key=lambda x: x[1], reverse=True)
-    #     print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
-    #     print ('replace indexs',word_importance_scores)
-    #     for idx, _ in word_importance_scores:
-    #         temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
-    #         temp_text2.attack_attrs['modified_indices'].remove(idx)
-    #         print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
-    #         # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
+#     #     # Step 3: Sort word importance scores in descending order and restore original words
+#     #     word_importance_scores.sort(key=lambda x: x[1], reverse=True)
+#     #     print ('attack_attrs ',perturbed_text.attack_attrs,perturbed_text  ) 
+#     #     print ('replace indexs',word_importance_scores)
+#     #     for idx, _ in word_importance_scores:
+#     #         temp_text2 = perturbed_text.replace_word_at_index(idx, original_text.words[idx])
+#     #         temp_text2.attack_attrs['modified_indices'].remove(idx)
+#     #         print ('temp_text2_word_imp',idx,temp_text2.attack_attrs,temp_text2)
+#     #         # print ('original_index_map',temp_text2.attack_attrs.original_index_map)
             
-    #         model_outputs = self.goal_function._call_model([temp_text2])
-    #         current_goal_status = self.goal_function._get_goal_status(
-    #             model_outputs[0], temp_text2, check_skip=check_skip
-    #         )
-    #         self.number_of_queries+=1
+#     #         model_outputs = self.goal_function._call_model([temp_text2])
+#     #         current_goal_status = self.goal_function._get_goal_status(
+#     #             model_outputs[0], temp_text2, check_skip=check_skip
+#     #         )
+#     #         self.number_of_queries+=1
 
-    #         # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
+#     #         # print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
 
  
-    #         if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-    #             # If perturbed_text is no longer adversarial, revert the last change
-    #             perturbed_text = temp_text2
-    #             # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
-    #         else:
-    #             break
-    #     # print ('original_text',original_text)
-    #     # print ('perturbed_text',perturbed_text) 
-    #     return perturbed_text
+#     #         if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#     #             # If perturbed_text is no longer adversarial, revert the last change
+#     #             perturbed_text = temp_text2
+#     #             # perturbed_text = perturbed_text.replace_word_at_index(idx, perturbed_text.words[idx])
+#     #         else:
+#     #             break
+#     #     # print ('original_text',original_text)
+#     #     # print ('perturbed_text',perturbed_text) 
+#     #     return perturbed_text
 
-    # def get_vector(self, embedding, word):
-    #     if isinstance(word, str):
-    #         if word in embedding._word2index:
-    #             word_index = embedding._word2index[word]
-    #         else:
-    #             return None  # Word not found in the dictionary
-    #     else:
-    #         word_index = word
+#     # def get_vector(self, embedding, word):
+#     #     if isinstance(word, str):
+#     #         if word in embedding._word2index:
+#     #             word_index = embedding._word2index[word]
+#     #         else:
+#     #             return None  # Word not found in the dictionary
+#     #     else:
+#     #         word_index = word
 
-    #     vector = embedding.embedding_matrix[word_index]
-    #     return torch.tensor(vector).to(textattack.shared.utils.device)
+#     #     vector = embedding.embedding_matrix[word_index]
+#     #     return torch.tensor(vector).to(textattack.shared.utils.device)
 
-    # def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
-    #     # Step 1: Calculate Euclidean distances and sampling probabilities
-    #     distances = []
-    #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
-    #         if perturbed_word != original_word:
-    #             # Using the get_vector function
-    #             perturbed_vec = self.get_vector(self.embedding, perturbed_word)
-    #             if perturbed_vec is None:
-    #                 continue  # Skip to the next word
-    #             original_vec = self.get_vector(self.embedding, original_word)
-    #             if original_vec is None:
-    #                 continue  # Skip to the next word
-    #             distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
-    #             distances.append((i, distance))
+#     # def push_words_towards_original(self, perturbed_text, original_text, check_skip=False):
+#     #     # Step 1: Calculate Euclidean distances and sampling probabilities
+#     #     distances = []
+#     #     for i, (perturbed_word, original_word) in enumerate(zip(perturbed_text.words, original_text.words)):
+#     #         if perturbed_word != original_word:
+#     #             # Using the get_vector function
+#     #             perturbed_vec = self.get_vector(self.embedding, perturbed_word)
+#     #             if perturbed_vec is None:
+#     #                 continue  # Skip to the next word
+#     #             original_vec = self.get_vector(self.embedding, original_word)
+#     #             if original_vec is None:
+#     #                 continue  # Skip to the next word
+#     #             distance = np.linalg.norm(perturbed_vec.cpu().numpy() - original_vec.cpu().numpy())
+#     #             distances.append((i, distance))
 
-    #     if not distances:
-    #         return perturbed_text
+#     #     if not distances:
+#     #         return perturbed_text
 
-    #     # Normalize distances to get probabilities
-    #     distances.sort(key=lambda x: x[1])
-    #     indices, dist_values = zip(*distances)
-    #     exp_dist_values = np.exp(dist_values)
-    #     probabilities = exp_dist_values / np.sum(exp_dist_values)
-    #     print ('probabilities',probabilities)
+#     #     # Normalize distances to get probabilities
+#     #     distances.sort(key=lambda x: x[1])
+#     #     indices, dist_values = zip(*distances)
+#     #     exp_dist_values = np.exp(dist_values)
+#     #     probabilities = exp_dist_values / np.sum(exp_dist_values)
+#     #     print ('probabilities',probabilities)
 
-    #     # temp_perturbed_text = copy.deepcopy(perturbed_text)
+#     #     # temp_perturbed_text = copy.deepcopy(perturbed_text)
         
-    #     # Step 2: Iterate with sampling based on the probabilities 
-    #     while len(indices) > 0:
-    #         i = np.random.choice(indices, p=probabilities)
-    #         print ('indices',indices,i)
-    #         perturbed_word = perturbed_text.words[i]
-    #         original_word = original_text.words[i]
+#     #     # Step 2: Iterate with sampling based on the probabilities 
+#     #     while len(indices) > 0:
+#     #         i = np.random.choice(indices, p=probabilities)
+#     #         print ('indices',indices,i)
+#     #         perturbed_word = perturbed_text.words[i]
+#     #         original_word = original_text.words[i]
 
-    #         sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
-    #         synonyms = [s.words[i] for s in sentence_replaced]
+#     #         sentence_replaced = self.get_transformations(original_text, original_text=original_text, indices_to_modify=[i])
+#     #         synonyms = [s.words[i] for s in sentence_replaced]
 
 
-    #         # Get top k synonyms
-    #         k = 10  # Number of synonyms to sample
-    #         top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
-    #         top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
+#     #         # Get top k synonyms
+#     #         k = 10  # Number of synonyms to sample
+#     #         top_k_synonyms_indexes  = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=k)
+#     #         top_k_synonyms = [self.embedding._index2word[index] for index in top_k_synonyms_indexes]
 
-    #         # Find the best anchor synonym with the highest semantic similarity
-    #         max_similarity = -float('inf')
-    #         w_bar = None
-    #         temp_text_bar = None
-    #         filtered_synonyms = None
-    #         print ('top_k_synonyms',top_k_synonyms)
-    #         # temp_text2 = copy.deepcopy(perturbed_text)
-    #         for synonym in top_k_synonyms:
-    #             if perturbed_word == synonym:
-    #                 continue # skip swapping the same word
-    #             print ('synonym',i,synonym)
-    #             # temp_text2 = copy.deepcopy(perturbed_text)
-    #             temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
+#     #         # Find the best anchor synonym with the highest semantic similarity
+#     #         max_similarity = -float('inf')
+#     #         w_bar = None
+#     #         temp_text_bar = None
+#     #         filtered_synonyms = None
+#     #         print ('top_k_synonyms',top_k_synonyms)
+#     #         # temp_text2 = copy.deepcopy(perturbed_text)
+#     #         for synonym in top_k_synonyms:
+#     #             if perturbed_word == synonym:
+#     #                 continue # skip swapping the same word
+#     #             print ('synonym',i,synonym)
+#     #             # temp_text2 = copy.deepcopy(perturbed_text)
+#     #             temp_text2 = perturbed_text.replace_word_at_index(i, synonym)
 
-    #             # Check if the substitution still results in an adversarial example
-    #             model_outputs = self.goal_function._call_model([temp_text2])
-    #             current_goal_status = self.goal_function._get_goal_status(
-    #                 model_outputs[0], temp_text2, check_skip=check_skip
-    #             )
-    #             self.number_of_queries+=1
+#     #             # Check if the substitution still results in an adversarial example
+#     #             model_outputs = self.goal_function._call_model([temp_text2])
+#     #             current_goal_status = self.goal_function._get_goal_status(
+#     #                 model_outputs[0], temp_text2, check_skip=check_skip
+#     #             )
+#     #             self.number_of_queries+=1
 
-    #             print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
+#     #             print ('temp_text2_top_k_syn',i,synonym,temp_text2.attack_attrs,temp_text2,current_goal_status , GoalFunctionResultStatus.SUCCEEDED)
 
-    #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-    #                 # Compute semantic similarity at the word level
-    #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
+#     #             if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#     #                 # Compute semantic similarity at the word level
+#     #                 sim_remove_unnecessary_org, sim_remove_unnecessary_pert = self.sentence_encoder_use.encode([original_word, synonym])
 
-    #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
-    #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
+#     #                 if not isinstance(sim_remove_unnecessary_org, torch.Tensor):
+#     #                     sim_remove_unnecessary_org = torch.tensor(sim_remove_unnecessary_org)
 
-    #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
-    #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
+#     #                 if not isinstance(sim_remove_unnecessary_pert, torch.Tensor):
+#     #                     sim_remove_unnecessary_pert = torch.tensor(sim_remove_unnecessary_pert)
 
-    #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
-    #                 print ('sim scores push towards orgin')
-    #                 if sim_score > max_similarity:
-    #                     max_similarity = sim_score
-    #                     w_bar = synonym
-    #                     temp_text_bar = temp_text2
+#     #                 sim_score = self.sentence_encoder_use.sim_metric(sim_remove_unnecessary_org.unsqueeze(0), sim_remove_unnecessary_pert.unsqueeze(0)).item()
+#     #                 print ('sim scores push towards orgin')
+#     #                 if sim_score > max_similarity:
+#     #                     max_similarity = sim_score
+#     #                     w_bar = synonym
+#     #                     temp_text_bar = temp_text2
 
             
-    #         if w_bar:# is None:
-    #               # Skip this index if no suitable anchor synonym is found
+#     #         if w_bar:# is None:
+#     #               # Skip this index if no suitable anchor synonym is found
             
-    #             number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
-    #             print ('num entries',number_entries)
-    #             all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
-    #             all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
+#     #             number_entries = len(self.embedding.nn_matrix[self.embedding._word2index[original_word]] )
+#     #             print ('num entries',number_entries)
+#     #             all_synonyms = self.embedding.nearest_neighbours(self.embedding._word2index[original_word], topn=number_entries)
+#     #             all_synonyms = [self.embedding._index2word[index] for index in all_synonyms]
             
-    #             print ('all_synonyms',all_synonyms)
-    #             filtered_synonyms = []
-    #             for synonym in all_synonyms:
-    #                 if perturbed_word == synonym or w_bar == synonym  :
-    #                     continue # skip swapping/checking the same word and the anchor word
-    #                 # Compute semantic similarity with w_bar and original_word
-    #                 sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
-    #                 sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
+#     #             print ('all_synonyms',all_synonyms)
+#     #             filtered_synonyms = []
+#     #             for synonym in all_synonyms:
+#     #                 if perturbed_word == synonym or w_bar == synonym  :
+#     #                     continue # skip swapping/checking the same word and the anchor word
+#     #                 # Compute semantic similarity with w_bar and original_word
+#     #                 sim_w_bar, sim_synonym = self.sentence_encoder_use.encode([w_bar, synonym])
+#     #                 sim_org, sim_synonym_org = self.sentence_encoder_use.encode([original_word, synonym])
 
-    #                 if not isinstance(sim_w_bar, torch.Tensor):
-    #                     sim_w_bar = torch.tensor(sim_w_bar)
-    #                 if not isinstance(sim_synonym, torch.Tensor):
-    #                     sim_synonym = torch.tensor(sim_synonym)
-    #                 if not isinstance(sim_org, torch.Tensor):
-    #                     sim_org = torch.tensor(sim_org)
-    #                 if not isinstance(sim_synonym_org, torch.Tensor):
-    #                     sim_synonym_org = torch.tensor(sim_synonym_org)
+#     #                 if not isinstance(sim_w_bar, torch.Tensor):
+#     #                     sim_w_bar = torch.tensor(sim_w_bar)
+#     #                 if not isinstance(sim_synonym, torch.Tensor):
+#     #                     sim_synonym = torch.tensor(sim_synonym)
+#     #                 if not isinstance(sim_org, torch.Tensor):
+#     #                     sim_org = torch.tensor(sim_org)
+#     #                 if not isinstance(sim_synonym_org, torch.Tensor):
+#     #                     sim_synonym_org = torch.tensor(sim_synonym_org)
 
-    #                 sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
-    #                 sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
+#     #                 sim_score_w_bar = self.sentence_encoder_use.sim_metric(sim_w_bar.unsqueeze(0), sim_synonym.unsqueeze(0)).item()
+#     #                 sim_score_org = self.sentence_encoder_use.sim_metric(sim_org.unsqueeze(0), sim_synonym_org.unsqueeze(0)).item()
 
-    #                 if sim_score_w_bar > sim_score_org:
-    #                     filtered_synonyms.append((sim_score_w_bar, synonym))
+#     #                 if sim_score_w_bar > sim_score_org:
+#     #                     filtered_synonyms.append((sim_score_w_bar, synonym))
 
-    #         if  filtered_synonyms:
-    #             # continue  # Skip this index if no suitable synonym is found
+#     #         if  filtered_synonyms:
+#     #             # continue  # Skip this index if no suitable synonym is found
 
-    #             # Sort the filtered synonyms by their semantic similarity score in descending order
-    #             filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
-    #             print ('filtered_synonyms',filtered_synonyms)
+#     #             # Sort the filtered synonyms by their semantic similarity score in descending order
+#     #             filtered_synonyms.sort(key=lambda item: item[0], reverse=True)
+#     #             print ('filtered_synonyms',filtered_synonyms)
                 
                 
 
-    #             print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
-    #             for _, synonym in filtered_synonyms:
-    #                 temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
-    #                 # temp_text2.attack_attrs['modified_indices'].remove(i)
-    #                 print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
-    #                 # Check if the substitution still results in an adversarial example
-    #                 model_outputs = self.goal_function._call_model([temp_text2]) 
-    #                 current_goal_status = self.goal_function._get_goal_status(
-    #                     model_outputs[0], temp_text2, check_skip=check_skip
-    #                 )
-    #                 self.number_of_queries+=1
-    #                 print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
-    #                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
-    #                     perturbed_text = temp_text2
-    #                     break
+#     #             print ('perturbed text',perturbed_text.attack_attrs,perturbed_text)
+#     #             for _, synonym in filtered_synonyms:
+#     #                 temp_text2 = perturbed_text.replace_word_at_index(i, synonym) 
+#     #                 # temp_text2.attack_attrs['modified_indices'].remove(i)
+#     #                 print ('temp_text2_filtered_syn',i,temp_text2.attack_attrs,temp_text2)
+#     #                 # Check if the substitution still results in an adversarial example
+#     #                 model_outputs = self.goal_function._call_model([temp_text2]) 
+#     #                 current_goal_status = self.goal_function._get_goal_status(
+#     #                     model_outputs[0], temp_text2, check_skip=check_skip
+#     #                 )
+#     #                 self.number_of_queries+=1
+#     #                 print ('temp_text2',temp_text2,current_goal_status, GoalFunctionResultStatus.SUCCEEDED)
+#     #                 if current_goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#     #                     perturbed_text = temp_text2
+#     #                     break
                     
             
-    #         print ('perturbed_text',perturbed_text)  
-    #         idx = indices.index(i)
-    #         indices = indices[:idx] + indices[idx + 1:] 
-    #         print ('indices2',indices,idx)
+#     #         print ('perturbed_text',perturbed_text)  
+#     #         idx = indices.index(i)
+#     #         indices = indices[:idx] + indices[idx + 1:] 
+#     #         print ('indices2',indices,idx)
             
-    #         probabilities = np.delete(probabilities, idx)
-    #         probabilities /= np.sum(probabilities)   
-    #     # sys.exit()
-    #     return perturbed_text 
+#     #         probabilities = np.delete(probabilities, idx)
+#     #         probabilities /= np.sum(probabilities)   
+#     #     # sys.exit()
+#     #     return perturbed_text 
 
-    def get_transformations(self, text, index):
-        return self.transformation(text, index)
+#     def get_transformations(self, text, index):
+#         return self.transformation(text, index)
 
-    def get_similarity(self, word1, word2):
-        return self.transformation.get_cosine_similarity(word1, word2)
+#     def get_similarity(self, word1, word2):
+#         return self.transformation.get_cosine_similarity(word1, word2)
     
-    @property
-    def is_black_box(self):
-        return True
+#     @property
+#     def is_black_box(self):
+#         return True
 
 
 class GreedySearch(SearchMethod):
@@ -4213,264 +4413,273 @@ class GreedySearch(SearchMethod):
 
 
 
-class GreedySearch_USE(SearchMethod):
-    """An attack that maintains a beam of the `beam_width` highest scoring
-    AttackedTexts, greedily updating the beam with the highest scoring
-    transformations from the current beam.
+# class GreedySearch_USE(SearchMethod):
+#     """An attack that maintains a beam of the `beam_width` highest scoring
+#     AttackedTexts, greedily updating the beam with the highest scoring
+#     transformations from the current beam.
 
-    Args:
-        goal_function: A function for determining how well a perturbation is doing at achieving the attack's goal.
-        transformation: The type of transformation.
-        beam_width (int): the number of candidates to retain at each step
-    """
-    def __init__(self,beam_width=1,**kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-    # def __init__(self,index_order_technique,goal_function, beam_width=1):
-    #     self.index_order_technique = index_order_technique
-    #     self.goal_function = goal_function
-        self.beam_width = beam_width
-        self.previeous_beam = [] 
+#     Args:
+#         goal_function: A function for determining how well a perturbation is doing at achieving the attack's goal.
+#         transformation: The type of transformation.
+#         beam_width (int): the number of candidates to retain at each step
+#     """
+#     def __init__(self,beam_width=1,**kwargs):
+#         for key, value in kwargs.items():
+#             setattr(self, key, value)
+#     # def __init__(self,index_order_technique,goal_function, beam_width=1):
+#     #     self.index_order_technique = index_order_technique
+#     #     self.goal_function = goal_function
+#         self.beam_width = beam_width
+#         self.previeous_beam = [] 
+#         self.current_sample_id = 0
     
 
-    def _get_index_order(self, initial_text, max_len=-1):
-        if self.index_order_technique  == 'random':
-            len_text, indices_to_order = self.get_indices_to_order(initial_text)
-            index_order = indices_to_order
-            np.random.shuffle(index_order)
-            search_over = False
-            return index_order, search_over
-        elif self.index_order_technique  == 'prompt_top_k': 
-            # ground_truth = 'positive'
-            K = '' # number of important words to return 
-            print ('self.ground_truth_output',self.goal_function.ground_truth_output) # should test with and without ground truth
+#     def _get_index_order(self, initial_text, max_len=-1):
+#         if self.index_order_technique  == 'random':
+#             len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#             index_order = indices_to_order
+#             np.random.shuffle(index_order)
+#             search_over = False
+#             return index_order, search_over
+#         elif self.index_order_technique  == 'prompt_top_k': 
+#             # ground_truth = 'positive'
+#             K = '' # number of important words to return 
+#             print ('self.ground_truth_output',self.goal_function.ground_truth_output) # should test with and without ground truth
             
-            label_list = self.dataset.label_names
-            label_index = self.goal_function.ground_truth_output
-            expected_prediction, other_classes = self.predictor.prompt_class._identify_correct_incorrect_labels( label_index)
+#             label_list = self.dataset.label_names
+#             label_index = self.goal_function.ground_truth_output
+#             expected_prediction, other_classes = self.predictor.prompt_class._identify_correct_incorrect_labels( label_index)
             
-            len_text, indices_to_order = self.get_indices_to_order(initial_text)
-            print ('initial_text',initial_text)
-            print ('len text indeces to order',len_text,indices_to_order)
-            examples = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
+#             len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#             print ('initial_text',initial_text)
+#             print ('len text indeces to order',len_text,indices_to_order)
+#             examples = ['The cat is on the table', 'The boy is playing soccer', 'She drove her car to work','The sun is shining brightly', 'He cooked dinner for his family']
             
-            # prompt = f"""{self.start_prompt_header}return the most important words for the task of {task} where the text is '{initial_text.text}' and is classified as {ground_truth}.
-            # Do not output anything else just the top words! separated as a comma, for example generated text: playing, soccer, boy
-            # Here are five examples that fit the task: 'The cat is on the table' -> cat, table | 'The boy is playing soccer' -> playing, soccer, boy | 'She drove her car to work'-> work, drove, car | 'The sun is shining brightly' -> brightly, shining, sun | 'He cooked dinner for his family' -> family, cooked, dinner
-            # The top {K} words are: {self.end_prompt_footer}"""
+#             # prompt = f"""{self.start_prompt_header}return the most important words for the task of {task} where the text is '{initial_text.text}' and is classified as {ground_truth}.
+#             # Do not output anything else just the top words! separated as a comma, for example generated text: playing, soccer, boy
+#             # Here are five examples that fit the task: 'The cat is on the table' -> cat, table | 'The boy is playing soccer' -> playing, soccer, boy | 'She drove her car to work'-> work, drove, car | 'The sun is shining brightly' -> brightly, shining, sun | 'He cooked dinner for his family' -> family, cooked, dinner
+#             # The top {K} words are: {self.end_prompt_footer}"""
 
-            prompt = f"""{self.start_prompt_header}return the most important words (in descending order of importance) for the following text '{initial_text.text}' which is classified as {expected_prediction}.
-            Do not output anything else just the top words! separated as a comma, for example generated text: playing, soccer, boy
-            Here are five examples that fit the task: 'The cat is on the table' -> cat, table | 'The boy is playing soccer' -> playing, soccer, boy | 'She drove her car to work'-> work, drove, car | 'The sun is shining brightly' -> brightly, shining, sun | 'He cooked dinner for his family' -> family, cooked, dinner
-            The top {K} words in descending order are: {self.end_prompt_footer}"""
-            # print ('prompt',prompt)
+#             prompt = f"""{self.start_prompt_header}return the most important words (in descending order of importance) for the following text '{initial_text.text}' which is classified as {expected_prediction}.
+#             Do not output anything else just the top words! separated as a comma, for example generated text: playing, soccer, boy
+#             Here are five examples that fit the task: 'The cat is on the table' -> cat, table | 'The boy is playing soccer' -> playing, soccer, boy | 'She drove her car to work'-> work, drove, car | 'The sun is shining brightly' -> brightly, shining, sun | 'He cooked dinner for his family' -> family, cooked, dinner
+#             The top {K} words in descending order are: {self.end_prompt_footer}"""
+#             # print ('prompt',prompt)
 
-            inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
+#             inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2000).to(self.device)
         
 
-            generate_args = {
-            "input_ids": inputs['input_ids'],
-            "attention_mask": inputs['attention_mask'],
-            "do_sample": True,  # enable sampling
-            "top_k": 40,  # top-k sampling
-            "top_p": 0.92,  # nucleus sampling probability
-            "temperature": 0.7,  # sampling temperature
-            "max_new_tokens": 200,
-            'pad_token_id': tokenizer.eos_token_id
-            }
+#             generate_args = {
+#             "input_ids": inputs['input_ids'],
+#             "attention_mask": inputs['attention_mask'],
+#             "do_sample": True,  # enable sampling
+#             "top_k": 40,  # top-k sampling
+#             "top_p": 0.92,  # nucleus sampling probability
+#             "temperature": 0.7,  # sampling temperature
+#             "max_new_tokens": 200,
+#             'pad_token_id': tokenizer.eos_token_id
+#             }
 
-            with torch.no_grad():
-                outputs = model.generate(**generate_args)
+#             with torch.no_grad():
+#                 outputs = model.generate(**generate_args)
             
-            prompt_length = len(inputs['input_ids'][0])
-            generated_tokens = outputs[0][prompt_length:]
-            generated_text = tokenizer.decode(generated_tokens,skip_special_tokens=True)
-            print("Generated Text word order:", generated_text)
-            print ('words of original text',initial_text.words)
-            words_list = [word.strip().lower() for word in generated_text.split(',')]
-            initial_words_list = [word.lower() for word in initial_text.words]
-            print ('word_list',words_list, set(initial_words_list), set(words_list)  )
-            # find set of words that are in both, then for each word in words list that is in set find index in initial_text.words
-            interesection_words = set(initial_words_list) & set(words_list) 
-            print ('interesection_words',interesection_words)
-            len_text, indices_to_order = self.get_indices_to_order(initial_text)
-            print ('len_text, indices_to_order',len_text, indices_to_order)
+#             prompt_length = len(inputs['input_ids'][0])
+#             generated_tokens = outputs[0][prompt_length:]
+#             generated_text = tokenizer.decode(generated_tokens,skip_special_tokens=True)
+#             print("Generated Text word order:", generated_text)
+#             print ('words of original text',initial_text.words)
+#             words_list = [word.strip().lower() for word in generated_text.split(',')]
+#             initial_words_list = [word.lower() for word in initial_text.words]
+#             print ('word_list',words_list, set(initial_words_list), set(words_list)  )
+#             # find set of words that are in both, then for each word in words list that is in set find index in initial_text.words
+#             interesection_words = set(initial_words_list) & set(words_list) 
+#             print ('interesection_words',interesection_words)
+#             len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#             print ('len_text, indices_to_order',len_text, indices_to_order)
             
             
-            indices_to_order = []
+#             indices_to_order = []
 
-            # for i,w in enumerate(initial_words_list):
-            #     if w in interesection_words:
-            #         indices_to_order.append(i)
+#             # for i,w in enumerate(initial_words_list):
+#             #     if w in interesection_words:
+#             #         indices_to_order.append(i)
 
-            initial_word_index_pair = {j:i for i,j in enumerate(initial_words_list) }
-            print ('initial_word_index_pair',initial_word_index_pair)
-            for i,w in enumerate(words_list):
-                if w in interesection_words:
-                    indices_to_order.append(initial_word_index_pair[w])# initial_words_list.index(w)) # potntially use miaos ranking explenation for theory behond this?
+#             initial_word_index_pair = {j:i for i,j in enumerate(initial_words_list) }
+#             print ('initial_word_index_pair',initial_word_index_pair)
+#             for i,w in enumerate(words_list):
+#                 if w in interesection_words:
+#                     indices_to_order.append(initial_word_index_pair[w])# initial_words_list.index(w)) # potntially use miaos ranking explenation for theory behond this?
 
 
-            print('indices_to_order',indices_to_order) 
+#             print('indices_to_order',indices_to_order) 
 
-            # len_text, indices_to_order = self.get_indices_to_order(initial_text)
-            index_order = indices_to_order
-            search_over = False 
+#             # len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#             index_order = indices_to_order
+#             search_over = False 
 
-            if len(index_order) == 0:
-                len_text, indices_to_order = self.get_indices_to_order(initial_text)
-                index_order = indices_to_order
-                np.random.shuffle(index_order)
-                search_over = False
+#             if len(index_order) == 0:
+#                 len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#                 index_order = indices_to_order
+#                 np.random.shuffle(index_order)
+#                 search_over = False
 
-            search_over = False
-            return index_order, search_over
-        elif self.index_order_technique == 'delete': 
-            len_text, indices_to_order = self.get_indices_to_order(initial_text)
+#             search_over = False
+#             return index_order, search_over
+#         elif self.index_order_technique == 'delete': 
+#             len_text, indices_to_order = self.get_indices_to_order(initial_text)
 
-            leave_one_texts = [
-                initial_text.delete_word_at_index(i) for i in indices_to_order
-            ]
-            print ('leave_one_texts',leave_one_texts)
-            leave_one_results, search_over = self.get_goal_results(leave_one_texts)
-            print ('leave_one_results, search_over',leave_one_results, search_over)
+#             leave_one_texts = [
+#                 initial_text.delete_word_at_index(i) for i in indices_to_order
+#             ]
+#             print ('leave_one_texts',leave_one_texts)
+#             leave_one_results, search_over = self.get_goal_results(leave_one_texts)
+#             print ('leave_one_results, search_over',leave_one_results, search_over)
 
-            index_scores = np.array([result.score for result in leave_one_results])
-            print ('index_scores',index_scores, 'search_over',search_over)
-            index_order = np.array(indices_to_order)[(-index_scores).argsort()]
-            return  index_order, search_over
-    def perform_search(self, initial_result): 
-        index_order, search_over = self._get_index_order(initial_result.attacked_text)
-        i = 0
-        cur_result = initial_result
-        results = None  
-        best_result = None
-        max_similarity = -float("inf")
-        # pick two indexes and modify them
-        while i < len(index_order) and not search_over:
-            if i > self.max_iter_i:
-                print ('reached max i',i)
-                break
-            transformed_text_candidates = self.get_transformations(
-                cur_result.attacked_text,
-                original_text=initial_result.attacked_text,
-                indices_to_modify=[index_order[i]],
-            ) 
-            print ('transformed_text_candidates',i,transformed_text_candidates,len(transformed_text_candidates))
-            i += 1
-            # apply filtering operation
-            # for i,tranform in enumerate(transformed_text_candidates):
-            #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, tranform.text])
+#             index_scores = np.array([result.score for result in leave_one_results])
+#             print ('index_scores',index_scores, 'search_over',search_over)
+#             index_order = np.array(indices_to_order)[(-index_scores).argsort()]
+#             return  index_order, search_over
+#     def perform_search(self, initial_result): 
+#         # self.current_sample_id+=1
+#         # print ('initial_result',initial_result)
+#         # print ('initial_result.attacked_text',initial_result.attacked_text)
+#         # initial_result.attacked_text.current_sample_id = self.current_sample_id
+#         # print ('initial_result.attacked_text.current_sample_id',initial_result.attacked_text.current_sample_id)
+        
+#         index_order, search_over = self._get_index_order(initial_result.attacked_text)
+#         i = 0
+#         cur_result = initial_result
+#         results = None  
+#         best_result = None
+#         max_similarity = -float("inf")
+#         # pick two indexes and modify them
+#         while i < len(index_order) and not search_over:
+#             if i > self.max_iter_i:
+#                 print ('reached max i',i)
+#                 break
+#             # print ('cur_result.attacked_text',cur_result.attacked_text.current_sample_id)
+#             transformed_text_candidates = self.get_transformations(
+#                 cur_result.attacked_text,
+#                 original_text=initial_result.attacked_text,
+#                 indices_to_modify=[index_order[i]],
+#             ) 
+#             print ('transformed_text_candidates',i,transformed_text_candidates,len(transformed_text_candidates))
+#             i += 1
+#             # apply filtering operation
+#             # for i,tranform in enumerate(transformed_text_candidates):
+#             #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, tranform.text])
 
-            #     if not isinstance(sim_final_original, torch.Tensor):
-            #         sim_final_original = torch.tensor(sim_final_original)
+#             #     if not isinstance(sim_final_original, torch.Tensor):
+#             #         sim_final_original = torch.tensor(sim_final_original)
 
-            #     if not isinstance(sim_final_pert, torch.Tensor):
-            #         sim_final_pert = torch.tensor(sim_final_pert)
+#             #     if not isinstance(sim_final_pert, torch.Tensor):
+#             #         sim_final_pert = torch.tensor(sim_final_pert)
 
-            #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-            #     print ('sim_score transform',sim_score, (1 - (args.similarity_threshold) / math.pi))
-            #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
-            #         continue
+#             #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#             #     print ('sim_score transform',sim_score, (1 - (args.similarity_threshold) / math.pi))
+#             #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+#             #         continue
 
-            valid_candidates = []
-            for candidate in transformed_text_candidates:
-                # similarity = self.use_constraint.similarity_function(
-                #     initial_result.attacked_text.text, 
-                #     candidate.text
-                # )
-                # print ('similarity',similarity)
-                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+#             valid_candidates = []
+#             for candidate in transformed_text_candidates:
+#                 # similarity = self.use_constraint.similarity_function(
+#                 #     initial_result.attacked_text.text, 
+#                 #     candidate.text
+#                 # )
+#                 # print ('similarity',similarity)
+#                 sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
                 
                 
-                if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
-                    valid_candidates.append(candidate)
+#                 if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
+#                     valid_candidates.append(candidate)
 
-            # Now, valid_candidates only contains those candidates that meet the USE constraint
-            print('valid_candidates', valid_candidates, len(valid_candidates))
-            transformed_text_candidates = valid_candidates
+#             # Now, valid_candidates only contains those candidates that meet the USE constraint
+#             print('valid_candidates', valid_candidates, len(valid_candidates))
+#             transformed_text_candidates = valid_candidates
 
-            if len(transformed_text_candidates) == 0:
-                continue
-            results, search_over = self.get_goal_results(transformed_text_candidates)
-            null_label = len(self.dataset.label_names)
-            print ('results_before_null_filter')
-            print ('null_label',null_label)
-            results = [i for i in results if i.output != null_label] # filter out all attacks that lead to null
-            # print ('results_after_null_filter',results)
+#             if len(transformed_text_candidates) == 0:
+#                 continue
 
-            # a self.track_result_score
-            # can put all scores here so that we can access them later
-            # for each i we can save a list of scores, then do the max in each, we expect for each i to increase
-            # we can then show how this increases by number of perturbations by definition a low and high score
-            # are high confidences, while a mid score are medium confidences
+#             results, search_over = self.get_goal_results(transformed_text_candidates)
+#             null_label = len(self.dataset.label_names)
+#             print ('results_before_null_filter')
+#             print ('null_label',null_label)
+#             results = [i for i in results if i.output != null_label] # filter out all attacks that lead to null
+#             # print ('results_after_null_filter',results)
 
-            results = sorted(results, key=lambda x: -x.score)
-            print ('results_after_sorted',results)
-            if len(results) == 0:
-                continue
-            # Skip swaps which don't improve the score
-            if results[0].score > cur_result.score: 
-                cur_result = results[0] 
+#             # a self.track_result_score
+#             # can put all scores here so that we can access them later
+#             # for each i we can save a list of scores, then do the max in each, we expect for each i to increase
+#             # we can then show how this increases by number of perturbations by definition a low and high score
+#             # are high confidences, while a mid score are medium confidences
+
+#             results = sorted(results, key=lambda x: -x.score)
+#             print ('results_after_sorted',results)
+#             if len(results) == 0:
+#                 continue
+#             # Skip swaps which don't improve the score
+#             if results[0].score > cur_result.score: 
+#                 cur_result = results[0] 
                  
-            else:
-                continue 
-            if cur_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
-                candidate = cur_result.attacked_text
-                # try:
-                #     similarity_score = candidate.attack_attrs["similarity_score"]
-                # except KeyError:
-                #     break
+#             else:
+#                 continue 
+#             if cur_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
+#                 candidate = cur_result.attacked_text
+#                 # try:
+#                 #     similarity_score = candidate.attack_attrs["similarity_score"]
+#                 # except KeyError:
+#                 #     break
 
-                sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
+#                 sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
 
-                if not isinstance(sim_final_original, torch.Tensor):
-                    sim_final_original = torch.tensor(sim_final_original)
+#                 if not isinstance(sim_final_original, torch.Tensor):
+#                     sim_final_original = torch.tensor(sim_final_original)
 
-                if not isinstance(sim_final_pert, torch.Tensor):
-                    sim_final_pert = torch.tensor(sim_final_pert)
+#                 if not isinstance(sim_final_pert, torch.Tensor):
+#                     sim_final_pert = torch.tensor(sim_final_pert)
 
-                sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-                print ('sim_score success',sim_score, (1 - (args.similarity_threshold) / math.pi))
+#                 sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#                 print ('sim_score success',sim_score, (1 - (args.similarity_threshold) / math.pi))
                 
                 
-                # if sim_score <  (1 - (args.similarity_threshold) / math.pi):
-                #     continue
-                sim_score = round(sim_score, 4)
-                similarity_score = sim_score 
+#                 # if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+#                 #     continue
+#                 sim_score = round(sim_score, 4)
+#                 similarity_score = sim_score 
 
 
-                if similarity_score > max_similarity:
-                    max_similarity = similarity_score
-                    best_result = cur_result
+#                 if similarity_score > max_similarity:
+#                     max_similarity = similarity_score
+#                     best_result = cur_result
 
-        self.goal_function.model.reset_inference_steps()
-        if best_result: 
-            return best_result
-        else:
-            return cur_result
-        # else:
-        #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
+#         # self.goal_function.model.reset_inference_steps()
+#         if best_result: 
+#             return best_result
+#         else:
+#             return cur_result
+#         # else:
+#         #     sim_final_original, sim_final_pert = self.use_constraint.encode([initial_result.attacked_text.text, cur_result.attacked_text.text])
 
-        #     if not isinstance(sim_final_original, torch.Tensor):
-        #         sim_final_original = torch.tensor(sim_final_original)
+#         #     if not isinstance(sim_final_original, torch.Tensor):
+#         #         sim_final_original = torch.tensor(sim_final_original)
 
-        #     if not isinstance(sim_final_pert, torch.Tensor):
-        #         sim_final_pert = torch.tensor(sim_final_pert)
+#         #     if not isinstance(sim_final_pert, torch.Tensor):
+#         #         sim_final_pert = torch.tensor(sim_final_pert)
 
-        #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-        #     print ('sim_score end',sim_score, (1 - (args.similarity_threshold) / math.pi))
-        #     # print ('prev similarity_score',similarity_score)
-        #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
-        #         return []
-        #     else:
-        #         return cur_result 
+#         #     sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
+#         #     print ('sim_score end',sim_score, (1 - (args.similarity_threshold) / math.pi))
+#         #     # print ('prev similarity_score',similarity_score)
+#         #     if sim_score <  (1 - (args.similarity_threshold) / math.pi):
+#         #         return []
+#         #     else:
+#         #         return cur_result 
 
-    @property
-    def is_black_box(self):
-        return True
+#     @property
+#     def is_black_box(self):
+#         return True
 
-    def extra_repr_keys(self):
-        return ["beam_width"]
+#     def extra_repr_keys(self):
+#         return ["beam_width"]
 
 
 class GreedySearch_USE_Hardlabel(SearchMethod):
@@ -5103,26 +5312,31 @@ class GreedySearch_WithMin_USE(SearchMethod):
     def extra_repr_keys(self):
         return ["beam_width"]
 
-if args.search_method == 'black_box':
-    search_method = BlackBoxSearch(**vars(args))#num_transformations)
-# elif args.search_method == 's1_black_box' :
+
+ 
+from src.search_algorithms.search_config import DYNAMIC_SEARCH
+search_method = DYNAMIC_SEARCH[args.search_method](**vars(args))
+
+# if args.search_method == 'black_box':
 #     search_method = BlackBoxSearch(**vars(args))#num_transformations)
-elif args.search_method == 'greedy_search': #'s1' or args.search_method =='2step' or args.search_method == 'empirical' or args.search_method == 'k_pred_avg':
-    search_method = GreedySearch(**vars(args))#index_order_technique,goal_function)#   GreedyWordSwapWIR(wir_method="delete")
-elif  args.search_method =='greedy_search_use':
-    search_method = GreedySearch_USE(**vars(args))
-elif args.search_method == 'greedy_search_use_hardlabel':
-    search_method = GreedySearch_USE_Hardlabel(**vars(args))
-elif args.search_method=='sspattack':
-    nltk.download('averaged_perceptron_tagger')
-    nltk.download('wordnet')
-    search_method = SSPAttackSearch(**vars(args))
-elif args.search_method=='texthoaxer':
-    nltk.download('averaged_perceptron_tagger')
-    nltk.download('wordnet')
-    search_method = TextHoaxer(**vars(args))
-elif args.search_method=='greedy_search_withmin_use':
-    search_method = GreedySearch_WithMin_USE(**vars(args))
+# # elif args.search_method == 's1_black_box' :
+# #     search_method = BlackBoxSearch(**vars(args))#num_transformations)
+# elif args.search_method == 'greedy_search': #'s1' or args.search_method =='2step' or args.search_method == 'empirical' or args.search_method == 'k_pred_avg':
+#     search_method = GreedySearch(**vars(args))#index_order_technique,goal_function)#   GreedyWordSwapWIR(wir_method="delete")
+# elif  args.search_method =='greedy_search_use':
+#     search_method = GreedySearch_USE(**vars(args))
+# elif args.search_method == 'greedy_search_use_hardlabel':
+#     search_method = GreedySearch_USE_Hardlabel(**vars(args))
+# elif args.search_method=='sspattack':
+#     nltk.download('averaged_perceptron_tagger')
+#     nltk.download('wordnet')
+#     search_method = SSPAttackSearch(**vars(args))
+# elif args.search_method=='texthoaxer':
+#     nltk.download('averaged_perceptron_tagger')
+#     nltk.download('wordnet')
+#     search_method = TextHoaxer(**vars(args))
+# elif args.search_method=='greedy_search_withmin_use':
+#     search_method = GreedySearch_WithMin_USE(**vars(args))
 
 # search_method_class_1 = AlzantotGeneticAlgorithm(pop_size=60, max_iters=20, post_crossover_check=False)
 
