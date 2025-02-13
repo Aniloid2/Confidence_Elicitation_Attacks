@@ -238,7 +238,7 @@ class BaseClassificationPrompt:
         return guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities
 
 
-    def _call_model(self,generate_args,extra_args):
+    def _call_model(self,extra_args):
         with torch.no_grad():
             # outputs = self.model.generate(**generate_args)
             print ('passing')

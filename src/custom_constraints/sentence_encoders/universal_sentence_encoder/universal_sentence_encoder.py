@@ -29,9 +29,11 @@ class UniversalSentenceEncoder(SentenceEncoder):
 
     def encode(self, sentences):
         if not self.model:
+            
             self.model = hub.load(self._tfhub_url)
-        encoding = self.model(sentences)
 
+        encoding = self.model(sentences)
+        
         if isinstance(encoding, dict):
             encoding = encoding["outputs"]
 

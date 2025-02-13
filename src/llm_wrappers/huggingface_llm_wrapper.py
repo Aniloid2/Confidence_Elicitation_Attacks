@@ -22,12 +22,13 @@ class HuggingFaceLLMWrapper(ModelWrapper):
             "top_p": 0.92,  # nucleus sampling probability
             "temperature": self.temperature,  # sampling temperature
             "max_new_tokens": 200,
-            'pad_token_id': self.tokenizer.eos_token_id
+            # 'pad_token_id': self.tokenizer.eos_token_id
         }
 
         self.general_tokenizer_encoding_args = {
             'return_tensors':"pt",
             }
+        
 
 
 
@@ -40,7 +41,7 @@ class HuggingFaceLLMWrapper(ModelWrapper):
     def __call__(self, text_input_list):#,ground_truth_output):
         
         self.device = next(self.model.parameters()).device
-        # print ('device',self.device)
+        
         print ('text_input_list',text_input_list)
         print ('self.device',self.device)
         # text_input_list = [text_input_list,text_input_list]

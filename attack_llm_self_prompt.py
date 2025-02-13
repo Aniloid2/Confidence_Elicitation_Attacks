@@ -12,8 +12,7 @@ import torch
 
 from textattack.constraints.pre_transformation import RepeatModification, StopwordModification
 from textattack.search_methods import AlzantotGeneticAlgorithm
-# from textattack.transformations import WordSwapEmbedding, WordSwapWordNet,WordSwap
-# from textattack.goal_functions import UntargetedClassification
+
 from textattack.shared import AttackedText
 from textattack.attack import Attack
 
@@ -26,7 +25,7 @@ from textattack.constraints.pre_transformation import (
 )
 
 from textattack.constraints.semantics import WordEmbeddingDistance
-# from textattack.constraints.semantics.sentence_encoders import UniversalSentenceEncoder
+
 from src.custom_constraints.sentence_encoders import UniversalSentenceEncoder
 from textattack.constraints.semantics.bert_score import BERTScore
 from textattack.constraints.grammaticality import PartOfSpeech
@@ -36,7 +35,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
  
 
 import os 
-# Load model, tokenizer, and model wrapper
 
 
 from numpy.random import dirichlet
@@ -50,7 +48,7 @@ set_huggingface_cache(args)
 from src.utils.shared.misc import environment_setup
 args = environment_setup(args)
 
-# from src.utils.shared.misc import self.predictor.prompt_class._identify_correct_incorrect_labels
+
 
 
 # import random
@@ -254,7 +252,14 @@ else:
 
 from src.utils.shared.misc import initialize_model_and_tokenizer
 
-args = initialize_model_and_tokenizer(args)
+# args = initialize_model_and_tokenizer(args)
+
+from src.utils.shared.misc import initialize_device
+
+args.device = initialize_device(args)
+
+
+
 # tokenizer = AutoTokenizer.from_pretrained(args.model_name, cache_dir=args.cache_transformers,trust_remote_code=True)
 # model = AutoModelForCausalLM.from_pretrained(args.model_name, cache_dir=args.cache_transformers,trust_remote_code=True)
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -431,81 +436,91 @@ import random
 
 
 from src.llm_wrappers.huggingface_llm_wrapper import HuggingFaceLLMWrapper
+from src.llm_wrappers.chatgpt_llm_wrapper import ChatGPTLLMWrapper
+
 
 args.dataset = dataset_class
-model_wrapper = HuggingFaceLLMWrapper(**vars(args))
-args.model = model_wrapper
+if 'gpt-4o' in args.model_type: 
+    model_wrapper = ChatGPTLLMWrapper(**vars(args))
+else:
+    
+    args.tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
+    args.model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
+    model_wrapper = HuggingFaceLLMWrapper(**vars(args))
 
+
+
+args.model = model_wrapper
 args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
 
 # need to change this so that it's a wrapper
-if 'gpt-4o' in args.model_type: 
-    # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
-    import requests
-    import json
-    def _call_model_API(self,generate_args,extra_args):
-        api_key = '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'
-        print ('generate_args',generate_args)
-        url = 'https://api.openai.com/v1/chat/completions'
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {api_key}',
-        }
-        payload = {
-            'model': 'gpt-4o',
-            'messages': [
-                {'role': 'system', 'content': "You are an expert assistant"},
-                {'role': 'user', 'content': extra_args['prompt']},
-            ],
-            'max_tokens': generate_args['max_new_tokens'],
-            'n': 1,
-            'stop': None,
-            'temperature': generate_args['temperature'],
-            # 'logprobs': True,
-            # 'top_logprobs': 5,
-            'logprobs': False, 
-        }
+# if 'gpt-4o' in args.model_type: 
+#     # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
+#     import requests
+#     import json
+#     def _call_model_API(self,generate_args,extra_args):
+#         api_key = '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'
+#         print ('generate_args',generate_args)
+#         url = 'https://api.openai.com/v1/chat/completions'
+#         headers = {
+#             'Content-Type': 'application/json',
+#             'Authorization': f'Bearer {api_key}',
+#         }
+#         payload = {
+#             'model': 'gpt-4o',
+#             'messages': [
+#                 {'role': 'system', 'content': "You are an expert assistant"},
+#                 {'role': 'user', 'content': extra_args['prompt']},
+#             ],
+#             'max_tokens': generate_args['max_new_tokens'],
+#             'n': 1,
+#             'stop': None,
+#             'temperature': generate_args['temperature'],
+#             # 'logprobs': True,
+#             # 'top_logprobs': 5,
+#             'logprobs': False, 
+#         }
 
-        # response = requests.post(url, headers=headers, data=json.dumps(payload))
-        # print ('response',response)
-        # if response.status_code == 200:
-        #     response_data = response.json()
-        #     print ('response_data',response_data)
-        #     choice = response_data['choices'][0]
-        #     message_content = choice['message']['content']
-        #     print ('message_content',message_content)
-        #     return message_content
-        # else:
-        #     print(f"Error: {response.status_code}")
-        #     print(response.text)
-        #     return None
-        max_retries = 10
-        wait_time = 60  # seconds
+#         # response = requests.post(url, headers=headers, data=json.dumps(payload))
+#         # print ('response',response)
+#         # if response.status_code == 200:
+#         #     response_data = response.json()
+#         #     print ('response_data',response_data)
+#         #     choice = response_data['choices'][0]
+#         #     message_content = choice['message']['content']
+#         #     print ('message_content',message_content)
+#         #     return message_content
+#         # else:
+#         #     print(f"Error: {response.status_code}")
+#         #     print(response.text)
+#         #     return None
+#         max_retries = 10
+#         wait_time = 60  # seconds
 
-        for attempt in range(max_retries):
-            response = requests.post(url, headers=headers, data=json.dumps(payload))
-            print('response', response)
+#         for attempt in range(max_retries):
+#             response = requests.post(url, headers=headers, data=json.dumps(payload))
+#             print('response', response)
 
-            if response.status_code == 200:
-                response_data = response.json()
-                print('response_data', response_data)
-                choice = response_data['choices'][0]
-                message_content = choice['message']['content']
-                print('message_content', message_content)
-                return message_content
-            else:
-                print(f"Error: {response.status_code}")
-                print(response.text)
+#             if response.status_code == 200:
+#                 response_data = response.json()
+#                 print('response_data', response_data)
+#                 choice = response_data['choices'][0]
+#                 message_content = choice['message']['content']
+#                 print('message_content', message_content)
+#                 return message_content
+#             else:
+#                 print(f"Error: {response.status_code}")
+#                 print(response.text)
 
-                if attempt < max_retries - 1:  # Don't wait after the last attempt
-                    print(f"Retrying in {wait_time} seconds...")
-                    time.sleep(wait_time)
+#                 if attempt < max_retries - 1:  # Don't wait after the last attempt
+#                     print(f"Retrying in {wait_time} seconds...")
+#                     time.sleep(wait_time)
 
-        return None
+#         return None
 
 
-    from src.prompting.classification import BaseClassificationPrompt
-    args.predictor.prompt_class._call_model = _call_model_API.__get__(args.predictor.prompt_class,BaseClassificationPrompt)
+#     from src.prompting.classification import BaseClassificationPrompt
+#     args.predictor.prompt_class._call_model = _call_model_API.__get__(args.predictor.prompt_class,BaseClassificationPrompt)
 
 
 
@@ -2208,8 +2223,10 @@ from textattack.goal_functions import ClassificationGoalFunction
 
 from src.goal_function_algorithms.predict_and_confidence_goal_function import Prediction_And_Confidence_GoalFunction
 
+
 # goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,query_budget=args.query_budget)
 goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,**vars(args))
+
 
 
 
@@ -5341,6 +5358,9 @@ search_method = DYNAMIC_SEARCH[args.search_method](**vars(args))
 # search_method_class_1 = AlzantotGeneticAlgorithm(pop_size=60, max_iters=20, post_crossover_check=False)
 
 # Create the attack
+
+ 
+
 greedy_attack = Attack(goal_function, constraints, transformation, search_method)
 # genetic_attack = Attack(goal_function, constraints, transformation, search_method_class_1)
 
@@ -5367,12 +5387,17 @@ attack_args = AttackArgs(
 # Run attack for class 0
 attacker_greedy_class_0 = Attacker(greedy_attack, dataset_class, attack_args)
 
+
 import time
 
 # Start the timer
 start_time = time.time()
  
 results = attacker_greedy_class_0.attack_dataset()
+
+
+
+
 end_time = time.time()
 
 

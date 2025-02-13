@@ -268,7 +268,7 @@ class Step2KPredAvg(BasePredictor):
             "top_p": 0.92,  # nucleus sampling probability
             "temperature": self.temperature,  # sampling temperature
             "max_new_tokens": 200,
-            'pad_token_id': self.tokenizer.eos_token_id
+            # 'pad_token_id': self.tokenizer.eos_token_id
         }
         extra_args = {
             "prompt": prompt,
@@ -284,7 +284,8 @@ class Step2KPredAvg(BasePredictor):
         # print("Generated Prediction Text:", generated_text) 
         self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
         self.prompt_class.model.general_generate_args = generate_args
-        generated_text = self.prompt_class._call_model(generate_args,extra_args)
+        generated_text = self.prompt_class._call_model(extra_args)
+        print ('generated_text before first',generated_text)
         generated_text = generated_text[0]
         # print ('generated_text before',generated_text)
         # generated_text = self.tokenizer.encode(
@@ -315,6 +316,7 @@ class Step2KPredAvg(BasePredictor):
 
         # Regex to find 'true' or 'false', case-insensitive, ensuring full word match
         # pattern = re.compile(r'\btrue\b|\bfalse\b', re.IGNORECASE)
+        
         results = self.prompt_class._extract_answer_prompt(generated_text)
 
         # print ('self.prompt_class.guess_pattern_prediction',self.prompt_class.guess_pattern_prediction)
@@ -396,7 +398,7 @@ class Step2KPredAvg(BasePredictor):
             "top_p": 0.92,
             "temperature": self.temperature,
             "max_new_tokens": 300,
-            'pad_token_id': self.tokenizer.eos_token_id
+            # 'pad_token_id': self.tokenizer.eos_token_id
         }
         extra_args = {
             "prompt": confidence_prompt,
@@ -404,7 +406,7 @@ class Step2KPredAvg(BasePredictor):
 
         self.prompt_class.model.general_tokenizer_encoding_args = tokenizer_encoding_args
         self.prompt_class.model.general_generate_args = generate_args
-        generated_text_conf = self.prompt_class._call_model(generate_args,extra_args)
+        generated_text_conf = self.prompt_class._call_model(extra_args)
         generated_text_conf=generated_text_conf[0]
         return {'raw_responses':f'{generated_text} {generated_text_conf}', 'predictions':generated_text,'confidences':generated_text_conf}
     

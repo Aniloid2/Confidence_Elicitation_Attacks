@@ -115,6 +115,12 @@ def environment_setup(args):
 
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer
+def initialize_device(args):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    return device
+
+
 def initialize_model_and_tokenizer(args):
     tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
     model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
@@ -124,7 +130,8 @@ def initialize_model_and_tokenizer(args):
         print('\nModel dtypes:')
         for name, param in model.named_parameters():
             print(f"Parameter: {name}, Data type: {param.dtype}")
-    # print_model_layer_dtype(model)
+    
+    
     if 'precision' in MODEL_INFO[args.model_type]:
         if MODEL_INFO[args.model_type]['precision'] == 'float32':
             pass

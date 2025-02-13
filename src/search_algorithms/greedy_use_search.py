@@ -140,6 +140,8 @@ class GreedyUSESearch(SearchMethod):
         # initial_result.attacked_text.current_sample_id = self.current_sample_id
         # print ('initial_result.attacked_text.current_sample_id',initial_result.attacked_text.current_sample_id)
         
+        
+        
         index_order, search_over = self._get_index_order(initial_result.attacked_text)
         i = 0
         cur_result = initial_result
@@ -181,8 +183,12 @@ class GreedyUSESearch(SearchMethod):
                 #     candidate.text
                 # )
                 # print ('similarity',similarity)
-                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+                print ('waiting here')
                 
+                sim_score = self.use_constraint.get_sim_score(initial_result.attacked_text.text, candidate.text)
+                print ('simsocre',sim_score)
+                # import time
+                # time.sleep(1000)
                 
                 if sim_score >= self.use_constraint.threshold:# (1 - (args.similarity_threshold) / math.pi):
                     valid_candidates.append(candidate)
@@ -193,7 +199,7 @@ class GreedyUSESearch(SearchMethod):
 
             if len(transformed_text_candidates) == 0:
                 continue
-
+            
             results, search_over = self.get_goal_results(transformed_text_candidates)
             null_label = len(self.dataset.label_names)
             print ('results_before_null_filter')
@@ -233,7 +239,7 @@ class GreedyUSESearch(SearchMethod):
                     sim_final_pert = torch.tensor(sim_final_pert)
 
                 sim_score = self.use_constraint.sim_metric(sim_final_original.unsqueeze(0), sim_final_pert.unsqueeze(0)).item()
-                print ('sim_score success',sim_score, (1 - (args.similarity_threshold) / math.pi))
+                print ('sim_score success',sim_score, (1 - (self.similarity_threshold) / math.pi))
                 
                 
                 # if sim_score <  (1 - (args.similarity_threshold) / math.pi):
@@ -246,6 +252,7 @@ class GreedyUSESearch(SearchMethod):
                     max_similarity = similarity_score
                     best_result = cur_result
 
+        
         # self.goal_function.model.reset_inference_steps()
         if best_result: 
             return best_result

@@ -1,1 +1,2 @@
 from .huggingface_llm_wrapper import HuggingFaceLLMWrapper
+from .chatgpt_llm_wrapper import ChatGPTLLMWrapper
