@@ -13,8 +13,11 @@ def predictor_evaluation(args,predictor):
     print ('top_k_dirichlet_mean',predictor.predictor_container.classifier_results.top_k_dirichlet_mean)
 
     for _, predictor_attribute in vars(predictor.predictor_container).items():
+        print ('predictor_attribute',predictor_attribute)
         if not isinstance(predictor_attribute, BasePredictorResults):
             for predictor_name, predictor_predictions in vars(predictor_attribute).items():
+                print ('predictor_name',predictor_name)
+                print ('predictor_predictions',predictor_predictions)
                 if predictor_predictions:  # Check if the list is not empty
                     # Perform operation if the list is not empty
                     print(f"Performing operation on {predictor_name}:")

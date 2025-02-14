@@ -1468,8 +1468,14 @@ args.end_prompt_footer = model_info['end_prompt_footer']
 # args.tokenizer = tokenizer
 # args.device = device
 # args.model = model
-from src.utils.shared.misc import initialize_model_and_tokenizer
-args = initialize_model_and_tokenizer(args) 
+# from src.utils.shared.misc import initialize_model_and_tokenizer
+# args = initialize_model_and_tokenizer(args) 
+
+from src.utils.shared.misc import initialize_device
+args.device = initialize_device(args)
+
+
+
 from src.containers import AbstractPredictor, BasePredictorResults, ClassifierPredictorResults
 
 class PredictionContainer(AbstractPredictor):
@@ -1477,90 +1483,31 @@ class PredictionContainer(AbstractPredictor):
         self.base_results = BasePredictorResults()
         self.classifier_results = ClassifierPredictorResults()
 
-from src.inference import Step2KPredAvg
 
-# if args.prompting_type == 'step2_k_pred_avg':
+
+from src.llm_wrappers.huggingface_llm_wrapper import HuggingFaceLLMWrapper
+from src.llm_wrappers.chatgpt_llm_wrapper import ChatGPTLLMWrapper
+
+if 'gpt-4o' in args.model_type: 
+    model_wrapper = ChatGPTLLMWrapper(**vars(args))
+else:
+    
+    args.tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
+    args.model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
+    args.model.to(args.device)
+    model_wrapper = HuggingFaceLLMWrapper(**vars(args)) 
+args.model = model_wrapper
+
+
+
+
+
 from src.inference.inference_config import DYNAMIC_INFERENCE
 args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
 args.predictor.predictor_container = PredictionContainer()
 
-if 'gpt-4o' in args.model_type: 
-    # we load a llama3 model so that our code is compatible with huggingface, but every call is made directly to the api
-    import requests
-    import json
-    import time
-    def _call_model_API(self,generate_args,extra_args):
-        api_key = ''
-        print ('generate_args',generate_args)
-        url = 'https://api.openai.com/v1/chat/completions'
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {api_key}',
-        }
-        payload = {
-            'model': 'gpt-4o',
-            'messages': [
-                {'role': 'system', 'content': "You are an expert assistant"},
-                {'role': 'user', 'content': extra_args['prompt']},
-            ],
-            'max_tokens': generate_args['max_new_tokens'],
-            'n': 1,
-            'stop': None,
-            'temperature': generate_args['temperature'],
-            # 'logprobs': True,
-            # 'top_logprobs': 5,
-            'logprobs': False, 
-        }
-
-        # response = requests.post(url, headers=headers, data=json.dumps(payload))
-        # print ('response',response)
-        # if response.status_code == 200:
-        #     response_data = response.json()
-        #     print ('response_data',response_data)
-        #     choice = response_data['choices'][0]
-        #     message_content = choice['message']['content']
-        #     print ('message_content',message_content)
-        #     return message_content
-        # else:
-        #     print(f"Error: {response.status_code}")
-        #     print(response.text)
-        #     return None
-        max_retries = 10
-        wait_time = 60  # seconds
-
-        for attempt in range(max_retries):
-            response = requests.post(url, headers=headers, data=json.dumps(payload))
-            print('response', response)
-
-            if response.status_code == 200:
-                response_data = response.json()
-                print('response_data', response_data)
-                choice = response_data['choices'][0]
-                message_content = choice['message']['content']
-                print('message_content', message_content)
-                return message_content
-            else:
-                print(f"Error: {response.status_code}")
-                print(response.text)
-
-                if attempt < max_retries - 1:  # Don't wait after the last attempt
-                    print(f"Retrying in {wait_time} seconds...")
-                    time.sleep(wait_time)
-
-        return None
 
 
-    from src.prompting.classification import BaseClassificationPrompt
-    args.predictor.prompt_class._call_model = _call_model_API.__get__(args.predictor.prompt_class,BaseClassificationPrompt)
-
-
-
-# if args.prompting_type == 'step2_k_pred_avg':
-#     predictor = Step2KPredAvg(**vars(args))
-#     predictor.predictor_container = PredictionContainer()
-# else:
-#     print ('invalid')
-#     sys.exit()
 
 
 # print ('texts',texts,'len texts', len(texts), 'true_labels',sum([i for i in true_labels if i == 1]),len(true_labels))

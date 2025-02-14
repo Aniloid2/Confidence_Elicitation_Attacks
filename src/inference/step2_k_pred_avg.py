@@ -239,6 +239,7 @@ class Step2KPredAvg(BasePredictor):
     
 
     def add_prompt_and_call_model(self, datapoint):
+        print ('datapoint',datapoint)
         text = datapoint
         self.prompt_class._initialize_sample_counters() 
         # print ('label_index_text',text,label_index)
@@ -408,6 +409,7 @@ class Step2KPredAvg(BasePredictor):
         self.prompt_class.model.general_generate_args = generate_args
         generated_text_conf = self.prompt_class._call_model(extra_args)
         generated_text_conf=generated_text_conf[0]
+        print ('generated_text_conf before return',generated_text_conf)
         return {'raw_responses':f'{generated_text} {generated_text_conf}', 'predictions':generated_text,'confidences':generated_text_conf}
     
     def standarize_output(self,output):
@@ -564,10 +566,18 @@ class Step2KPredAvg(BasePredictor):
         return {'raw_responses': output['raw_responses'], 'predictions':predictions,'confidences':confidences}
     
     def aggregate_output(self, output):
+        print ('output,output',output)
         results_post_process = output['predictions']
         confidence_numerical_results = output['confidences']
-        inference_step = output['inference_step']
-        current_sample_id = output['current_sample_id']
+        # inference_step and current_sample_id only applicable if we are doing inference with a goal function class 
+        if 'inference_step' in output:
+            inference_step = output['inference_step']
+        else:
+            inference_step = None
+        if 'current_sample_id' in output:
+            current_sample_id = output['current_sample_id']
+        else:
+            current_sample_id = None
         weighted_counts = {label: 0.0 for label in self.prompt_class.label_list}
         weighted_counts['null'] = 0.0
         
@@ -581,7 +591,7 @@ class Step2KPredAvg(BasePredictor):
         print ('weighted_counts+conf',weighted_counts)
         guess_result_with_confidence = max(weighted_counts, key=weighted_counts.get) 
 
-        def compute_dirichlet_statistics(weighted_counts, label_list,current_sample_id,inference_step):
+        def compute_dirichlet_statistics(weighted_counts, label_list,current_sample_id=None,inference_step=None):
             print(' ', weighted_counts)
 
             # You mentioned 'weighted_counts_binary' in your request, but it seems missing.
@@ -638,8 +648,27 @@ class Step2KPredAvg(BasePredictor):
         alpha, dirichlet_distribution, empirical_mean, second_order_uncertainty, probabilities = compute_dirichlet_statistics(weighted_counts,weighted_counts.keys(),current_sample_id,inference_step)
         return guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities
 
-    
-    def predict_and_confidence(self, datapoint):
+    def predict_and_confidence(self,datapoint):
+        output = self.add_prompt_and_call_model(datapoint)
+        output = self.standarize_output(output)
+        guess_result_with_confidence, empirical_mean, second_order_uncertainty, probabilities = self.aggregate_output(output)
+        guess_result = self.prompt_class._predictor_decision()
+
+        if self.predictor_container: 
+            self.predictor_container.add_top_k_max_prediction(self.prompt_class.task_name_to_label[guess_result])
+
+            self.predictor_container.add_top_k_max_prediction_and_confidence(self.prompt_class.task_name_to_label[guess_result_with_confidence])
+            guess_result_empirical_mean = self.prompt_class.label_list_with_null[np.argmax(empirical_mean)]
+            self.predictor_container.add_top_k_dirichlet_mean(self.prompt_class.task_name_to_label[guess_result_empirical_mean])
+        
+
+
+        confidence_result = max(probabilities)
+        return guess_result, empirical_mean, confidence_result
+
+
+
+    def predict_and_confidence2(self, datapoint):
          
         # if task not in ['sst2', 'ag_news', 'popQA']:
         #     raise ValueError("Unsupported task. Please choose 'sst2', 'ag_news', or 'popQA'.")
