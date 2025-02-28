@@ -1,6 +1,10 @@
 # LLM Robustness Evaluation and Attack Tool
 
-This repository contains the code for CEAttacks
+## CEAttacks: Code for Confidence Elicitation - A New Attack Vector for Large Language Models
+
+This repository contains the code for [CEAttacks: Confidence Elicitation: A New Attack Vector for Large Language Models](https://openreview.net/forum?id=aTYexOYlLb).
+
+![Confidence Elicitation Attack Framework](confidence_elicitation_attacks.png)
 
 ## Installation
 
@@ -107,4 +111,16 @@ MODEL_INFO = {
 5. **Similarity Metrics**: USE and BERT_sim are directly called in `attack_llm.py`. You can add custom epsilon bounds in `src/custom_constraints`. In the folder there is a USE implementation for guidance.
  
 
+### Citation
 
+If you use our work, please cite it as follows:
+
+```
+@inproceedings{formento2025confidence,
+  title={Confidence Elicitation: A New Attack Vector for Large Language Models},
+  author={Brian Formento and Chuan-Sheng Foo and See-Kiong Ng},
+  booktitle={The Thirteenth International Conference on Learning Representations},
+  year={2025},
+  url={https://openreview.net/forum?id=aTYexOYlLb}
+}
+```
