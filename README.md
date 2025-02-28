@@ -23,13 +23,13 @@ bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
 Alternatively, you can directly call the evaluation function:
 
 ```bash
-CUDA_VISIBLE_DEVICES=3 python robustness_eval_huggingface.py \
+CUDA_VISIBLE_DEVICES=0 python robustness_eval_huggingface.py \
   --model_type llama3 \
   --task sst2 \
   --prompting_type step2_k_pred_avg \
   --k_pred 20 \
-  --search_method greedy_search_use \
-  --transformation_method word_swap_embedding \
+  --search_method greedy_use_search \
+  --transformation_method ceattack \
   --n_embeddings 10 \
   --max_iter_i 5 \
   --confidence_type weighted_confidence \
@@ -40,7 +40,8 @@ CUDA_VISIBLE_DEVICES=3 python robustness_eval_huggingface.py \
   --index_order_technique random \
   --temperature 0.001 \
   --num_examples 500 \
-  --cache_transformers /mnt/hdd/[youruserfolder]/ \
+  --query_budget 500 \
+  --cache_transformers /[youruserfolder]/ \
   --experiment_name_folder 'testing_attack' > testing_attack.txt
 ```
 
@@ -57,13 +58,13 @@ bash_scripts/attack_orchestration/attack_all_models_tasks.sh
 Alternatively, you can run the attack script directly from the Python file:
 
 ```bash
-CUDA_VISIBLE_DEVICES=3 python attack_llm_self_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python attack_llm_self_prompt.py \
   --model_type llama3 \
   --task sst2 \
   --prompting_type step2_k_pred_avg \
   --k_pred 20 \
-  --search_method greedy_search_use \
-  --transformation_method word_swap_embedding \
+  --search_method greedy_use_search \
+  --transformation_method ceattack \
   --n_embeddings 10 \
   --max_iter_i 5 \
   --confidence_type weighted_confidence \
@@ -74,11 +75,12 @@ CUDA_VISIBLE_DEVICES=3 python attack_llm_self_prompt.py \
   --index_order_technique random \
   --temperature 0.001 \
   --num_examples 500 \
-  --cache_transformers /mnt/hdd/[youruserfolder]/ \
+  --query_budget 500 \
+  --cache_transformers /[youruserfolder]/ \
   --experiment_name_folder 'testing_attack' > testing_attack.txt
 ```
 
-This will run a simple attack based on counter-fitted word substitutions (`word_swap_embedding`) with n=10 potential word synonyms per word, using greedy search (`greedy_search_use`) and a max i = 5 (`max_iter_i`). The 2-step confidence elicitation prompt (`step2_k_pred_avg`) is used.
+This will run a simple attack based on counter-fitted word substitutions (`ceattack`) with n=10 potential word synonyms per word, using greedy search and universal semantic encoder bound (`greedy_use_search`) and a max i = 5 (`max_iter_i`). The 2-step confidence elicitation prompt (`step2_k_pred_avg`) is used.
 
 ## Configuration
 
@@ -98,10 +100,11 @@ MODEL_INFO = {
 
 2. **Dataset**: Add a new dataset and relevant loading logic in `src/utils/shared/data_loader.py`. Then edit `TASK_N_CLASSES` in `globals.py`. For classification, add a Python file in `src/prompting/classification` with your new template or use the `base_classification_prompt`.
 
-3. **Inference Technique**: Currently, only `src/inference/step2_k_pred_avg.py` is available. Use this as a template for other techniques such as CoT, vanilla, etc.
+3. **Inference Technique**: Currently, `src/inference/step2_k_pred_avg.py` and `src/inference/empirical_confidence.py` are available. Use this as a template for other techniques such as CoT, vanilla, etc.
 
-4. **Attacks**: Currently implemented in `attack_llm_self_prompt.py`. Future plans include modularizing them in a `src/attacks` folder.
+4. **Attacks**: Currently implemented in `src/search_algorithms` and `src/transformation_algorithms`. You can add your own class in either folder to create your own transformation or search algorithm.
 
-5. **Similarity Metrics**: USE and BERT_sim are implemented in `attack_llm_self_prompt.py`. Future plans include modularizing them and adding them to the `src/custom_constraints` folder.
+5. **Similarity Metrics**: USE and BERT_sim are directly called in `attack_llm_self_prompt.py`. You can add custom epsilon bounds in `src/custom_constraints`. In the folder there is a USE implementation for guidance.
+ 
 
 
