@@ -23,7 +23,7 @@ bash_scripts/attack_orchestration/check_calibration_all_models_tasks.sh
 Alternatively, you can directly call the evaluation function:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python robustness_eval_huggingface.py \
+CUDA_VISIBLE_DEVICES=0 python robustness_eval.py \
   --model_type llama3 \
   --task sst2 \
   --prompting_type step2_k_pred_avg \
@@ -58,7 +58,7 @@ bash_scripts/attack_orchestration/attack_all_models_tasks.sh
 Alternatively, you can run the attack script directly from the Python file:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python attack_llm_self_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python attack_llm.py \
   --model_type llama3 \
   --task sst2 \
   --prompting_type step2_k_pred_avg \
@@ -104,7 +104,7 @@ MODEL_INFO = {
 
 4. **Attacks**: Currently implemented in `src/search_algorithms` and `src/transformation_algorithms`. You can add your own class in either folder to create your own transformation or search algorithm.
 
-5. **Similarity Metrics**: USE and BERT_sim are directly called in `attack_llm_self_prompt.py`. You can add custom epsilon bounds in `src/custom_constraints`. In the folder there is a USE implementation for guidance.
+5. **Similarity Metrics**: USE and BERT_sim are directly called in `attack_llm.py`. You can add custom epsilon bounds in `src/custom_constraints`. In the folder there is a USE implementation for guidance.
  
 
 
