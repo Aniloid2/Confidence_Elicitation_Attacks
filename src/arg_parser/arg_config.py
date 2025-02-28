@@ -15,7 +15,7 @@ def get_args():
                         help='Task to perform')
     parser.add_argument('--task_structure', type=str, default='classification', choices=['classification','generation'],
                         help='What is the task strtructure, for classification we expect a static label list across all samples. In future we may extend to sequence to sequence modelling, dynamic label classification etc') 
-    parser.add_argument('--confidence_type', type=str, default='weighted_confidence', choices=['verbal_confidence','verbal_numerical_confidence','weighted_confidence','sherman_kent', 'yougov','single_token_mix'],
+    parser.add_argument('--confidence_type', type=str, default='weighted_confidence', choices=['verbal_confidence','verbal_numerical_confidence','weighted_confidence','single_token_mix'],
                         help='type of confidence levels')
     parser.add_argument('--prompting_type', type=str, default='step2_k_pred_avg', choices=[ 'empirical_confidence','step2_k_pred_avg' ,'other_prompting_types_here'],
                         help='Type of prompting to use')
