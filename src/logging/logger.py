@@ -72,7 +72,7 @@ def log_results_extension(results, test_folder, name_of_test, name_log, args):
 
     for i, result in enumerate(results):
         print('Number of Queries:', result.num_queries)
-        args.ceattack_logger.info(f'Number of Queries: \n {result.num_queries}')
+        args.ceattack_logger.info(f'Number of Queries: {result.num_queries}')
 
         # Calculate Perplexity
         try:
@@ -82,8 +82,7 @@ def log_results_extension(results, test_folder, name_of_test, name_log, args):
         except Exception as e:
             df.at[i, 'original_perplexity'] = -1
             df.at[i, 'attack_perplexity'] = -1
-            print('Error calculating perplexity:', e)
-            args.ceattack_logger.warning(f'Error calculating perplexity: \n {e}')
+            
 
         # Calculate USE Metric
         try: 
@@ -95,8 +94,7 @@ def log_results_extension(results, test_folder, name_of_test, name_log, args):
                 df.at[i, 'attack_use_score'] = usem['avg_attack_use_score']
         except Exception as e:
             df.at[i, 'attack_use_score'] = -1
-            print('Error calculating USE score:', e)
-            args.ceattack_logger.warning(f'Error calculating USE score: \n {e}')
+            
 
         # Calculate Number of Words Perturbed
         try:
@@ -106,8 +104,7 @@ def log_results_extension(results, test_folder, name_of_test, name_log, args):
             df.at[i, 'num_words_perturbed'] = num_perturbed_words
         except Exception as e:
             df.at[i, 'num_words_perturbed'] = -1
-            print('Error calculating number of words perturbed:', e)
-            args.ceattack_logger.warning(f'Error calculating number of words perturbed: \n {e}')
+            
 
 
     df.to_csv(file_path, index=False)
@@ -190,6 +187,7 @@ def evaluate_results(results, args):
     filtered_predictions = [pred for pred in result_predictions if pred != null_class]
     filtered_true_labels = [true_label for true_label, pred in zip(result_true_labels, result_predictions) if pred != null_class]
 
+    # remove the null class
     print('Filtered Perturbed Result True Labels:', filtered_true_labels)
     args.ceattack_logger.info(f'Filtered Perturbed Result True Labels: \n {filtered_true_labels}')
 
@@ -206,7 +204,7 @@ def evaluate_results(results, args):
 
     successful_samples_queries = count_successful_samples_quereis(results)
     print('Successful Samples Queries:', successful_samples_queries)
-    args.logging.info(f"Successful Samples Queries: {successful_samples_queries}")
+    args.ceattack_logger.info(f"Successful Samples Queries: {successful_samples_queries}")
 
 def count_successful_samples_quereis(results):
     total_queries = 0

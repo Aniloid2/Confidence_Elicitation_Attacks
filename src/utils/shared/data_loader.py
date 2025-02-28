@@ -1,7 +1,7 @@
 
 
 import os
-# from datasets import load_dataset 
+
 DATA_LOCATION = {
     'sst2': 'stanfordnlp/sst2',
     'ag_news': 'fancyzhx/ag_news',
@@ -19,6 +19,7 @@ def load_huggingface_dataset(name, split, per_class_samples):
         from datasets import load_dataset 
         dataset = load_dataset(name,split, split='validation')
         print(f"{name} dataset loaded successfully", type(dataset), 'column names', dataset.column_names)
+        
         dataset = HuggingFaceDataset(dataset, split=split, shuffle=True)
         label_names = dataset.label_names if hasattr(dataset, 'label_names') else None
         return dataset, label_names
@@ -35,24 +36,17 @@ def load_data(args):
         strategy_dataset = load_dataset(dataset_location, split='validation')#.select(range(500)) # example: taking 50 samples
         print(f"{args.task} dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
         args.ceattack_logger.info(f"{args.task} dataset loaded successfully {type(strategy_dataset)} column {strategy_dataset.column_names}")
-        # sys.exit()
-        # strategy_dataset = strategy_dataset.rename_column("sentence", "text")
-        # strategy_dataset = strategy_dataset.rename_column("label", "label")
+        
         per_class_samples = args.num_examples//args.n_classes
         dataset = HuggingFaceDataset(strategy_dataset, split="test", shuffle=True)
-        # for i,j in dataset:
-        #     print ('i',i,j) 
-        # sys.exit() 
-
-        # dataset = HuggingFaceDataset("glue", "sst2", split="validation", shuffle=True)
+        
         label_names = dataset.label_names
 
-        # For dataset_class_1, only include sentences with 3 or more characters and label == 1
         dataset_class_1 = [(text['sentence'], label) for (text, label) in dataset if label == 1 and len(text['sentence']) >= 3]
         dataset_class_1_t = dataset_class_1[:per_class_samples]
         incontext_dataset_class_1 = dataset_class_1[-5:]
 
-        # For dataset_class_0, only include sentences with 3 or more characters and label == 0
+
         dataset_class_0 = [(text['sentence'], label) for (text, label) in dataset if label == 0 and len(text['sentence']) >= 3]
         dataset_class_0_t = dataset_class_0[:per_class_samples]
         incontext_dataset_class_0 = dataset_class_0[-5:]
@@ -71,43 +65,34 @@ def load_data(args):
         print(f"{args.task} dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
         args.ceattack_logger.info(f"{args.task} dataset loaded successfully {type(strategy_dataset)} column {strategy_dataset.column_names}")
         dataset = HuggingFaceDataset(strategy_dataset, split="test", shuffle=True)
-        # dataset = HuggingFaceDataset('ag_news', split="test", shuffle=True)
+        
+        
         label_names = dataset.label_names
         per_class_samples = args.num_examples//args.n_classes
 
-        # For dataset_class_0, only include documents with 3 or more characters and label == 0
+        
         dataset_class_0 = [(text['text'], label) for (text, label) in dataset if label == 0 and len(text['text']) >= 3]
         dataset_class_0_t = dataset_class_0[:per_class_samples]
         incontext_dataset_class_0 = dataset_class_0[-5:]
 
-        # I was experimenting with few shot in context learning, but all my experiments were kept zero shot in the end for simplicity
-        # For dataset_class_1, only include documents with 3 or more characters and label == 1
+        
         dataset_class_1 = [(text['text'], label) for (text, label) in dataset if label == 1 and len(text['text']) >= 3]
         dataset_class_1_t = dataset_class_1[:per_class_samples]
         incontext_dataset_class_1 = dataset_class_1[-5:] 
-
-        # For dataset_class_2
+        
         dataset_class_2 = [(text['text'], label) for (text, label) in dataset if label == 2 and len(text['text']) >= 3]
         dataset_class_2_t = dataset_class_2[:per_class_samples]
         incontext_dataset_class_2 = dataset_class_2[-5:]
 
-        # For dataset_class_3
         dataset_class_3 = [(text['text'], label) for (text, label) in dataset if label == 3 and len(text['text']) >= 3]
         dataset_class_3_t = dataset_class_3[:per_class_samples]
         incontext_dataset_class_3 = dataset_class_3[-5:]
-
-        # Combine datasets from different classes
+        
         dataset_class =  dataset_class_1_t + dataset_class_0_t + dataset_class_2_t + dataset_class_3_t
-        # dataset_class =  dataset_class_1_t[9:20]  
-
+        
         print(f'Total filtered dataset size: {len(dataset_class)}')
         args.ceattack_logger.info(f"Total filtered dataset size: {len(dataset_class)}")
         
-        # print(f'In-context samples for class 1: {incontext_dataset_class_1}')
-        # print(f'In-context samples for class 0: {incontext_dataset_class_0}')
-        # print(f'In-context samples for class 2: {incontext_dataset_class_2}')
-        # print(f'In-context samples for class 3: {incontext_dataset_class_3}')
-        # print (dataset_class)
         return dataset_class, label_names 
 
     elif task == 'popQA':
@@ -115,27 +100,22 @@ def load_data(args):
         from datasets import load_dataset
         import json
         from collections import defaultdict
-        # The current version dosn't work with popQA but i kept the functionality anyway in case
-        # someone wants to extend this. 
+        
+        
         split = "test"
         print(f"Loading {args.task} {split} dataset from {dataset_location}...")
         args.ceattack_logger.info(f"Loading {args.task} {split} dataset from {dataset_location}...")
         raw_dataset = load_dataset(dataset_location, split=split).select(range(5))
         print(f"{args.task} {split} dataset loaded successfully", type(raw_dataset),'column names',raw_dataset.column_names)
         args.ceattack_logger.info(f"{args.task} dataset loaded successfully {type(strategy_dataset)} column {strategy_dataset.column_names}")
-        raise ValueError(f"The current version dosn't work with {args.task} but I kept the functionality case someone wants to extend this." )
-        # add a new column, and for each datasample given raw_dataset['prop'] (e.g capital, business etc) extract all other rows that have the same raw_dataset['prop'] and add their answers which are accessed raw_dataset['possible_answers'] and add them to a new column raw_dataset['wrong_possible_answers'] 
-        # Create a dictionary to hold all possible answers for each 'prop'
-        # prop_to_answers = defaultdict(list)
-        # # Populate the dictionary
-        # for sample in raw_dataset:
-        #     prop_to_answers[sample['prop']].append(sample['possible_answers'])
-
+        raise ValueError(f"The current version dosn't work with {args.task} but I kept the functionality in case someone wants to extend this." )
+        
+        
 
         prop_to_answers = {}
         # Populate the dictionary
         for sample in raw_dataset:
-            # print ('sample',sample)
+            
             if sample['prop'] in prop_to_answers:
                 prop_to_answers[sample['prop']] |= set(json.loads(sample['possible_answers']))
             else:
@@ -143,53 +123,40 @@ def load_data(args):
                 
  
 
-        # Create the new column 'wrong_possible_answers'
+
         wrong_possible_answers_col = []
         possible_correct_incorrect_answers_col = []
         for sample in raw_dataset:
             current_prop = sample['prop']
-            # current_answers = sample['possible_answers']
+            
             current_answers = set(json.loads(sample['possible_answers']))
-            print ('current_answers',current_answers)
-
-            # Get all possible answers for the current 'prop'
-            # all_answers_for_prop = prop_to_answers[current_prop]
+            
+            
             all_answers_for_prop =  prop_to_answers[current_prop]
-            print ('all_answers_for_prop',all_answers_for_prop)
-
-            # Perform set difference to find wrong possible answers
+            
             wrong_answers = all_answers_for_prop - current_answers
-            print ('wrong_answers',wrong_answers)
-            # Convert back to list
+            
             wrong_possible_answers_col.append(json.dumps(list(wrong_answers))) 
 
             possible_correct_incorrect_answers_col.append(json.dumps({
                 'correct': list(current_answers),
                 'incorrect': list(wrong_answers)
             }))
-            # # Create the list of wrong possible answers by excluding the current sample's answers
-            # wrong_answers = [ans for ans in all_answers_for_prop if ans != current_answers]
-
-            # # Flatten the list of lists
-            # wrong_answers = [item for sublist in wrong_answers for item in sublist]
-
-            # wrong_possible_answers_col.append(wrong_answers) 
-        # Add the new column to the dataset
+            
         raw_dataset = raw_dataset.add_column("wrong_possible_answers", wrong_possible_answers_col)
         raw_dataset = raw_dataset.add_column("possible_correct_incorrect_answers", possible_correct_incorrect_answers_col)
 
-        print ('raw_dataset',raw_dataset)
-        print (raw_dataset['wrong_possible_answers']) 
-        print (raw_dataset['possible_correct_incorrect_answers']) 
-        # with   create all possible answers, in possible_answers, we insert a dictionary = {'correct':{},'incorrect':{}} 
+        
+        
+        
         raw_dataset = raw_dataset.rename_column("possible_correct_incorrect_answers", "label")
         raw_dataset = raw_dataset.rename_column("question", "text") 
-        # Create the PyTorch dataset
+        
         dataset = HuggingFaceDataset(raw_dataset,split="test", shuffle=True)
         print(f"Converted to PyTorch Dataset", type(dataset))
         label_names = None
  
-        # Collect data for dataset_class_t and incontext_dataset_class
+ 
         dataset_class = [] 
         dataset_class = [(text['text'], label) for (text, label) in dataset]
         dataset_class_t = dataset_class[:args.num_examples]
@@ -215,8 +182,8 @@ def load_data(args):
 
         strategy_dataset_class = []
         strategy_dataset_class = [(text['text'], int(label)) for (text, label) in strategy_dataset]
-        # strategy_dataset_class_t = strategy_dataset_class[133:136]#[:args.num_examples]#[17:18]
-        strategy_dataset_class_t = strategy_dataset_class[:args.num_examples]#[17:18]
+        
+        strategy_dataset_class_t = strategy_dataset_class[:args.num_examples] 
         strategy_incontext_dataset_class = strategy_dataset_class[-5:]
         label_names = ['false','true']
         
@@ -236,19 +203,17 @@ def load_data(args):
         dataset = dataset.shuffle(seed=42).select(range(2000))
         dataset = dataset.filter(lambda example: example['entity_pages']['wiki_context'])
         label_names = ['false','true'] 
-
-        # dataset = dataset.rename_column("question", "text")
-        # dataset = dataset.rename_column("answer", "answers")
+        
         dataset = dataset.rename_column("question_id", "title")
         def extract_context_and_rename(example):
-            # Extract the 'wiki_context' data from 'entity_pages'
+            
             context = example['entity_pages']['wiki_context']
             context = ' '.join( context[0].split(' ')[:100])
             example['context'] = context
             return example
 
         def extract_answers_and_rename(example):
-            # Extract the 'wiki_context' data from 'entity_pages'
+            
             example['answers'] = example['answer']['normalized_aliases'] 
             return example
 
@@ -256,7 +221,7 @@ def load_data(args):
         dataset = dataset.map(extract_answers_and_rename)
 
         dataset = dataset.remove_columns(['question_source'])
-        # dataset = dataset.remove_columns(['question_id'])
+        
         dataset = dataset.remove_columns(['search_results'])
         dataset = dataset.remove_columns(['entity_pages'])
 
@@ -267,8 +232,7 @@ def load_data(args):
         dataset_class = [((text['question'],text['context']), answers) for (text, answers) in dataset] 
         dataset_class_t = dataset_class[:args.num_examples] 
         incontext_dataset_class = dataset_class[-5:]
- 
-        # print("Column names:", dataset.column_names)
+        
 
         print(f'Total filtered dataset size for triviaQA: {len(dataset_class_t)}')
         print(f'In-context samples for triviaQA: {incontext_dataset_class}') 
@@ -279,7 +243,7 @@ def load_data(args):
         from datasets import load_dataset 
         args.ceattack_logger.info(f"Loading {args.task} dataset from {dataset_location}")
         print(f"Loading {args.task} dataset from {dataset_location}...")
-        # Load the validation split of the MNLI dataset
+        
         strategy_dataset = load_dataset({dataset_location}, split='validation_matched')
         print(f"{args.task} dataset loaded successfully", type(strategy_dataset), 'column names', strategy_dataset.column_names)
         args.ceattack_logger.info(f"{args.task} dataset loaded successfully {type(strategy_dataset)} column {strategy_dataset.column_names}")
@@ -289,12 +253,12 @@ def load_data(args):
         dataset = HuggingFaceDataset(strategy_dataset, split="validation", shuffle=True)
         label_names = dataset.label_names
 
-        # Split dataset by label
+
         dataset_class_0 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 0]  # Neutral
         dataset_class_1 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 1]  # Entailment
         dataset_class_2 = [((text['premise'], text['hypothesis']), label) for (text, label) in dataset if label == 2]  # Contradiction
 
-        # Create samples per class
+
         dataset_class_0_t = dataset_class_0[:per_class_samples]
         incontext_dataset_class_0 = dataset_class_0[-5:]
 
@@ -304,7 +268,7 @@ def load_data(args):
         dataset_class_2_t = dataset_class_2[:per_class_samples]
         incontext_dataset_class_2 = dataset_class_2[-5:]
 
-        # Combine datasets
+
         dataset_class = dataset_class_0_t + dataset_class_1_t + dataset_class_2_t
         
         return dataset_class, label_names
@@ -353,7 +317,6 @@ def load_data(args):
         print("Task not supported.")
         raise ValueError(f"The task {args.task} is not supported" )
         
-
 
 from textattack.datasets import Dataset
 

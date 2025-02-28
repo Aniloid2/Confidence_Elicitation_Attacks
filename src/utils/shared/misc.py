@@ -56,22 +56,19 @@ def print_args_human_readable(args):
 import logging 
 from datetime import datetime
 def set_logging(args, logging_level = 'debug'):  
-    # Print the folder paths
-    print('high_level_folder:', args.high_level_folder )
-    print('test_folder:', args.test_folder)
+    
     os.makedirs(args.test_folder, exist_ok=True)
 
     logger = logging.getLogger('Calibra')
-    # Prevent propagation
-    # logger.propagate = False 
-
+    
     if logging_level == 'debug':
         log_level = logging.DEBUG
     elif logging_level == 'info':
         log_level = logging.INFO
     else:
-        log_level = logging.INFO  # Default level if args is not as expected
-    print ('args',args)
+        log_level = logging.INFO   
+    
+    
     logs_folder = os.path.join(args.test_folder, 'CEAttack_logs')
     if not os.path.exists(logs_folder):
         os.makedirs(logs_folder)
@@ -82,11 +79,7 @@ def set_logging(args, logging_level = 'debug'):
     file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
-    # logging.basicConfig(
-    #     filename=logging_path,
-    #     level=log_level,
-    #     format='%(asctime)s - %(levelname)s - %(message)s'
-    # )
+    
      
     return logger
 

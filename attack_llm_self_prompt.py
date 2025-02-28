@@ -245,8 +245,8 @@ minutes, seconds = divmod(elapsed_time, 60)
 hours, minutes = divmod(minutes, 60)
 
 # Print the elapsed time
-print(f"Execution Time: {int(hours):03}:{int(minutes):02}:{int(seconds):02}")
-args.logging.info(f"Execution Time: {int(hours):03}:{int(minutes):02}:{int(seconds):02}")
+print(f"Execution Time: {int(hours):03}:{int(minutes):02}:{int(seconds):02}") 
+args.ceattack_logger.info(f"Execution Time: {int(hours):03}:{int(minutes):02}:{int(seconds):02}")
 
 from src.logging import log_results, log_results_extension, evaluate_results
 
@@ -269,6 +269,7 @@ with open(file_path, 'wb') as file:
     pickle.dump(results, file)
 
 print(f'Results saved to {file_path}')
+args.ceattack_logger.info(f'Results saved to {file_path}')
 
 # To load the `results` list from the file
 with open(file_path, 'rb') as file:
@@ -276,14 +277,9 @@ with open(file_path, 'rb') as file:
 
 for result in loaded_results:
     original_text = result.original_result.attacked_text
-    perturbed_text = result.perturbed_result.attacked_text
-    print ('original_text',original_text)
-    print ('perturbed_text',perturbed_text)
+    perturbed_text = result.perturbed_result.attacked_text 
 
-
-
-
-  
+ 
 filtered_results = []
 for i, result in enumerate(results):   
     if result.original_result.output != args.n_classes: 

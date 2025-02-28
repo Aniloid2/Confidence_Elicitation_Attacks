@@ -118,99 +118,38 @@ TASK_N_CLASSES = {
 }
 
 MODEL_INFO = {
-    'llama2': {
-        'model_name': "meta-llama/Llama-2-7b-chat-hf",
-        'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
-    },
-    'mistral': {
-        'model_name': "mistralai/Mistral-7B-Instruct-v0.2",
-        'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
-    },
     'llama3': {
         'model_name': "meta-llama/Meta-Llama-3-8B-Instruct",
         'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
         'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    },
-    'llama3_2_1b': {
-        'model_name': "meta-llama/Llama-3.2-1B-Instruct",
-        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
-        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    },
-    'llama3_2_3b': {
-        'model_name': "meta-llama/Llama-3.2-3B-Instruct",
-        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
-        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    },
-    'llama3_2_11b': {
+    }, # llama3
+    'Llama-3.2-11B-Vision-Instruct': {
         'model_name': "meta-llama/Llama-3.2-11B-Vision-Instruct",
         'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
         'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     },
-    'gemma2':{
+    'gemma-2-9b-it':{
         'model_name': 'google/gemma-2-9b-it',
         'start_prompt_header':'<bos><start_of_turn>user',
         'end_prompt_footer':'<end_of_turn><start_of_turn>model'
     },
-    'llama3_1': {
-        'model_name': "meta-llama/Meta-Llama-3.1-8B-Instruct",
-        'start_prompt_header': "<|begin_of_text|><|start_header_id|>user<|end_header_id|>",
-        'end_prompt_footer': "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    },
-    'phi3': {
-        'model_name': "microsoft/Phi-3-small-8k-instruct",
-        'start_prompt_header': "<|user|>",
-        'end_prompt_footer': " <|end|><|assistant|>"
-    },
     'mistralv03': {
         'model_name': "mistralai/Mistral-7B-Instruct-v0.3",
         'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
+        'end_prompt_footer': "[/INST]" #mistralv03
     },
-    'mistral-8b-instruct-2410': {
-        'model_name': "mistralai/Ministral-8B-Instruct-2410",
-        'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
-    },
-    'mistral-small-instruct-2409': {
-        'model_name': "mistralai/Mistral-Small-Instruct-2409",
-        'start_prompt_header': "<s>[INST]",
-        'end_prompt_footer': "[/INST]"
-    },
-    'mistral-nemo-instruct-2407': {
+    'Mistral-Nemo-Instruct-2407': {
         'model_name': "mistralai/Mistral-Nemo-Instruct-2407",
         'start_prompt_header': "<s>[INST]",
         'end_prompt_footer': "[/INST]",
         'precision': 'float16',
     },
-    'qwen2.5-7b-instruct': {
+    'Qwen2.5-7B-Instruct': {
         'model_name': "Qwen/Qwen2.5-7B-Instruct",
         'start_prompt_header': "<|im_start|>",
         'end_prompt_footer': "<|im_end|><|endoftext|>"
-    },
-    'qwen2-7b-instruct': {
-        'model_name': "Qwen/Qwen2-7B-Instruct",
-        'start_prompt_header': "<|im_start|>",
-        'end_prompt_footer': "<|im_end|><|endoftext|>"
-    },
-    'qwen2.5-14b-instruct': {
-        'model_name': "Qwen/Qwen2.5-14B-Instruct",
-        'start_prompt_header': "<|im_start|>",
-        'end_prompt_footer': "<|im_end|><|endoftext|>",
-        'precision': 'float16'
-    },
-    'qwen1.5-14b-chat': {
-        'model_name': "Qwen/Qwen1.5-14B-Chat",
-        'start_prompt_header': "<|im_start|>",
-        'end_prompt_footer': "<|im_end|><|endoftext|>"
-    },
-    'qwen2.5-14b-instruct-int8': {
-        'model_name': "Qwen/Qwen2.5-14B-Instruct-GPTQ-Int8",
-        'start_prompt_header': "<|im_start|>",
-        'end_prompt_footer': "<|im_end|><|endoftext|>"
-    },
-    'gpt-4o-llama3': {
+    },  
+    'gpt-4o': {
         'model_name': None,
         'start_prompt_header': None,
         'end_prompt_footer': None

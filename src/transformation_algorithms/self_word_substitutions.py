@@ -11,6 +11,19 @@ class SelfWordSubstitutionW1(WordSwap):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    """
+    This implementation is from the W1 attack in AN LLM CAN FOOL ITSELF: A PROMPT-BASED ADVERSARIAL ATTACK https://arxiv.org/pdf/2310.13345
+
+    In the original paper, the authors report an approximate 5% attack success rate, which is roughly consistent with our own findings. However, 
+    we also observe that models such as llama3 and Mistral struggle to swap words while ensuring that the class switch maintains the original sentiment. 
+    As a result, they often substitute a word with its antonym. In the original paper, the attack is evaluated by checking the classification label in 
+    the generated output. For example, given a prompt like 'change one word in the sentence “this is a good day” so that the sentiment class shifts from 
+    positive to negative while preserving the semantics,' the typical output might be: 'I changed the word “good” to “dull” so the new sentence is “this 
+    is a dull day,” which preserves the semantics while altering the sentiment to negative.' The authors then determine the final prediction by taking the 
+    majority label from the generated output. In our work, we follow previous methodologies by extracting the new adversarial sentence, passing it through 
+    a semantic similarity encoder to check the semantics remain intact, and finally performing inference again.
+    """
+
 
 
         
