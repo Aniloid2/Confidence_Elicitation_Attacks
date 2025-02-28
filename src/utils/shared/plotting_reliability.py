@@ -33,11 +33,7 @@ def plot_calibration_curve(args, true_labels, probabilities, name_plot):
             true_prob, pred_prob = calibration_curve(true_labels_binarized[:, i], probabilities[:, i], n_bins=10)
             plt.plot(pred_prob, true_prob, marker='o', linewidth=1, label=f'{args.dataset.label_names[i]}')
 
-        # plt.title(
-        #     f'Calibration Plot for \n Multi-Class Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
-        #     fontsize=45,
-        #     pad=25
-        # )
+
         plt.title(
             f'Calibration Plot for \n Classification {args.task}/{args.model_type}', 
             fontsize=45,
@@ -47,11 +43,7 @@ def plot_calibration_curve(args, true_labels, probabilities, name_plot):
     else:
         true_prob, pred_prob = calibration_curve(true_labels, probabilities[:, 1], n_bins=10)
         plt.plot(pred_prob, true_prob, marker='o', linewidth=1, label='Calibration Plot')
-        # plt.title(
-        #     f'Calibration Plot for \n Binary Classification {args.task}/{args.model_type} \n Confidence Type: {args.confidence_type}', 
-        #     fontsize=45,
-        #     pad=25
-        # )
+
         plt.title(
             f'Calibration Plot for \n Classification {args.task}/{args.model_type}', 
             fontsize=45,
@@ -111,15 +103,15 @@ def calculate_ece_for_all_classes(args,true_labels, probabilities):
         ece = calculate_ece(true_labels == i, probabilities[:, i])
         ece_total += ece
         print(f"Expected Calibration Error (ECE) for class {i}: {ece:.4f}")
-        args.logging.info(f"Expected Calibration Error (ECE) for class {i}: {ece:.4f}")
+        args.ceattack_logger.info(f"Expected Calibration Error (ECE) for class {i}: {ece:.4f}")
 
     # Print average ECE
     average_ece = ece_total / args.n_classes
     print(f"Average Expected Calibration Error (ECE): {average_ece:.4f}")
-    args.logging.info(f"Average Expected Calibration Error (ECE): {average_ece:.4f}")
+    args.ceattack_logger.info(f"Average Expected Calibration Error (ECE): {average_ece:.4f}")
     # Pearson Correlation Coefficient
     correctness = (true_labels == np.argmax(probabilities, axis=1)).astype(np.float32)
     confidences = np.max(probabilities, axis=1)
     correlation_coefficient = np.corrcoef(correctness, confidences)[0, 1]
     print(f"Pearson Correlation Coefficient (r): {correlation_coefficient:.4f}")
-    args.logging.info(f"Pearson Correlation Coefficient (r): {correlation_coefficient:.4f}")
+    args.ceattack_logger.info(f"Pearson Correlation Coefficient (r): {correlation_coefficient:.4f}")

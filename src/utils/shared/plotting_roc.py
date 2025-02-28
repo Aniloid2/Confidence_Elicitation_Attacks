@@ -39,7 +39,7 @@ def plot_roc_curve(args,true_labels, probabilities, name_plot):
         auroc = roc_auc_score(true_labels, probabilities[:, 1])
 
     plt.plot([0, 1], [0, 1], linestyle='--', label='Random Chance')
-    # plt.title(f'ROC Curve for \n Classification {args.task}/{args.model_type} \n Confidence Type:{args.confidence_type}', fontsize=45, pad=25)
+    
     plt.title(f'ROC Curve for \n Classification {args.task}/{args.model_type}', fontsize=45, pad=25)
     
     plt.xlabel('False Positive Rate', fontsize=35)
@@ -56,7 +56,7 @@ def plot_roc_curve(args,true_labels, probabilities, name_plot):
     plt.close()
 
     print(f"AUROC: {auroc:.4f}")
-    args.logging.info(f'AUROC: {auroc:.4f}')
+    args.ceattack_logger.info(f'AUROC: {auroc:.4f}')
 
 
 def calculate_roc_metrics(args,true_labels, probabilities):
@@ -77,16 +77,16 @@ def calculate_roc_metrics(args,true_labels, probabilities):
             auprc_pos = average_precision_score(true_labels_binarized[:, i], probabilities[:, i])
             auprcs_positive.append(auprc_pos)
             print(f"AUPRC for class {i} (positive class): {auprc_pos:.4f}")
-            args.logging.info(f"AUPRC for class {i} (positive class): {auprc_pos:.4f}")
+            args.ceattack_logger.info(f"AUPRC for class {i} (positive class): {auprc_pos:.4f}")
     else:
         auroc = roc_auc_score(true_labels, probabilities[:, 1])
         auprc_positive = average_precision_score(true_labels, probabilities[:, 1])
         print(f"AUPRC-Positive: {auprc_positive:.4f}")
-        args.logging.info(f"AUPRC-Positive: {auprc_positive:.4f}")
+        args.ceattack_logger.info(f"AUPRC-Positive: {auprc_positive:.4f}")
         true_labels_negative = 1 - true_labels
         probabilities_negative = 1 - probabilities[:, 1]
         auprc_negative = average_precision_score(true_labels_negative, probabilities_negative)
         print(f"AUPRC-Negative: {auprc_negative:.4f}")
-        args.logging.info(f"AUPRC-Negative: {auprc_negative:.4f}")
+        args.ceattack_logger.info(f"AUPRC-Negative: {auprc_negative:.4f}")
     print(f"AUROC: {auroc:.4f}")
-    args.logging.info(f'AUROC: {auroc:.4f}')
+    args.ceattack_logger.info(f'AUROC: {auroc:.4f}')

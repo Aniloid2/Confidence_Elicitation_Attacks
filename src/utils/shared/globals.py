@@ -105,20 +105,6 @@ CONFIDENCE_MAP = {'verbal_confidence':{
 
 
 
-# TASK_LABEL_TO_NAME = {
-#     'sst2': {0: 'negative', 1: 'positive', 2: 'null'},
-#     'ag_news': {0: 'world', 1: 'sports', 2: 'business', 3: 'sci/tech', 4: 'null'},
-#     'popQA': {0: 'incorrect', 1: 'correct', 2: 'null'},
-#     'strategyQA': {0: 'false', 1: 'true', 2: 'null'}
-# }
-
-# TASK_NAME_TO_LABEL = {
-#     'sst2': {'negative': 0, 'positive': 1, 'null': 2},
-#     'ag_news': {'world': 0, 'sports': 1, 'business': 2, 'sci/tech': 3, 'null': 4},
-#     'popQA': {'incorrect': 0, 'correct': 1, 'null': 2},
-#     'strategyQA': {'false': 0, 'true': 1, 'null': 2}
-# }
-
 TASK_N_CLASSES = {
     'sst2': 2,
     'ag_news': 4,

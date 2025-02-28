@@ -1,6 +1,8 @@
-# config.py
+
+
 import argparse
 import os
+from src.utils.shared.misc import set_logging
 def get_args():
     parser = argparse.ArgumentParser(description='Argument parser for model configuration')
 
@@ -52,8 +54,17 @@ def get_args():
                         help='Plot the dirichlet distribution if True of the entire dataset')
     parser.add_argument('--seed', type=int, default=42,
                         help='Set seed')
-    
+    parser.add_argument('--api_key', type=str, default='',
+                        help='set open ai api key')
     args = parser.parse_args()
+
+    high_level_folder = args.experiment_name_folder
+    test_folder = os.path.join(high_level_folder, f'{args.model_type}_{args.task}_log_folder') 
+    args.test_folder = test_folder 
+    args.high_level_folder = high_level_folder 
+    args.name_of_test = f'EN{str(args.num_examples)}_MT{args.model_type}_TA{args.task}_PT{args.prompting_type}_PST{args.prompt_shot_type}_ST{args.similarity_technique}_NT{args.num_transformations}'
+
+    args.ceattack_logger = set_logging(args)
     
     method_to_type = {
         'ceattack': 'word_level',
@@ -66,6 +77,7 @@ def get_args():
         args.transformation_type = method_to_type[selected_method]
     else:
         args.transformation_type = 'sentence_level'
+    args.ceattack_logger.info(f"Selected transformation method '{selected_method}' is of type '{method_to_type[selected_method]}'.")
     print(f"Selected transformation method '{selected_method}' is of type '{method_to_type[selected_method]}'.")
 
     # we use this mostly to define which constraints to use on the tasks. for example strategyQA will have a NoNounConstraint since otherwise we may change name of places and people
@@ -85,10 +97,9 @@ def get_args():
         args.task_type = task_to_type[selected_task]
     else:
         args.task_type = 'classification'
+    args.ceattack_logger.info(f"Selected transformation method '{selected_task}' is of type '{task_to_type[selected_task]}'.")
     print(f"Selected transformation method '{selected_task}' is of type '{task_to_type[selected_task]}'.")
 
-
-    # Parse the arguments
     return args
  
 

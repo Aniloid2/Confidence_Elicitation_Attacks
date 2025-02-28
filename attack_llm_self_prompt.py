@@ -46,7 +46,10 @@ from src.arg_parser.set_cache import set_huggingface_cache
 set_huggingface_cache(args)
 
 from src.utils.shared.misc import environment_setup
-args = environment_setup(args)
+args = environment_setup(args) 
+
+# from src.utils.shared.misc import set_logging
+# args.ceattack_logger = set_logging(args)
 
 
 
@@ -54,7 +57,7 @@ args = environment_setup(args)
 # Ensure both the high-level and specific directories are created
 os.makedirs(args.test_folder, exist_ok=True)
 
-name_of_test = f'EN{str(args.num_examples)}_MT{args.model_type}_TA{args.task}_PT{args.prompting_type}_PST{args.prompt_shot_type}_ST{args.similarity_technique}_NT{args.num_transformations}'
+# name_of_test = f'EN{str(args.num_examples)}_MT{args.model_type}_TA{args.task}_PT{args.prompting_type}_PST{args.prompt_shot_type}_ST{args.similarity_technique}_NT{args.num_transformations}'
 
 
 
@@ -72,19 +75,20 @@ args.end_prompt_footer = model_info['end_prompt_footer']
 
 
 from src.utils.shared.misc import set_stopwords
-stopwords = set_stopwords() 
+stopwords = set_stopwords(args) 
 constraints = [ RepeatModification(),StopwordModification(stopwords=stopwords)]
+
 import math
 if args.similarity_technique == 'USE':
     angular_use_threshold = args.similarity_threshold
     
-    use_threshold = 1 - (angular_use_threshold) / math.pi 
+    threshold = 1 - (angular_use_threshold) / math.pi 
     compare_against_original = True
     window_size = None 
     skip_text_shorter_than_window=False 
 
     use_constraint = UniversalSentenceEncoder(
-                threshold=use_threshold,
+                threshold=threshold,
                 metric="angular",
                 compare_against_original=compare_against_original,
                 window_size=window_size,
@@ -92,12 +96,12 @@ if args.similarity_technique == 'USE':
             )
 elif args.similarity_technique == 'BERTScore':
     
-    bert_score = args.similarity_threshold
-    use_constraint = BERTScore(min_bert_score =bert_score)
+    threshold = args.similarity_threshold
+    use_constraint = BERTScore(min_bert_score =threshold)
 
 
 args.use_constraint = use_constraint # passing epsilon bound as a argument allows to use it more flexibly, currently textattack applies it after a get_transformations call if we add it as a constraint
-
+args.ceattack_logger.info(f'Using Epsilon object: \n {args.use_constraint} with threshold: {threshold}')
 
 constraints.append(WordEmbeddingDistance(min_cos_sim=0.5))
 
@@ -109,7 +113,7 @@ constraints.append(input_column_modification)
 
 if args.task_type == 'question_answering':
     constraints.append(PartOfSpeech(allow_verb_noun_swap=False))
-    if args.method_type == 'word_level':
+    if args.transformation_type == 'word_level':
         from src.custom_constraints.swap_constraints import NoNounConstraint
         constraints.append(NoNounConstraint())
 else:
@@ -124,6 +128,7 @@ args.device = initialize_device(args)
 
 from src.utils.shared import load_data
 dataset_class, label_names = load_data(args)
+
 from src.utils.shared import SimpleDataset
 dataset_class =  SimpleDataset(dataset_class,label_names = label_names ) 
 args.dataset = dataset_class
@@ -147,7 +152,6 @@ args.dataset = dataset_class
 if 'gpt-4o' in args.model_type: 
     model_wrapper = ChatGPTLLMWrapper(**vars(args))
 else:
-    
     args.tokenizer = AutoTokenizer.from_pretrained(args.model_name ,cache_dir=args.cache_transformers,trust_remote_code=True  )
     args.model = AutoModelForCausalLM.from_pretrained(args.model_name , cache_dir=args.cache_transformers,trust_remote_code=True)
     model_wrapper = HuggingFaceLLMWrapper(**vars(args))
@@ -159,12 +163,10 @@ args.predictor = DYNAMIC_INFERENCE[args.prompting_type](**vars(args))
 
 
 
-# Define the goal function
-from textattack.goal_functions import ClassificationGoalFunction
 
 
 
-
+# define goal function, this is for now classification, but could be, in theory, other objectives
 from src.goal_function_algorithms.predict_and_confidence_goal_function import Prediction_And_Confidence_GoalFunction
 goal_function = Prediction_And_Confidence_GoalFunction(model_wrapper,**vars(args))
 args.goal_function = goal_function
@@ -206,10 +208,10 @@ greedy_attack = Attack(goal_function, constraints, transformation, search_method
 
 
 
-print ('Saving to:',args.test_folder,name_of_test )
+print ('Saving to:',args.test_folder,args.name_of_test )
 attack_args = AttackArgs(
     num_examples=args.num_examples,
-    log_to_csv=os.path.join(args.test_folder, f'normal_{name_of_test}.csv'),  # Adjusted to save in test_folder
+    log_to_csv=os.path.join(args.test_folder, f'normal_{args.name_of_test}.csv'),  # Adjusted to save in test_folder
     checkpoint_interval=1000,
     checkpoint_dir="checkpoints",
     disable_stdout=True,
@@ -248,9 +250,9 @@ args.logging.info(f"Execution Time: {int(hours):03}:{int(minutes):02}:{int(secon
 
 from src.logging import log_results, log_results_extension, evaluate_results
 
-log_results(results, test_folder=args.test_folder, name_of_test = name_of_test, name_log = 'normal', args = args)
+log_results(results, test_folder=args.test_folder, name_of_test = args.name_of_test, name_log = 'normal', args = args)
  
-log_results_extension(results, test_folder=args.test_folder, name_of_test = name_of_test, name_log = 'normal', args = args )
+log_results_extension(results, test_folder=args.test_folder, name_of_test = args.name_of_test, name_log = 'normal', args = args )
 
 
 
@@ -260,7 +262,7 @@ evaluate_results(results, args)
 
 import pickle
 name_log = 'results'
-file_path = os.path.join(args.test_folder, f'{name_log}_{name_of_test}.pkl')
+file_path = os.path.join(args.test_folder, f'{name_log}_{args.name_of_test}.pkl')
 
 # Saving the `results` list to a file
 with open(file_path, 'wb') as file:
@@ -287,5 +289,5 @@ for i, result in enumerate(results):
     if result.original_result.output != args.n_classes: 
         filtered_results.append(result) 
 
-log_results(filtered_results, test_folder=args.test_folder, name_of_test = name_of_test, name_log = 'filtered', args = args)
+log_results(filtered_results, test_folder=args.test_folder, name_of_test = args.name_of_test, name_log = 'filtered', args = args)
 

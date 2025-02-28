@@ -1,16 +1,6 @@
-
-import os 
-
-import numpy as np 
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from sklearn.metrics import confusion_matrix, accuracy_score
-import torch
-import re
-import matplotlib.pyplot as plt 
-from numpy.random import dirichlet  
-import json 
-
-import random
+ 
+from transformers import  AutoTokenizer, AutoModelForCausalLM 
+ 
 
 from src.arg_parser.arg_config import get_args
 args = get_args()  
@@ -23,7 +13,7 @@ from src.utils.shared.misc import environment_setup
 args = environment_setup(args) 
  
  
-from src.utils.shared.globals import CONFIDENCE_LEVELS, CONFIDENCE_MAP,TASK_N_CLASSES,MODEL_INFO # ,TASK_LABEL_TO_NAME, TASK_NAME_TO_LABEL
+from src.utils.shared.globals import CONFIDENCE_LEVELS, CONFIDENCE_MAP,TASK_N_CLASSES,MODEL_INFO
 
 
  
@@ -48,9 +38,6 @@ args.dataset =  SimpleDataset(data_to_evaluate,label_names = label_names )
 
 
 print("Dataset loaded successfully.",args.dataset) 
-
-
-
 
 
 args.model_name =  model_info['model_name']
@@ -97,14 +84,9 @@ args.predictor.predictor_container = PredictionContainer()
 
 for datapoint in args.dataset:
     
-    text, true_label = datapoint
-
- 
-    print ('text true label',text,true_label)
-     
+    text, true_label = datapoint 
     
-    
-    guess, probs, confidence = args.predictor.predict_and_confidence(datapoint)
+    guess, probs, confidence = args.predictor.predict_and_confidence(text)
     
         
     prediction_label = args.predictor.prompt_class.task_name_to_label[guess] #TASK_NAME_TO_LABEL

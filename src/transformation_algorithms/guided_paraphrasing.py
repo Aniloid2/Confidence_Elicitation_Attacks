@@ -35,14 +35,14 @@ class GuidedParaphrasing(WordSwap):
         generated_tokens = outputs[0][prompt_length:]
         generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-        # generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+         
         print ('generated_text:',generated_text)
  
         match_generated_text = None
         if self.task == 'sst2':
             pattern = r"(?<=:)(.+)"  
             match_generated_text = re.search(pattern, generated_text)
-        elif self.task == 'ag_news': # label leaking filtering
+        elif self.task == 'ag_news': 
             substrings_to_remove = ['business', 'world', 'tech/sci','sci/tech', 'tech', 'science', 'sport']
             
 
