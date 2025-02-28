@@ -204,4 +204,5 @@ bash_scripts*
 ceattack_test1/*
 ceattack_test1.txt
 
-plot_results_from_latex_tables.txt
+plot_results_from_latex_tables.py
+empirical_confidence_stability.py
