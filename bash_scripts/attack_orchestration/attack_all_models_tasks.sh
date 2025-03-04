@@ -28,45 +28,45 @@ declare -a param_names=("model_type" "task" "num_transformations" "prompting_typ
 
 # # llama3 8b instruct
 # # TextFooler   llama3 8b instruct
-# declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_1=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_2=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+declare -a config_gpu_0=("llama3" "sst2" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+declare -a config_gpu_1=("llama3" "strategyQA" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+declare -a config_gpu_2=("llama3" "ag_news" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 # # # llama3 8b instruct  sspattack
-# declare -a config_gpu_3=("llama3" "sst2" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_4=("llama3" "strategyQA" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_5=("llama3" "ag_news" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_3=("llama3" "sst2" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_4=("llama3" "strategyQA" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_5=("llama3" "ag_news" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 # # #   llama3 8b instruct selffool
-# declare -a config_gpu_6=("llama3" "sst2" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_7=("llama3" "strategyQA" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_8=("llama3" "ag_news" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500  "~/.cache/huggingface/")
+# declare -a config_gpu_6=("llama3" "sst2" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_7=("llama3" "strategyQA" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_8=("llama3" "ag_news" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500  "/mnt/hdd/brian/")
 
 # # #  llama3 8b instruct  texthoaxer
-# declare -a config_gpu_9=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_10=("llama3" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_11=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_9=("llama3" "sst2" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_10=("llama3" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_11=("llama3" "ag_news" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
  
 # # mistralv03 7b CEAttack   
-# declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_2=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_0=("mistralv03" "sst2" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_1=("mistralv03" "strategyQA" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_2=("mistralv03" "ag_news" 1 "step2_k_pred_avg" "greedy_use_search" "ceattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 # # # mistralv03 7b  sspattack
-# declare -a config_gpu_3=("mistralv03" "sst2" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_4=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_5=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_3=("mistralv03" "sst2" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_4=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_5=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "sspattack_search" "sspattack" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 # # #   mistralv03 7b selffool
-# declare -a config_gpu_6=("mistralv03" "sst2" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_7=("mistralv03" "strategyQA" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_8=("mistralv03" "ag_news" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_6=("mistralv03" "sst2" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_7=("mistralv03" "strategyQA" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_8=("mistralv03" "ag_news" 20 "step2_k_pred_avg" "black_box_search" "self_word_sub" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 # # #  mistralv03 7b  texthoaxer
-# declare -a config_gpu_9=("mistralv03" "sst2" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_10=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
-# declare -a config_gpu_11=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "~/.cache/huggingface/")
+# declare -a config_gpu_9=("mistralv03" "sst2" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_10=("mistralv03" "strategyQA" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 6 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
+# declare -a config_gpu_11=("mistralv03" "ag_news" 2 "step2_k_pred_avg" "texthoaxer_search" "texthoaxer" 10 0.5 "weighted_confidence" 20 "USE" "zs" "random" 0.001 500 5 500 "/mnt/hdd/brian/")
 
 
 

@@ -71,8 +71,8 @@ def log_results_extension(results, test_folder, name_of_test, name_log, args):
     successful_samples_queries = 0
 
     for i, result in enumerate(results):
-        print('Number of Queries:', result.num_queries)
-        args.ceattack_logger.info(f'Number of Queries: {result.num_queries}')
+        
+        
 
         # Calculate Perplexity
         try:
