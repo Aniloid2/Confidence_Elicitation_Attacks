@@ -8,10 +8,17 @@ This repository contains the code for [CEAttacks: Confidence Elicitation: A New 
 
 ## Installation
 
-Install the required environment using the `requirements.txt` file:
+### Hardware
+**GPUs**: We run our experiments on NVIDIA A40 GPUs with 46 GB of memory. To run the experiments, you'll need enough GPU memory to load the model you’re evaluating.
 
+### Conda
+
+- **Conda**: You need to have either [Anaconda](https://www.anaconda.com/products/distribution) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed on your system.
+
+- **Create the Conda Environment**: This will download all the dependencies, we run our experiments with python 3.8.5. You can check the yml file or the requirements.txt for details on the packages used.  
 ```bash
-pip install -r requirements.txt
+conda env create -f ceattack.yml
+conda activate ceattack
 ```
 
 ## Usage

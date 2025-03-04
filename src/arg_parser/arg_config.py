@@ -42,7 +42,7 @@ def get_args():
                         help='Number of transformations to perform')
     parser.add_argument('--index_order_technique', type=str, default='random', choices=['random','delete' ,'other_techniques_here'],
                         help='Index order technique to use')
-    parser.add_argument('--cache_transformers', type=str, default='/mnt/hdd1/brian/hub',
+    parser.add_argument('--cache_transformers', type=str, default='~/.cache/huggingface/',
                         help='Directory for transformers cache')
     parser.add_argument('--cache_dir', type=str, default=os.path.expanduser('~/.cache/CEAttacks'),
                         help='Directory for caching files')
