@@ -8,7 +8,7 @@ class StrategyQAPrompts(BaseClassificationPrompt):
 
 
 
-        self.label_index = None  # Placeholder, it should be set when calling prompt methods
+        self.label_index = None  
         self.task_dictionary_counts_correct = None
         self.task_dictionary_counts_incorrect = None
          
@@ -30,12 +30,12 @@ class StrategyQAPrompts(BaseClassificationPrompt):
         return confidence_prompt
 
     def _predict_and_confidence_prompt(self, text):
-        # Placeholder for the predict_and_confidence prompt
+         
         prompt = f"[Placeholder for predict_and_confidence_prompt with text: {text}]"
         return prompt
 
     def cot_prompt(self, text):
-        # Placeholder for chain-of-thought prompt
+         
         prompt = f"[Placeholder for cot_prompt with text: {text}]"
         return prompt
 

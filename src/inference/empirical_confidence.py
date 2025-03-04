@@ -36,8 +36,8 @@ class EmpiricalConfidence(BasePredictor):
     def _query_model_and_return_result_list(self,extra_args):
         generated_text = self.prompt_class._call_model(extra_args)
         generated_text = generated_text[0]
-        print ('Generated text empirical:',generated_text)
-        self.ceattack_logger.debug(f"Generated text empirical: \n {generated_text}")
+        print (f"Generated text empirical: \n {generated_text} \n")
+        self.ceattack_logger.debug(f"Generated text empirical: \n {generated_text} \n")
         
         
         pattern = re.compile(self.prompt_class.guess_pattern_prediction, re.IGNORECASE) 

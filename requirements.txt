@@ -6,6 +6,7 @@ anytree==2.12.1
 astunparse==1.6.3
 async-timeout==4.0.3
 attrs==23.2.0
+auto_gptq==0.7.1
 autoawq==0.2.5
 autoawq_kernels==0.0.6
 beautifulsoup4==4.12.3
@@ -18,6 +19,7 @@ cachetools==5.3.3
 certifi==2024.2.2
 charset-normalizer==3.3.2
 click==8.1.7
+coloredlogs==15.0.1
 conllu==4.5.3
 contourpy==1.1.1
 cycler==0.12.1
@@ -37,6 +39,7 @@ fsspec==2024.3.1
 ftfy==6.2.0
 gast==0.4.0
 gdown==5.1.0
+gekko==1.2.1
 gensim==4.3.2
 google-auth==2.29.0
 google-auth-oauthlib==1.0.0
@@ -44,6 +47,7 @@ google-pasta==0.2.0
 grpcio==1.63.0
 h5py==3.11.0
 huggingface-hub==0.24.6
+humanfriendly==10.0
 idna==3.7
 importlib_metadata==7.1.0
 importlib_resources==6.4.0
@@ -89,6 +93,7 @@ nvidia-nvtx-cu12==12.1.105
 oauthlib==3.2.2
 OpenHowNet==2.0
 opt-einsum==3.3.0
+optimum==1.23.3
 packaging==24.0
 pandas==2.0.3
 peft==0.10.0
@@ -113,6 +118,8 @@ regex==2024.4.16
 requests==2.31.0
 requests-oauthlib==2.0.0
 rich==13.7.1
+rouge==1.0.1
+rouge-score==0.1.2
 rsa==4.9
 s3transfer==0.10.1
 safetensors==0.4.3
@@ -136,18 +143,18 @@ tensorflow-hub==0.16.1
 tensorflow-io-gcs-filesystem==0.34.0
 termcolor==2.4.0
 terminaltables==3.1.10
-textattack==0.3.10
+-e git+https://github.com/QData/TextAttack.git@ad8896316846a0630b7d702245a0731c90ec1161#egg=textattack
 tf-keras==2.15.0
 threadpoolctl==3.4.0
 tiktoken==0.7.0
-tokenizers==0.19.1
+tokenizers==0.20.1
 torch==2.2.2
 tqdm==4.66.2
 transformer-smaller-training-vocab==0.4.0
-transformers==4.44.2
+transformers==4.45.2
 triton==2.2.0
 trl==0.8.6
-typing_extensions==4.5.0
+typing_extensions==4.12.2
 tyro==0.8.3
 tzdata==2024.1
 urllib3==1.26.18
