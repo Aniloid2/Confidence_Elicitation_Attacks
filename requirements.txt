@@ -7,8 +7,6 @@ astunparse==1.6.3
 async-timeout==4.0.3
 attrs==23.2.0
 auto_gptq==0.7.1
-autoawq==0.2.5
-autoawq_kernels==0.0.6
 beautifulsoup4==4.12.3
 bert-score==0.3.13
 bitsandbytes==0.43.1
@@ -32,7 +30,7 @@ editdistance==0.8.1
 eval_type_backport==0.2.0
 filelock==3.13.4
 flair==0.13.1
-flatbuffers==24.3.25
+flatbuffers==25.2.10
 fonttools==4.51.0
 frozenlist==1.4.1
 fsspec==2024.3.1
@@ -52,11 +50,12 @@ idna==3.7
 importlib_metadata==7.1.0
 importlib_resources==6.4.0
 Janome==0.5.0
+jax==0.4.13
 jieba==0.42.1
 Jinja2==3.1.3
 jmespath==1.0.1
 joblib==1.4.0
-keras==2.13.1
+keras==2.12.0
 kiwisolver==1.4.5
 langdetect==1.0.9
 language-tool-python==2.8
@@ -69,6 +68,7 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 matplotlib==3.7.5
 mdurl==0.1.2
+ml-dtypes==0.2.0
 more-itertools==10.2.0
 mpld3==0.5.10
 mpmath==1.3.0
@@ -77,7 +77,7 @@ multiprocess==0.70.16
 networkx==3.1
 nltk==3.8.1
 num2words==0.5.13
-numpy==1.24.3
+numpy==1.23.5
 nvidia-cublas-cu12==12.1.3.1
 nvidia-cuda-cupti-cu12==12.1.105
 nvidia-cuda-nvrtc-cu12==12.1.105
@@ -88,7 +88,7 @@ nvidia-curand-cu12==10.3.2.106
 nvidia-cusolver-cu12==11.4.5.107
 nvidia-cusparse-cu12==12.1.0.106
 nvidia-nccl-cu12==2.19.3
-nvidia-nvjitlink-cu12==12.4.127
+nvidia-nvjitlink-cu12==12.8.61
 nvidia-nvtx-cu12==12.1.105
 oauthlib==3.2.2
 OpenHowNet==2.0
@@ -100,7 +100,7 @@ peft==0.10.0
 pillow==10.3.0
 pinyin==0.4.0
 pptree==3.1
-protobuf==4.25.4
+protobuf==4.25.6
 psutil==5.9.8
 pyarrow==16.0.0
 pyarrow-hotfix==0.6
@@ -117,7 +117,7 @@ PyYAML==6.0.1
 regex==2024.4.16
 requests==2.31.0
 requests-oauthlib==2.0.0
-rich==13.7.1
+rich==13.9.4
 rouge==1.0.1
 rouge-score==0.1.2
 rsa==4.9
@@ -135,15 +135,15 @@ soupsieve==2.5
 sqlitedict==2.1.0
 sympy==1.12
 tabulate==0.9.0
-tensorboard==2.13.0
+tensorboard==2.12.3
 tensorboard-data-server==0.7.2
-tensorflow==2.13.1
-tensorflow-estimator==2.13.0
+tensorflow==2.12.0
+tensorflow-estimator==2.12.0
 tensorflow-hub==0.16.1
 tensorflow-io-gcs-filesystem==0.34.0
 termcolor==2.4.0
 terminaltables==3.1.10
--e git+https://github.com/QData/TextAttack.git@ad8896316846a0630b7d702245a0731c90ec1161#egg=textattack
+textattack==0.3.10
 tf-keras==2.15.0
 threadpoolctl==3.4.0
 tiktoken==0.7.0
@@ -154,15 +154,16 @@ transformer-smaller-training-vocab==0.4.0
 transformers==4.45.2
 triton==2.2.0
 trl==0.8.6
+typeguard==4.4.0
 typing_extensions==4.12.2
-tyro==0.8.3
+tyro==0.9.16
 tzdata==2024.1
 urllib3==1.26.18
 wcwidth==0.2.13
 Werkzeug==3.0.3
 Wikipedia-API==0.6.0
 word2number==1.1
-wrapt==1.16.0
+wrapt==1.14.1
 xxhash==3.4.1
 yarl==1.9.4
 zipp==3.18.1
